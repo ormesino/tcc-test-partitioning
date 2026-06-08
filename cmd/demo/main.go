@@ -2,10 +2,10 @@
 // algorithms across multiple datasets and worker counts.
 //
 // This demo simulates the full experimental pipeline:
-//   1. Load synthetic datasets (stand-in for real collected data).
-//   2. Run all 4 algorithms with p ∈ {2, 4, 8} workers.
-//   3. Compute and display metrics for each combination.
-//   4. Print a summary highlighting best algorithm per dataset.
+//  1. Load synthetic datasets (stand-in for real collected data).
+//  2. Run all 4 algorithms with p ∈ {2, 4, 8} workers.
+//  3. Compute and display metrics for each combination.
+//  4. Print a summary highlighting best algorithm per dataset.
 //
 // Usage: go run cmd/demo/main.go
 package main

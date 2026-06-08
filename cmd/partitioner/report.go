@@ -24,29 +24,29 @@ import (
 
 // outputReport is the top-level payload written to --output-json.
 type outputReport struct {
-	Mode         string      `json:"mode"`
-	DataFile     string      `json:"data_file,omitempty"`
-	ProjectPath  string      `json:"project_path,omitempty"`
-	Workers      int         `json:"workers"`
-	PackageCount int         `json:"package_count"`
-	T1NS         int64       `json:"t1_ns"`
-	T1Source     string      `json:"t1_source"`
-	GeneratedAt  time.Time   `json:"generated_at"`
-	Algorithms   []algEntry  `json:"algorithms"`
+	Mode         string     `json:"mode"`
+	DataFile     string     `json:"data_file,omitempty"`
+	ProjectPath  string     `json:"project_path,omitempty"`
+	Workers      int        `json:"workers"`
+	PackageCount int        `json:"package_count"`
+	T1NS         int64      `json:"t1_ns"`
+	T1Source     string     `json:"t1_source"`
+	GeneratedAt  time.Time  `json:"generated_at"`
+	Algorithms   []algEntry `json:"algorithms"`
 }
 
 // algEntry captures everything the run knows about a single
 // algorithm: the planned (theoretical) schedule plus, when in
 // --mode run, the measured execution outcome.
 type algEntry struct {
-	Algorithm                string             `json:"algorithm"`
-	PlannedMakespanNS        int64              `json:"planned_makespan_ns"`
-	PlannedLoadVarianceS2    float64            `json:"planned_load_variance_s2"`
-	PlannedLoadStdDevS       float64            `json:"planned_load_stddev_s"`
-	PlannedSpeedup           float64            `json:"planned_speedup"`
-	PlannedEfficiency        float64            `json:"planned_efficiency"`
-	PartitioningOverheadNS   int64              `json:"partitioning_overhead_ns"`
-	Partitions               []partitionSummary `json:"partitions"`
+	Algorithm              string             `json:"algorithm"`
+	PlannedMakespanNS      int64              `json:"planned_makespan_ns"`
+	PlannedLoadVarianceS2  float64            `json:"planned_load_variance_s2"`
+	PlannedLoadStdDevS     float64            `json:"planned_load_stddev_s"`
+	PlannedSpeedup         float64            `json:"planned_speedup"`
+	PlannedEfficiency      float64            `json:"planned_efficiency"`
+	PartitioningOverheadNS int64              `json:"partitioning_overhead_ns"`
+	Partitions             []partitionSummary `json:"partitions"`
 
 	// Execution is only populated by --mode run.
 	Execution *executionSummary `json:"execution,omitempty"`

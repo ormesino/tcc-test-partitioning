@@ -55,8 +55,8 @@ func (q *Quantity) Partition(packages []model.PackageInfo, workers int) model.Pa
 	// Distribute packages in contiguous blocks.
 	// First (n % workers) workers get ceil(n/workers) packages,
 	// the rest get floor(n/workers).
-	base := n / workers   // floor(n/p)
-	extra := n % workers  // number of workers that get one extra
+	base := n / workers  // floor(n/p)
+	extra := n % workers // number of workers that get one extra
 
 	offset := 0
 	for w := 0; w < workers; w++ {

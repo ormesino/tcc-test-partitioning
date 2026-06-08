@@ -23,26 +23,26 @@ type demoReport struct {
 }
 
 type datasetEntry struct {
-	Name         string       `json:"name"`
-	PackageCount int          `json:"package_count"`
-	T1NS         int64        `json:"t1_ns"`
-	WorkerRuns   []workerRun  `json:"worker_runs"`
+	Name         string      `json:"name"`
+	PackageCount int         `json:"package_count"`
+	T1NS         int64       `json:"t1_ns"`
+	WorkerRuns   []workerRun `json:"worker_runs"`
 }
 
 type workerRun struct {
-	Workers         int             `json:"workers"`
-	IdealMakespanNS int64           `json:"ideal_makespan_ns"`
-	Algorithms      []algMetrics    `json:"algorithms"`
-	Best            bestAlgorithm   `json:"best"`
+	Workers         int           `json:"workers"`
+	IdealMakespanNS int64         `json:"ideal_makespan_ns"`
+	Algorithms      []algMetrics  `json:"algorithms"`
+	Best            bestAlgorithm `json:"best"`
 }
 
 type algMetrics struct {
-	Algorithm    string  `json:"algorithm"`
-	MakespanNS   int64   `json:"makespan_ns"`
-	Speedup      float64 `json:"speedup"`
-	Efficiency   float64 `json:"efficiency"`
-	LoadStdDevS  float64 `json:"load_stddev_s"`
-	OverheadNS   int64   `json:"partitioning_overhead_ns"`
+	Algorithm   string  `json:"algorithm"`
+	MakespanNS  int64   `json:"makespan_ns"`
+	Speedup     float64 `json:"speedup"`
+	Efficiency  float64 `json:"efficiency"`
+	LoadStdDevS float64 `json:"load_stddev_s"`
+	OverheadNS  int64   `json:"partitioning_overhead_ns"`
 }
 
 type bestAlgorithm struct {

@@ -57,13 +57,13 @@ type aggregateRecord struct {
 
 	// Execution stats — populated only when at least one rep produced
 	// a successful execution measurement.
-	ExecMakespanMedianNS  *int64   `json:"exec_makespan_median_ns,omitempty"`
-	ExecMakespanMinNS     *int64   `json:"exec_makespan_min_ns,omitempty"`
-	ExecMakespanMaxNS     *int64   `json:"exec_makespan_max_ns,omitempty"`
-	ExecMakespanMeanNS    *int64   `json:"exec_makespan_mean_ns,omitempty"`
-	ExecMakespanStdDevNS  *int64   `json:"exec_makespan_stddev_ns,omitempty"`
-	ExecSpeedupMedian     *float64 `json:"exec_speedup_median,omitempty"`
-	ExecErrorCount        int      `json:"exec_error_count,omitempty"`
+	ExecMakespanMedianNS *int64   `json:"exec_makespan_median_ns,omitempty"`
+	ExecMakespanMinNS    *int64   `json:"exec_makespan_min_ns,omitempty"`
+	ExecMakespanMaxNS    *int64   `json:"exec_makespan_max_ns,omitempty"`
+	ExecMakespanMeanNS   *int64   `json:"exec_makespan_mean_ns,omitempty"`
+	ExecMakespanStdDevNS *int64   `json:"exec_makespan_stddev_ns,omitempty"`
+	ExecSpeedupMedian    *float64 `json:"exec_speedup_median,omitempty"`
+	ExecErrorCount       int      `json:"exec_error_count,omitempty"`
 }
 
 // fullReport is the top-level JSON written to results.json.
