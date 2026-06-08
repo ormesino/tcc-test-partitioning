@@ -1,0 +1,22 @@
+{
+  "mode": "simulate",
+  "workers": [2, 4, 8],
+  "algorithms": ["all"],
+  "repetitions": 1,
+  "timeout_minutes": 30,
+  "output_dir": "benchmarks/results",
+  "projects": [
+    {
+      "name": "moderate-synthetic",
+      "data_file": "data/synthetic/moderate.json"
+    },
+    {
+      "name": "heavytail-synthetic",
+      "data_file": "data/synthetic/heavytail.json"
+    },
+    {
+      "name": "mixed-synthetic",
+      "data_file": "data/synthetic/mixed.json"
+    }
+  ]
+}
