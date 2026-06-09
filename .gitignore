@@ -30,7 +30,12 @@ go.work.sum
 # Report files
 report.json
 
+# Data generated (not including /data/synthetic/fixtures.go on ignore)
+/data/baseline/
+/data/probe/
+/data/characterization/
+/data/repos/
+
 # Other files
 /docs
 /reports
-/data/repos
