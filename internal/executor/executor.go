@@ -116,13 +116,28 @@ type Config struct {
 
 	// Verbose enables -v flag on go test.
 	Verbose bool
+
+	// WarmCache, when true, pre-compiles all test binaries before
+	// launching workers. This populates Go's build cache so that
+	// workers only measure test execution time, not compilation.
+	// Simulates a CI environment with a warm build cache.
+	WarmCache bool
 }
 
 // RunPartitioned executes go test for each partition in parallel,
 // one goroutine per worker, and measures wall-clock time.
 //
-// TODO: validar com ambiente Go
+// When cfg.WarmCache is true, a pre-compilation step runs before
+// launching workers. This compiles all test binaries into Go's
+// build cache without executing any tests, so that the workers'
+// wall-clock time reflects only test execution, not compilation.
+// The pre-compilation uses default parallelism (all CPUs) for speed
+// and is NOT included in the makespan measurement.
 func RunPartitioned(cfg Config, partResult model.PartitionResult) ExecutionResult {
+	if cfg.WarmCache {
+		warmBuildCache(cfg)
+	}
+
 	workers := len(partResult.Partitions)
 	resultCh := make(chan WorkerResult, workers)
 	var wg sync.WaitGroup
@@ -255,8 +270,11 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 		pkgPaths[i] = pkg.Name
 	}
 
-	// Build command: go test -count=1 [-v] pkg1 pkg2 ...
-	args := []string{"test", "-count", fmt.Sprintf("%d", cfg.Count)}
+	// Build command: go test -p 1 -parallel 1 -count=1 [-v] pkg1 pkg2 ...
+	// Restricting to -p 1 -parallel 1 ensures this worker acts as a single
+	// sequential processor, matching the theoretical P||Cmax scheduling model
+	// and avoiding combinatorial explosion of parallelism that causes OOM.
+	args := []string{"test", "-p", "1", "-parallel", "1", "-count", fmt.Sprintf("%d", cfg.Count)}
 	if cfg.Verbose {
 		args = append(args, "-v")
 	}
@@ -296,6 +314,44 @@ func runGoTest(cfg Config, args []string) (string, error) {
 	out, err := cmd.CombinedOutput()
 
 	return string(out), err
+}
+
+// warmBuildCache pre-compiles all test binaries in the project
+// without running any tests. It uses `-run=^$` (matches no test
+// names) to trigger compilation only. The default `-p` (all CPUs)
+// is used for maximum compilation speed.
+//
+// After this function returns, Go's build cache (GOCACHE) contains
+// the compiled test binaries. Subsequent `go test` invocations
+// (even with `-p 1`) will skip compilation and only run tests.
+//
+// This simulates a CI environment where the build cache is warm
+// from a previous pipeline stage or a cached Docker layer.
+func warmBuildCache(cfg Config) {
+	fmt.Fprintf(os.Stderr, "  [warm-cache] Pre-compiling test binaries for %s...\n", cfg.ProjectPath)
+	start := time.Now()
+
+	ctx := context.Background()
+	if cfg.Timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, cfg.Timeout)
+		defer cancel()
+	}
+
+	// -run=^$ matches no test, so nothing executes.
+	// -count=1 ensures the test cache is not used, but the build cache IS used.
+	// Default -p (GOMAXPROCS) gives maximum compilation parallelism.
+	cmd := exec.CommandContext(ctx, "go", "test", "-run=^$", "-count=1", "./...")
+	cmd.Dir = cfg.ProjectPath
+	cmd.Stdout = os.Stderr // Show compilation progress on stderr.
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "  [warm-cache] WARNING: pre-compilation had errors: %v\n", err)
+		// Continue anyway — partial cache is still useful.
+	}
+
+	fmt.Fprintf(os.Stderr, "  [warm-cache] Done in %v\n", time.Since(start))
 }
 
 // FormatExecutionResult returns a human-readable summary of an
