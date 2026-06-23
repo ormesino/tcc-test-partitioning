@@ -1,7 +1,8 @@
 $ErrorActionPreference = "Continue"
 
 $Report = "data\repos\triage.csv"
-"repo,clone_ok,build_ok,n_packages,n_test_packages,last_commit,size_mb" | Out-File -Encoding utf8 -FilePath $Report
+$run_started_at = (Get-Date).ToUniversalTime().ToString("o")
+"run_started_at,repo,clone_started_at,clone_finished_at,clone_ok,build_started_at,build_finished_at,build_ok,n_packages,n_test_packages,last_commit,last_commit_hash,size_mb" | Out-File -Encoding utf8 -FilePath $Report
 
 $repos = Get-Content "data\repos\repos.txt" | Where-Object { $_.Trim() -ne "" }
 
@@ -11,19 +12,26 @@ foreach ($repo in $repos) {
 
   $clone_ok = "no"
   $build_ok = "no"
+  $clone_started_at = "-"
+  $clone_finished_at = "-"
+  $build_started_at = "-"
+  $build_finished_at = "-"
   $n_packages = "-"
   $n_test_packages = "-"
   $last_commit = "-"
+  $last_commit_hash = "-"
   $size_mb = "-"
 
   if (-not (Test-Path $dir)) {
+    $clone_started_at = (Get-Date).ToUniversalTime().ToString("o")
     $cloneOutput = git clone --depth=50 "https://github.com/$repo.git" $dir 2>&1
+    $clone_finished_at = (Get-Date).ToUniversalTime().ToString("o")
     if ($LASTEXITCODE -eq 0) {
       $clone_ok = "yes"
     }
     else {
       Write-Host "Failed to clone $repo : $cloneOutput"
-      "$repo,$clone_ok,$build_ok,$n_packages,$n_test_packages,$last_commit,$size_mb" | Out-File -Append -Encoding utf8 -FilePath $Report
+      "$run_started_at,$repo,$clone_started_at,$clone_finished_at,$clone_ok,$build_started_at,$build_finished_at,$build_ok,$n_packages,$n_test_packages,$last_commit,$last_commit_hash,$size_mb" | Out-File -Append -Encoding utf8 -FilePath $Report
       continue
     }
   }
@@ -37,8 +45,12 @@ foreach ($repo in $repos) {
     $size_mb = [math]::Round((Get-ChildItem -Recurse -File | Measure-Object -Property Length -Sum).Sum / 1MB, 2)
     $last_commit = git log -1 --format=%cd --date=short 2>$null
     if (-not $last_commit) { $last_commit = "-" }
+    $last_commit_hash = git rev-parse HEAD 2>$null
+    if (-not $last_commit_hash) { $last_commit_hash = "-" }
 
+    $build_started_at = (Get-Date).ToUniversalTime().ToString("o")
     $buildOutput = go build ./... 2>&1
+    $build_finished_at = (Get-Date).ToUniversalTime().ToString("o")
     if ($LASTEXITCODE -eq 0) {
       $build_ok = "yes"
     }
@@ -64,5 +76,5 @@ foreach ($repo in $repos) {
 
   Write-Host "Processing $name"
 
-  "$repo,$clone_ok,$build_ok,$n_packages,$n_test_packages,$last_commit,$size_mb" | Out-File -Append -Encoding utf8 -FilePath $Report
+  "$run_started_at,$repo,$clone_started_at,$clone_finished_at,$clone_ok,$build_started_at,$build_finished_at,$build_ok,$n_packages,$n_test_packages,$last_commit,$last_commit_hash,$size_mb" | Out-File -Append -Encoding utf8 -FilePath $Report
 }

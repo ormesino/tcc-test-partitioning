@@ -116,7 +116,7 @@ algoritmos.
    exemplo `C:\src\cli`.
 
 2. Caracterize a suíte de testes. O script executa N rodadas de
-   `go test -json -count=1`, salva os eventos brutos em
+   `go test -json -p 1 -parallel 1 -count=1`, salva os eventos brutos em
    `data/probe/<nome>/` e gera `data/characterization/<nome>.json`
    com mediana e CV por pacote.
 
@@ -222,5 +222,4 @@ Pontos centrais:
 - Durações em nanossegundos com sufixo `_ns` (`int64`).
 - `time.Time` em RFC3339.
 - Campos opcionais marcados com `omitempty`.
-
 

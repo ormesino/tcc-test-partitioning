@@ -4,12 +4,15 @@
     JSON de caracterizacao consumido por cmd/partitioner.
 
 .DESCRIPTION
-    Implementa o pipeline definido pelas ADRs 006-008:
+    Implementa o pipeline definido pelas ADRs 006-008 e ADR-017:
       - ADR-006: pacotes que falham ou sao skipados sao excluidos
                  (filtragem feita por cmd/analyze).
       - ADR-007: executa N rodadas com `-count=1` (default N=10).
       - ADR-008: mediana entre as rodadas como duracao canonica;
                  CV = stddev/media entre as mesmas rodadas.
+      - ADR-017: mede cada pacote sob `-p 1 -parallel 1`, alinhando
+                 a caracterizacao historica ao modelo sequencial por
+                 worker usado pelo executor.
 
     Cada rodada gera dois arquivos em data/probe/<ProjectName>/:
         run_NN.json  ← stdout puro (NDJSON consumido por cmd/analyze)
@@ -87,7 +90,7 @@ for ($i = 1; $i -le $Runs; $i++) {
     $file    = Join-Path $probeDir "run_$tag.json"
     $errFile = Join-Path $probeDir "run_$tag.err"
 
-    Write-Host "  [$tag/$Runs] go test -json -count=1 -timeout ${TimeoutMinutes}m $Pattern"
+    Write-Host "  [$tag/$Runs] go test -json -p 1 -parallel 1 -count=1 -timeout ${TimeoutMinutes}m $Pattern"
 
     Push-Location $ProjectPath
     try {
@@ -99,7 +102,7 @@ for ($i = 1; $i -le $Runs; $i++) {
         # tratamos como erro aqui — ADR-006 filtra esses pacotes em
         # cmd/analyze.
         $utf8 = New-Object System.Text.UTF8Encoding($false)
-        $outLines = & go test -json "-count=1" "-timeout" "${TimeoutMinutes}m" $Pattern 2> $errFile
+        $outLines = & go test -json "-p" "1" "-parallel" "1" "-count=1" "-timeout" "${TimeoutMinutes}m" $Pattern 2> $errFile
         [System.IO.File]::WriteAllLines($file, $outLines, $utf8)
     }
     finally {
