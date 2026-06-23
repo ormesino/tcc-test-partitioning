@@ -13,17 +13,17 @@ import (
 	"tcc-test-partitioning/internal/model"
 )
 
-// ProfileModerate returns ~150 packages with moderate variance.
-// Target statistics: CV ≈ 1.3, Max/Med ≈ 17.
-// Simulates profiles like cli/cli (234 pkgs, CV 1.25, Max/Med 19.71)
-// and grpc-go (134 pkgs, CV 1.41, Max/Med 14.25).
+// ProfileModerate returns 150 packages with moderate-to-high variance.
+// Current duration distribution: CV ≈ 2.0, Max/Med ≈ 42.
+// It is a synthetic stress case inspired by cli/cli and grpc-go, not
+// a calibrated replica of their exact statistics.
 func ProfileModerate() []model.PackageInfo {
 	// Distribution strategy:
 	//   - Bulk (~120 pkgs): 50ms – 500ms  (fast unit tests)
 	//   - Medium (~25 pkgs): 500ms – 3s   (integration-ish)
-	//   - Heavy (~5 pkgs):   3s – 10s     (slow tests)
-	//   Median ≈ 150ms, Max ≈ 10s → Max/Med ≈ 17 (rounding to ~67)
-	//   CV target ≈ 1.3
+	//   - Heavy (~5 pkgs):   5s – 10s     (slow tests)
+	//   Median ≈ 237ms, Max = 10s → Max/Med ≈ 42
+	//   Duration CV ≈ 2.0
 
 	pkgs := make([]model.PackageInfo, 0, 150)
 
@@ -77,18 +77,19 @@ func ProfileModerate() []model.PackageInfo {
 	return pkgs
 }
 
-// ProfileHeavyTail returns ~120 packages with heavy-tailed variance.
-// Target statistics: CV ≈ 2.9, Max/Med ≈ 90.
-// Simulates profiles like hugo (139 pkgs, CV 2.90, Max/Med 74.79)
-// and goreleaser (100 pkgs, CV 2.90, Max/Med 105.94).
+// ProfileHeavyTail returns 120 packages with an intentionally extreme
+// heavy-tailed distribution.
+// Current duration distribution: CV ≈ 4.2, Max/Med ≈ 698.
+// It stresses the algorithms more aggressively than hugo and
+// goreleaser, whose observed Max/Med ratios are lower.
 func ProfileHeavyTail() []model.PackageInfo {
 	// Distribution strategy:
 	//   - Bulk (~95 pkgs):  10ms – 200ms   (very fast)
 	//   - Medium (~15 pkgs): 200ms – 2s    (moderate)
 	//   - Heavy (~8 pkgs):   5s – 30s      (slow)
 	//   - Extreme (~2 pkgs): 60s – 90s     (dominant outliers)
-	//   Median ≈ 80ms, Max = 90s → Max/Med ≈ 90 (rounding to 1125)
-	//   CV target ≈ 2.9
+	//   Median ≈ 129ms, Max = 90s → Max/Med ≈ 698
+	//   Duration CV ≈ 4.2
 
 	pkgs := make([]model.PackageInfo, 0, 120)
 
@@ -138,9 +139,9 @@ func ProfileHeavyTail() []model.PackageInfo {
 	return pkgs
 }
 
-// ProfileMixed returns ~200 packages combining moderate and
-// heavy-tailed sub-populations. Used for robustness testing to
-// verify that algorithms handle heterogeneous workloads well.
+// ProfileMixed returns 200 packages combining fast and moderate
+// sub-populations from the other fixtures. Used for robustness
+// testing with a less extreme heterogeneous workload.
 func ProfileMixed() []model.PackageInfo {
 	// Strategy: take subsets of both profiles and merge them.
 	// This creates a bimodal distribution that stresses the
@@ -158,8 +159,8 @@ func ProfileMixed() []model.PackageInfo {
 		pkgs = append(pkgs, p)
 	}
 
-	// Take the first 90 from heavy-tail (relabelled to avoid name
-	// collision) to reach our ~200 target.
+	// Take the first 90 fast packages from heavy-tail (relabelled
+	// to avoid name collision) to reach our 200-package target.
 	for i := 0; i < 90 && i < len(heavy); i++ {
 		p := heavy[i]
 		p.Name = fmt.Sprintf("example.com/mixed/heavypart/pkg%03d", i+1)

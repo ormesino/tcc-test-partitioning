@@ -64,6 +64,8 @@ func main() {
 		"Path to write a structured JSON report in --mode simulate / run.")
 	listPackages := flag.Bool("list-packages", false,
 		"Include the full package list per partition in --output-json (default: omit).")
+	warmCache := flag.Bool("warm-cache", false,
+		"Pre-compile test binaries before running to separate compilation cost (run/baseline modes).")
 
 	flag.Parse()
 
@@ -103,11 +105,11 @@ func main() {
 	case "simulate":
 		runSimulate(*dataFile, *algorithm, *workers, *baselineSeqFile, *outputJSON, *listPackages)
 	case "run":
-		runExecution(*dataFile, *projectPath, *algorithm, *workers, *timeout, *verbose, *baselineSeqFile, *outputJSON, *listPackages)
+		runExecution(*dataFile, *projectPath, *algorithm, *workers, *timeout, *verbose, *warmCache, *baselineSeqFile, *outputJSON, *listPackages)
 	case "baseline-seq":
-		runBaselineSeq(*projectPath, *timeout, *verbose, *output)
+		runBaselineSeq(*projectPath, *timeout, *verbose, *warmCache, *output)
 	case "baseline-par":
-		runBaselinePar(*projectPath, *workers, *timeout, *verbose, *output)
+		runBaselinePar(*projectPath, *workers, *timeout, *verbose, *warmCache, *output)
 	}
 }
 
@@ -264,7 +266,7 @@ func runSimulate(dataFile, algName string, workers int, baselineSeqFile, outputJ
 // reused for both the human-readable text and the JSON report.
 //
 // TODO: validar com ambiente Go
-func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int, verbose bool, baselineSeqFile, outputJSON string, listPackages bool) {
+func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int, verbose, warmCache bool, baselineSeqFile, outputJSON string, listPackages bool) {
 	packages, err := loadPackages(dataFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -277,6 +279,10 @@ func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
 		Count:       1,
 		Verbose:     verbose,
+	}
+
+	if warmCache {
+		executor.WarmBuildCache(cfg)
 	}
 
 	seqDuration, seqSource := resolveT1(packages, baselineSeqFile)
@@ -354,12 +360,16 @@ func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int
 // BaselineReport JSON for later reuse by --mode run.
 //
 // TODO: validar com ambiente Go
-func runBaselineSeq(projectPath string, timeoutMin int, verbose bool, output string) {
+func runBaselineSeq(projectPath string, timeoutMin int, verbose, warmCache bool, output string) {
 	cfg := executor.Config{
 		ProjectPath: projectPath,
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
 		Count:       1,
 		Verbose:     verbose,
+	}
+
+	if warmCache {
+		executor.WarmBuildCache(cfg)
 	}
 
 	fmt.Println("=== Baseline Sequential (go test -p 1 -parallel 1) ===")
@@ -384,12 +394,16 @@ func runBaselineSeq(projectPath string, timeoutMin int, verbose bool, output str
 // BaselineReport JSON.
 //
 // TODO: validar com ambiente Go
-func runBaselinePar(projectPath string, workers, timeoutMin int, verbose bool, output string) {
+func runBaselinePar(projectPath string, workers, timeoutMin int, verbose, warmCache bool, output string) {
 	cfg := executor.Config{
 		ProjectPath: projectPath,
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
 		Count:       1,
 		Verbose:     verbose,
+	}
+
+	if warmCache {
+		executor.WarmBuildCache(cfg)
 	}
 
 	fmt.Printf("=== Baseline Parallel (go test -p %d -parallel 1) ===\n", workers)

@@ -116,12 +116,6 @@ type Config struct {
 
 	// Verbose enables -v flag on go test.
 	Verbose bool
-
-	// WarmCache, when true, pre-compiles all test binaries before
-	// launching workers. This populates Go's build cache so that
-	// workers only measure test execution time, not compilation.
-	// Simulates a CI environment with a warm build cache.
-	WarmCache bool
 }
 
 // RunPartitioned executes go test for each partition in parallel,
@@ -134,10 +128,6 @@ type Config struct {
 // The pre-compilation uses default parallelism (all CPUs) for speed
 // and is NOT included in the makespan measurement.
 func RunPartitioned(cfg Config, partResult model.PartitionResult) ExecutionResult {
-	if cfg.WarmCache {
-		warmBuildCache(cfg)
-	}
-
 	workers := len(partResult.Partitions)
 	resultCh := make(chan WorkerResult, workers)
 	var wg sync.WaitGroup
@@ -316,7 +306,7 @@ func runGoTest(cfg Config, args []string) (string, error) {
 	return string(out), err
 }
 
-// warmBuildCache pre-compiles all test binaries in the project
+// WarmBuildCache pre-compiles all test binaries in the project
 // without running any tests. It uses `-run=^$` (matches no test
 // names) to trigger compilation only. The default `-p` (all CPUs)
 // is used for maximum compilation speed.
@@ -327,7 +317,7 @@ func runGoTest(cfg Config, args []string) (string, error) {
 //
 // This simulates a CI environment where the build cache is warm
 // from a previous pipeline stage or a cached Docker layer.
-func warmBuildCache(cfg Config) {
+func WarmBuildCache(cfg Config) {
 	fmt.Fprintf(os.Stderr, "  [warm-cache] Pre-compiling test binaries for %s...\n", cfg.ProjectPath)
 	start := time.Now()
 

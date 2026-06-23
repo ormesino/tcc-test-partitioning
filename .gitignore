@@ -37,5 +37,6 @@ report.json
 /data/repos/
 
 # Other files
+/benchmarks
 /docs
 /reports

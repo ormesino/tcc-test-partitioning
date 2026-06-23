@@ -38,6 +38,8 @@ docs/             metodologia, ADRs, diário de bordo, proposta
 - PowerShell 7+ se for usar `scripts/collect.ps1`.
 - GNU `make` (opcional) para os atalhos do `Makefile`; no Windows,
   via Git Bash ou `choco install make`.
+- Python com `pandas` e `matplotlib` apenas se for gerar os gráficos
+  de análise com `scripts/generate_charts.py`.
 
 ## Pipeline experimental
 
@@ -83,6 +85,105 @@ go run ./cmd/benchmark --config benchmarks/example-config.json
 # → benchmarks/results/<timestamp>/{config.json, results.json, raw.csv, aggregate.csv}
 ```
 
+## Roteiro para avaliadores
+
+Este repositório permite dois níveis de reprodução. O primeiro valida a
+ferramenta com dados sintéticos e não exige clonar projetos externos. O
+segundo reproduz a campanha empírica sobre um projeto Go real.
+
+### Caminho rápido: validar a ferramenta
+
+```powershell
+# 1. Gerar os datasets sintéticos em data/synthetic/.
+go run ./cmd/gendata -profile all
+
+# 2. Rodar a demonstração comparativa.
+go run ./cmd/demo --output-json reports/demo.json
+
+# 3. Rodar a matriz sintética de exemplo.
+go run ./cmd/benchmark --config benchmarks/example-config.json
+```
+
+Esse fluxo executa os quatro algoritmos (`Round-Robin`, `Quantity`,
+`LPT` e `FFD-Weighted`) para diferentes quantidades de workers e grava
+relatórios estruturados em JSON/CSV. Ele é suficiente para inspecionar
+a interface, o formato dos dados e o comportamento planejado dos
+algoritmos.
+
+### Caminho completo: gerar seus próprios dados
+
+1. Clone ou disponibilize um projeto Go em um diretório local, por
+   exemplo `C:\src\cli`.
+
+2. Caracterize a suíte de testes. O script executa N rodadas de
+   `go test -json -count=1`, salva os eventos brutos em
+   `data/probe/<nome>/` e gera `data/characterization/<nome>.json`
+   com mediana e CV por pacote.
+
+```powershell
+pwsh scripts/collect.ps1 -ProjectPath C:\src\cli -ProjectName cli -Runs 10
+```
+
+3. Meça o baseline sequencial. Esse arquivo fornece o T1 usado no
+   cálculo de speedup empírico.
+
+```powershell
+go run ./cmd/partitioner --mode baseline-seq `
+  --project-path C:\src\cli `
+  --output data/baseline/cli-seq.json
+```
+
+4. Para uma campanha com cache quente, meça também o T1 no mesmo
+   regime. O `--warm-cache` pré-compila os binários de teste antes
+   da medição, de modo que o baseline e as execuções particionadas
+   comparem tempos da mesma natureza.
+
+```powershell
+go run ./cmd/partitioner --mode baseline-seq --warm-cache `
+  --project-path C:\src\cli `
+  --output data/baseline/cli-seq-warm.json
+```
+
+5. Execute uma simulação pontual, sem rodar testes reais.
+
+```powershell
+go run ./cmd/partitioner --mode simulate `
+  --algorithm all --workers 4 `
+  --data-file data/characterization/cli.json `
+  --output-json reports/cli-simulate-w4.json
+```
+
+6. Execute uma medição real particionada.
+
+```powershell
+go run ./cmd/partitioner --mode run --warm-cache `
+  --algorithm ffd --workers 4 `
+  --data-file data/characterization/cli.json `
+  --baseline-seq-file data/baseline/cli-seq-warm.json `
+  --project-path C:\src\cli `
+  --output-json reports/cli-ffd-w4-warm.json
+```
+
+7. Para reproduzir a matriz experimental completa, ajuste uma config
+   em `benchmarks/` e rode o driver:
+
+```powershell
+go run ./cmd/benchmark --config benchmarks/campaign_cli_warm.json
+```
+
+A saída é criada em `benchmarks/results/<projeto>/<timestamp>/` com:
+
+- `config.json`: cópia auditável da configuração usada.
+- `results.json`: relatório completo estruturado.
+- `raw.csv`: uma linha por repetição.
+- `aggregate.csv`: medianas e estatísticas por algoritmo/workers.
+
+8. Opcionalmente gere gráficos acadêmicos:
+
+```powershell
+python scripts/generate_charts.py benchmarks/results/cli/<timestamp>
+```
+
 ## Exploração sem ambiente Go real
 
 ```powershell
@@ -113,6 +214,7 @@ Pontos centrais:
 - **ADR-010** — peso FFD = `Duration × (1 + CV)`.
 - **ADR-011** — duas baselines obrigatórias: `-p 1` (T1) e `-p P` (paralelo nativo).
 - **ADR-012** — strategy pattern via interface `Partitioner`.
+- **ADR-017 e ADR-018** — forçamos a simulação a ser sequencial por worker para fidelidade teórica, mas implementamos `"warm_cache": true` na config para separar a execução dos testes da compilação.
 
 ## Convenções de JSON
 
@@ -120,3 +222,5 @@ Pontos centrais:
 - Durações em nanossegundos com sufixo `_ns` (`int64`).
 - `time.Time` em RFC3339.
 - Campos opcionais marcados com `omitempty`.
+
+

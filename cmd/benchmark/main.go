@@ -106,6 +106,13 @@ func main() {
 		t1, t1Source := resolveT1(packages, proj.BaselineSeqFile)
 		fmt.Printf("  Packages: %d | T1 (%s): %v\n", len(packages), t1Source, t1)
 
+		if cfg.WarmCache {
+			executor.WarmBuildCache(executor.Config{
+				ProjectPath: proj.ProjectPath,
+				Timeout:     time.Duration(cfg.TimeoutMinutes) * time.Minute,
+			})
+		}
+
 		for _, w := range cfg.Workers {
 			for _, alg := range algorithms {
 				for rep := 1; rep <= cfg.Repetitions; rep++ {
@@ -179,7 +186,6 @@ func runOne(cfg Config, proj ProjectSpec, packages []model.PackageInfo, t1 time.
 		Timeout:     time.Duration(cfg.TimeoutMinutes) * time.Minute,
 		Count:       1,
 		Verbose:     cfg.Verbose,
-		WarmCache:   cfg.WarmCache,
 	}
 	execResult := executor.RunPartitioned(execCfg, partResult)
 
