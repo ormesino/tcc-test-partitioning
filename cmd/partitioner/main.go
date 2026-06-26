@@ -123,7 +123,7 @@ func resolveAlgorithms(name string) []partitioner.Partitioner {
 		return []partitioner.Partitioner{&partitioner.Quantity{}}
 	case "lpt":
 		return []partitioner.Partitioner{&partitioner.LPT{}}
-	case "ffd", "ffd-weighted":
+	case "ffd", "ffd-multifit":
 		return []partitioner.Partitioner{&partitioner.FFD{}}
 	case "all":
 		return []partitioner.Partitioner{
@@ -277,6 +277,7 @@ func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
 		Count:       1,
 		Verbose:     verbose,
+		WarmCache:   warmCache,
 	}
 
 	if warmCache {

@@ -187,6 +187,7 @@ func runOne(cfg Config, proj ProjectSpec, packages []model.PackageInfo, t1 time.
 		Timeout:     time.Duration(cfg.TimeoutMinutes) * time.Minute,
 		Count:       1,
 		Verbose:     cfg.Verbose,
+		WarmCache:   cfg.WarmCache,
 	}
 	execResult := executor.RunPartitioned(execCfg, partResult)
 

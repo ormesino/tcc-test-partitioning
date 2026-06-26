@@ -9,7 +9,6 @@
 //     run are also excluded (we need N samples for CV).
 //   - ADR-007: expects N runs (default workflow uses N=10).
 //   - ADR-008: median across the N runs is the canonical duration.
-//     CV is computed as stddev/mean across the same N runs.
 //
 // Input format:
 //
@@ -22,7 +21,7 @@
 //	go run ./cmd/analyze -output data/characterization/cli.json \
 //	    data/probe/cli/run_01.json data/probe/cli/run_02.json ...
 //
-//	# Single run via stdin (CV will be 0):
+//	# Single run via stdin:
 //	go test -json ./... | go run ./cmd/analyze -output out.json
 package main
 
@@ -180,7 +179,6 @@ func secondsToDuration(s float64) time.Duration {
 // is reported to stderr.
 //
 // Duration:  median across runs (ADR-008).
-// CV:        population stddev / mean across the same runs.
 func aggregate(runs []map[string]pkgOutcome, verbose bool) []model.PackageInfo {
 	if len(runs) == 0 {
 		return nil
@@ -233,15 +231,13 @@ func aggregate(runs []map[string]pkgOutcome, verbose bool) []model.PackageInfo {
 		}
 
 		med := median(samples)
-		cv := coefficientOfVariation(samples)
 		out = append(out, model.PackageInfo{
 			Name:     pkg,
 			Duration: med,
-			CV:       cv,
 		})
 		if verbose {
-			fmt.Fprintf(os.Stderr, "  include %s median=%v cv=%.3f\n",
-				pkg, med, cv)
+			fmt.Fprintf(os.Stderr, "  include %s median=%v\n",
+				pkg, med)
 		}
 	}
 
@@ -270,29 +266,7 @@ func median(in []time.Duration) time.Duration {
 	return (s[n/2-1] + s[n/2]) / 2
 }
 
-// coefficientOfVariation returns stddev/mean (population) on the
-// samples expressed in seconds. Returns 0 when len(samples) < 2 or
-// the mean is zero — both cases mean CV is undefined or unstable.
-func coefficientOfVariation(samples []time.Duration) float64 {
-	if len(samples) < 2 {
-		return 0
-	}
-	var sum float64
-	for _, s := range samples {
-		sum += s.Seconds()
-	}
-	mean := sum / float64(len(samples))
-	if mean == 0 {
-		return 0
-	}
-	var sq float64
-	for _, s := range samples {
-		d := s.Seconds() - mean
-		sq += d * d
-	}
-	stddev := math.Sqrt(sq / float64(len(samples)))
-	return stddev / mean
-}
+
 
 // emit serializes pkgs as indented JSON to the given path, or stdout
 // when path is empty.

@@ -120,6 +120,9 @@ type Config struct {
 
 	// Verbose enables -v flag on go test.
 	Verbose bool
+
+	// WarmCache, when false, forces runWorker to use an isolated GOCACHE.
+	WarmCache bool
 }
 
 // RunPartitioned executes go test for each partition in parallel,
@@ -189,7 +192,7 @@ func RunBaselineSeqPackages(cfg Config, packages []string) ExecutionResult {
 	}
 	args = appendPackageArgs(args, packages)
 
-	output, err := runGoTest(cfg, args)
+	output, err := runGoTest(cfg, args, nil)
 	elapsed := time.Since(start)
 
 	wr := WorkerResult{
@@ -231,7 +234,7 @@ func RunBaselineParPackages(cfg Config, parallelism int, packages []string) Exec
 	}
 	args = appendPackageArgs(args, packages)
 
-	output, err := runGoTest(cfg, args)
+	output, err := runGoTest(cfg, args, nil)
 	elapsed := time.Since(start)
 
 	wr := WorkerResult{
@@ -292,8 +295,17 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 	}
 	args = append(args, pkgPaths...)
 
+	var env []string
+	if !cfg.WarmCache {
+		tempDir, err := os.MkdirTemp("", fmt.Sprintf("tcc-worker-%d-*", partition.WorkerID))
+		if err == nil {
+			defer os.RemoveAll(tempDir)
+			env = append(os.Environ(), "GOCACHE="+tempDir)
+		}
+	}
+
 	start := time.Now()
-	output, err := runGoTest(cfg, args)
+	output, err := runGoTest(cfg, args, env)
 	elapsed := time.Since(start)
 
 	return WorkerResult{
@@ -307,7 +319,7 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 
 // runGoTest executes a go test command with the given arguments
 // and returns combined output. Respects cfg.Timeout.
-func runGoTest(cfg Config, args []string) (string, error) {
+func runGoTest(cfg Config, args []string, env []string) (string, error) {
 	var ctx context.Context
 	var cancel context.CancelFunc
 
@@ -320,6 +332,9 @@ func runGoTest(cfg Config, args []string) (string, error) {
 
 	cmd := exec.CommandContext(ctx, "go", args...)
 	cmd.Dir = cfg.ProjectPath
+	if len(env) > 0 {
+		cmd.Env = env
+	}
 
 	out, err := cmd.CombinedOutput()
 

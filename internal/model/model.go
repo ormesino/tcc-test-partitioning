@@ -10,7 +10,6 @@ import "time"
 //
 // In scheduling theory, each PackageInfo is a job j_i with:
 //   - processing time p_i  = Duration
-//   - variability    cv_i  = CV  (used only by weighted algorithms)
 type PackageInfo struct {
 	// Name is the fully qualified Go package import path,
 	// e.g. "github.com/cli/cli/v2/pkg/cmd/pr".
@@ -19,12 +18,6 @@ type PackageInfo struct {
 	// Duration is the median wall-clock time observed across
 	// multiple test executions (typically 10 runs, per ADR-007).
 	Duration time.Duration `json:"duration_ns"`
-
-	// CV is the coefficient of variation (stddev / mean) of the
-	// observed durations. A higher CV indicates less predictable
-	// execution time. Used by the FFD weighted algorithm to
-	// penalize high-variance packages.
-	CV float64 `json:"cv"`
 }
 
 // Partition represents the workload assigned to a single worker

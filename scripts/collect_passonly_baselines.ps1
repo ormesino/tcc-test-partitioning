@@ -82,6 +82,10 @@ function Invoke-Baseline {
 
     if ($Warm) {
         $args += '--warm-cache'
+    } else {
+        Write-Host "==> Limpando cache do Go (cold start)..."
+        & go clean -cache
+        & go clean -testcache
     }
 
     Write-Host "==> $Project $Mode $(if ($Mode -eq 'baseline-par') { "w=$WorkersValue " })$(if ($Warm) { 'warm' } else { 'cold' })"

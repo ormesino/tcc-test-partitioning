@@ -89,6 +89,10 @@ try {
     )
 
     foreach ($c in $coldConfigs) {
+        Write-Log "  Limpando caches do Go antes da campanha $($c.Name)"
+        & go clean -cache
+        & go clean -testcache
+
         $exitCode = Run-Step -Name $c.Name `
             -Command "go" `
             -Args @("run", "./cmd/benchmark", "--config", $c.Config, "--timeout-minutes", "$TimeoutMinutes")

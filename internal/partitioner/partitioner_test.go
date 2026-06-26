@@ -10,7 +10,6 @@ import (
 
 // mkPkgs builds a slice of PackageInfo with deterministic names
 // ("pkg00", "pkg01", ...) and the given durations in milliseconds.
-// CV defaults to 0 unless overridden via mkPkgsCV.
 func mkPkgs(ms ...int) []model.PackageInfo {
 	out := make([]model.PackageInfo, len(ms))
 	for i, m := range ms {

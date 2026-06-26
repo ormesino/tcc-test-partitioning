@@ -161,7 +161,7 @@ func resolveAlgorithms(names []string) ([]partitioner.Partitioner, error) {
 			out = append(out, &partitioner.Quantity{})
 		case "lpt":
 			out = append(out, &partitioner.LPT{})
-		case "ffd", "ffd-weighted":
+		case "ffd", "ffd-multifit":
 			out = append(out, &partitioner.FFD{})
 		default:
 			return nil, fmt.Errorf("unknown algorithm: %q (valid: round-robin, quantity, lpt, ffd, all)", n)

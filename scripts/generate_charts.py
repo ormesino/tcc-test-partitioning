@@ -42,16 +42,16 @@ ALGO_COLORS = {
     "Round-Robin":  "#E74C3C",   # vermelho
     "Quantity":     "#3498DB",   # azul
     "LPT":         "#2ECC71",   # verde
-    "FFD-Weighted": "#9B59B6",  # roxo
+    "FFD-Multifit": "#9B59B6",  # roxo
 }
 
-ALGO_ORDER = ["Round-Robin", "Quantity", "LPT", "FFD-Weighted"]
+ALGO_ORDER = ["Round-Robin", "Quantity", "LPT", "FFD-Multifit"]
 
 ALGO_SHORT = {
     "Round-Robin":  "RR",
     "Quantity":     "QTY",
     "LPT":         "LPT",
-    "FFD-Weighted": "FFD",
+    "FFD-Multifit": "FFD",
 }
 
 plt.rcParams.update({
