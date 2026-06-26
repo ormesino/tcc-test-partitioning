@@ -1,5 +1,5 @@
-# Makefile para tcc-test-partitioning.
-# Funciona em PowerShell (via `make` do GNU/Chocolatey) ou em bash.
+# Makefile for tcc-test-partitioning.
+# Works in PowerShell (via GNU Make / Chocolatey) or in Bash.
 
 GO ?= go
 BIN_DIR := bin
@@ -8,11 +8,11 @@ REPORTS_DIR := reports
 
 .PHONY: all build test fmt vet tidy clean \
         gendata demo simulate-example bench-example \
-        check ci
+        check ci run-campaigns clean-logs clean-reports
 
 all: check build
 
-## --- desenvolvimento ----------------------------------------------
+## --- development ---------------------------------------------------
 
 fmt:
 	$(GO) fmt ./...
@@ -26,10 +26,10 @@ tidy:
 test:
 	$(GO) test ./cmd/... ./internal/... ./data/synthetic
 
-# Atalho recomendado antes de commit.
+# Recommended shortcut before committing.
 check: fmt vet test
 
-# Pipeline determinística para CI (sem `fmt`, que altera arquivos).
+# Deterministic pipeline for CI (without `fmt`, which alters files).
 ci: vet test
 
 ## --- builds --------------------------------------------------------
@@ -41,18 +41,25 @@ build:
 clean:
 	@rm -rf $(BIN_DIR)
 
-## --- fixtures e exemplos ------------------------------------------
+clean-logs:
+	@rm -rf logs/campaigns/*
 
-# Gera os três datasets sintéticos em data/synthetic/.
+clean-reports:
+	@rm -rf $(REPORTS_DIR)/*
+	@rm -rf benchmarks/results/*
+
+## --- fixtures and examples -----------------------------------------
+
+# Generates the three synthetic datasets in data/synthetic/.
 gendata:
 	$(GO) run ./cmd/gendata -profile all -output-dir $(SYNTH_DIR)
 
-# Demonstração visual + relatório JSON.
+# Visual demonstration + JSON report.
 demo: gendata
 	@mkdir -p $(REPORTS_DIR)
 	$(GO) run ./cmd/demo --output-json $(REPORTS_DIR)/demo.json
 
-# Exemplo de simulate sobre o dataset "moderate".
+# Simulate example on the "moderate" synthetic dataset.
 simulate-example: gendata
 	@mkdir -p $(REPORTS_DIR)
 	$(GO) run ./cmd/partitioner --mode simulate \
@@ -60,6 +67,12 @@ simulate-example: gendata
 		--data-file $(SYNTH_DIR)/moderate.json \
 		--output-json $(REPORTS_DIR)/simulate-moderate-lpt-w4.json
 
-# Matriz experimental completa em modo simulate (config de exemplo).
+# Full experimental matrix in simulate mode (example config).
 bench-example: gendata
 	$(GO) run ./cmd/benchmark --config benchmarks/example-config.json
+
+## --- experimental campaigns (PowerShell wrappers) ------------------
+
+# Runs the complete campaign execution script (cold and warm).
+run-campaigns:
+	pwsh -ExecutionPolicy Bypass -File scripts/run_all_campaigns.ps1
