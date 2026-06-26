@@ -27,16 +27,25 @@ go.work.sum
 # Editor/IDE
 .vscode/
 
-# Report files
-report.json
+# Runtime outputs
+/report.json
+/reports/
+/logs/
+/bin/
 
-# Data generated (not including /data/synthetic/fixtures.go on ignore)
-/data/baseline/
-/data/probe/
-/data/characterization/
+# External repositories. Keep only the curated list of subjects.
+/repos/*
+!/repos/repos.txt
 /data/repos/
 
-# Other files
-/benchmarks
+# Raw and historical experimental data
+/data/probe/
+/data/characterization/old/
+/data/baseline/*.json
+!/data/baseline/*passonly.json
+
+# Benchmark results are generated; configs are versioned.
+/benchmarks/results/
+
+# Internal documentation, not part of the public project artifact.
 /docs
-/reports

@@ -1,225 +1,187 @@
 # tcc-test-partitioning
 
-Avaliação empírica de algoritmos de particionamento de testes para suítes Go.
-Compara quatro algoritmos — Round-Robin, Quantity, LPT e FFD-Weighted — contra
-duas baselines (`go test -p 1` sequencial e `go test -p P` paralelo nativo)
-sob o modelo de escalonamento P||Cmax (Graham, 1969).
+Empirical evaluation of test-suite partitioning algorithms for Go projects.
+The tool compares four static partitioning strategies, Round-Robin, Quantity,
+LPT, and FFD-Weighted, against Go-native baselines under the P||Cmax scheduling
+model.
 
-Projeto de TCC. Sem dependências externas: apenas a biblioteca padrão do Go
-(≥ 1.22), inclusive nos testes.
+The project is part of an undergraduate Computer Science thesis. The
+implementation intentionally uses only the Go standard library.
 
-## Estrutura
+## What This Repository Contains
 
-```
+This repository contains a small research toolchain for:
+
+- collecting package-level Go test durations;
+- building pass-only characterization datasets;
+- simulating partitioning strategies from historical durations;
+- executing partitioned `go test` workloads locally;
+- collecting sequential and Go-native parallel baselines;
+- running full benchmark campaigns and exporting JSON/CSV results.
+
+For the consolidated research and design rationale, see
+[DECISIONS.md](DECISIONS.md).
+
+## Repository Layout
+
+```text
 cmd/
-  analyze/      agrega N execuções de `go test -json` em PackageInfo (mediana + CV)
-  benchmark/    driver experimental: projetos × workers × algoritmos × reps
-  demo/         exploração com dados sintéticos (sem `go test` real)
-  gendata/      exporta fixtures sintéticas como JSON
-  partitioner/  CLI principal: simulate, run, baseline-seq, baseline-par
+  analyze/      Aggregates N go test -json runs into PackageInfo data.
+  benchmark/    Experimental driver: projects x workers x algorithms x reps.
+  demo/         Demonstrates all algorithms on synthetic datasets.
+  gendata/      Exports deterministic synthetic fixtures as JSON.
+  partitioner/  Main CLI: simulate, run, baseline-seq, baseline-par.
 data/
-  synthetic/    fixtures Go que produzem perfis estatísticos conhecidos
+  synthetic/         Deterministic synthetic fixtures.
+  characterization/  Final pass-only package datasets for the selected projects.
+  baseline/          Final pass-only baseline measurements.
 internal/
-  model/        tipos de domínio (PackageInfo, Partition, PartitionResult)
-  partitioner/  implementações dos quatro algoritmos
-  executor/     execução paralela de `go test` (CSP, 1 goroutine/worker)
-  metrics/      Speedup, Efficiency, Makespan, desvio-padrão da carga
+  model/        Domain types: PackageInfo, Partition, PartitionResult.
+  partitioner/  Implementations of the four partitioning algorithms.
+  executor/     Parallel execution of go test using goroutines and channels.
+  metrics/      Makespan, speedup, efficiency, and load-balance metrics.
+repos/
+  repos.txt     List of analyzed GitHub projects; clones live in repos/<name>.
 scripts/
-  collect.ps1   orquestra a coleta de dados de um projeto real
+  collect.ps1                    Collects repeated go test -json runs.
+  collect_passonly_baselines.ps1 Collects comparable pass-only baselines.
+  recharacterize_all.ps1         Rebuilds characterization data for all subjects.
+  run_all_campaigns.ps1          Runs the final cold and warm campaigns.
+  generate_charts.py             Generates plots from benchmark results.
+  triage.ps1                     Performs candidate-project triage.
 benchmarks/
-  example-config.json  configuração de exemplo para `cmd/benchmark`
-docs/             metodologia, ADRs, diário de bordo, proposta
+  example-config.json  Synthetic benchmark example.
+  campaign_*.json      Final campaign configs for the selected projects.
 ```
 
-## Pré-requisitos
+Generated runtime outputs such as logs, reports, raw probes, benchmark results,
+and cloned external repositories are ignored by Git.
 
-- Go 1.22+ (apenas para os modos `run`, `baseline-seq` e `baseline-par`;
-  os modos `simulate` e `demo` rodam sem invocar `go test`).
-- PowerShell 7+ se for usar `scripts/collect.ps1`.
-- GNU `make` (opcional) para os atalhos do `Makefile`; no Windows,
-  via Git Bash ou `choco install make`.
-- Python com `pandas` e `matplotlib` apenas se for gerar os gráficos
-  de análise com `scripts/generate_charts.py`.
+## Requirements
 
-## Pipeline experimental
+- Go 1.22 or newer.
+- PowerShell 7 or newer for the collection scripts.
+- Python with `pandas` and `matplotlib` only for chart generation.
+- GNU Make is optional and only provides convenience targets.
 
-### 1. Caracterizar projeto real (opcional)
+## Quick Validation
 
-```powershell
-pwsh scripts/collect.ps1 -ProjectPath C:\src\cli -ProjectName cli -Runs 10
-# → data/probe/cli/run_NN.json (N execuções de `go test -json`)
-# → data/characterization/cli.json ([]PackageInfo agregado)
-```
-
-### 2. Medir baseline sequencial (T1)
+The fastest way to validate the tool does not require cloning external
+projects or running real test suites.
 
 ```powershell
-go run ./cmd/partitioner --mode baseline-seq `
-  --project-path C:\src\cli `
-  --output data/baseline/cli-seq.json
-```
-
-### 3. Simular ou executar com particionamento
-
-```powershell
-# Simulação (deterministica, sem invocar `go test`):
-go run ./cmd/partitioner --mode simulate `
-  --algorithm lpt --workers 4 `
-  --data-file data/characterization/cli.json `
-  --baseline-seq-file data/baseline/cli-seq.json `
-  --output-json reports/cli-lpt-w4.json
-
-# Execução real:
-go run ./cmd/partitioner --mode run `
-  --algorithm ffd --workers 4 `
-  --data-file data/characterization/cli.json `
-  --baseline-seq-file data/baseline/cli-seq.json `
-  --project-path C:\src\cli `
-  --output-json reports/cli-ffd-w4.json
-```
-
-### 4. Matriz experimental completa
-
-```powershell
-go run ./cmd/benchmark --config benchmarks/example-config.json
-# → benchmarks/results/<timestamp>/{config.json, results.json, raw.csv, aggregate.csv}
-```
-
-## Roteiro para avaliadores
-
-Este repositório permite dois níveis de reprodução. O primeiro valida a
-ferramenta com dados sintéticos e não exige clonar projetos externos. O
-segundo reproduz a campanha empírica sobre um projeto Go real.
-
-### Caminho rápido: validar a ferramenta
-
-```powershell
-# 1. Gerar os datasets sintéticos em data/synthetic/.
 go run ./cmd/gendata -profile all
-
-# 2. Rodar a demonstração comparativa.
 go run ./cmd/demo --output-json reports/demo.json
-
-# 3. Rodar a matriz sintética de exemplo.
 go run ./cmd/benchmark --config benchmarks/example-config.json
 ```
 
-Esse fluxo executa os quatro algoritmos (`Round-Robin`, `Quantity`,
-`LPT` e `FFD-Weighted`) para diferentes quantidades de workers e grava
-relatórios estruturados em JSON/CSV. Ele é suficiente para inspecionar
-a interface, o formato dos dados e o comportamento planejado dos
-algoritmos.
+This generates deterministic synthetic datasets, runs all four algorithms, and
+writes structured JSON/CSV reports.
 
-### Caminho completo: gerar seus próprios dados
+## Main CLI
 
-1. Clone ou disponibilize um projeto Go em um diretório local, por
-   exemplo `C:\src\cli`.
-
-2. Caracterize a suíte de testes. O script executa N rodadas de
-   `go test -json -p 1 -parallel 1 -count=1`, salva os eventos brutos em
-   `data/probe/<nome>/` e gera `data/characterization/<nome>.json`
-   com mediana e CV por pacote.
-
-```powershell
-pwsh scripts/collect.ps1 -ProjectPath C:\src\cli -ProjectName cli -Runs 10
-```
-
-3. Meça o baseline sequencial. Esse arquivo fornece o T1 usado no
-   cálculo de speedup empírico.
-
-```powershell
-go run ./cmd/partitioner --mode baseline-seq `
-  --project-path C:\src\cli `
-  --output data/baseline/cli-seq.json
-```
-
-4. Para uma campanha com cache quente, meça também o T1 no mesmo
-   regime. O `--warm-cache` pré-compila os binários de teste antes
-   da medição, de modo que o baseline e as execuções particionadas
-   comparem tempos da mesma natureza.
-
-```powershell
-go run ./cmd/partitioner --mode baseline-seq --warm-cache `
-  --project-path C:\src\cli `
-  --output data/baseline/cli-seq-warm.json
-```
-
-5. Execute uma simulação pontual, sem rodar testes reais.
+### Simulate from a characterization file
 
 ```powershell
 go run ./cmd/partitioner --mode simulate `
-  --algorithm all --workers 4 `
+  --algorithm all `
+  --workers 4 `
   --data-file data/characterization/cli.json `
+  --baseline-seq-file data/baseline/cli-seq-passonly.json `
   --output-json reports/cli-simulate-w4.json
 ```
 
-6. Execute uma medição real particionada.
+`simulate` does not execute `go test`; it computes planned schedules and
+metrics from previously collected durations.
+
+### Run a partitioned execution
 
 ```powershell
 go run ./cmd/partitioner --mode run --warm-cache `
-  --algorithm ffd --workers 4 `
+  --algorithm ffd `
+  --workers 4 `
   --data-file data/characterization/cli.json `
-  --baseline-seq-file data/baseline/cli-seq-warm.json `
-  --project-path C:\src\cli `
+  --baseline-seq-file data/baseline/cli-seq-warm-passonly.json `
+  --project-path repos/cli `
   --output-json reports/cli-ffd-w4-warm.json
 ```
 
-7. Para reproduzir a matriz experimental completa, ajuste uma config
-   em `benchmarks/` e rode o driver:
+`run` partitions the package list and executes one `go test` process per worker.
+Each worker is restricted to `-p 1 -parallel 1` to preserve the scheduling model
+and avoid local over-parallelism.
+
+## Data Collection Workflow
+
+### 1. Clone or place subject repositories
+
+The selected projects are listed in `repos/repos.txt`. Local clones are expected
+under `repos/<name>`, for example `repos/cli` or `repos/grpc-go`.
+
+### 2. Characterize a project
+
+```powershell
+pwsh scripts/collect.ps1 -ProjectPath repos/cli -ProjectName cli -Runs 10
+```
+
+This runs `go test -json -p 1 -parallel 1 -count=1` repeatedly, stores raw probe
+files under `data/probe/<project>/`, and writes the aggregated pass-only dataset
+to `data/characterization/<project>.json`.
+
+### 3. Collect pass-only baselines
+
+```powershell
+pwsh -ExecutionPolicy Bypass -File scripts/collect_passonly_baselines.ps1 -TimeoutMinutes 60
+```
+
+The baseline commands use the same package list as the characterization file.
+This keeps `T1` and `Tp` comparable when computing speedup.
+
+### 4. Run benchmark campaigns
 
 ```powershell
 go run ./cmd/benchmark --config benchmarks/campaign_cli_warm.json
 ```
 
-A saída é criada em `benchmarks/results/<projeto>/<timestamp>/` com:
+A benchmark run writes:
 
-- `config.json`: cópia auditável da configuração usada.
-- `results.json`: relatório completo estruturado.
-- `raw.csv`: uma linha por repetição.
-- `aggregate.csv`: medianas e estatísticas por algoritmo/workers.
+- `config.json`: resolved configuration copy;
+- `results.json`: full structured report;
+- `raw.csv`: one row per repetition;
+- `aggregate.csv`: summary by project, algorithm, and worker count.
 
-8. Opcionalmente gere gráficos acadêmicos:
-
-```powershell
-python scripts/generate_charts.py benchmarks/results/cli/<timestamp>
-```
-
-## Exploração sem ambiente Go real
+For the complete set of final campaigns:
 
 ```powershell
-# Gera os JSONs sintéticos:
-go run ./cmd/gendata -profile all
-
-# Demonstração visual (4 algoritmos × 3 datasets × 3 worker counts):
-go run ./cmd/demo --output-json reports/demo.json
+pwsh -ExecutionPolicy Bypass -File scripts/run_all_campaigns.ps1 -TimeoutMinutes 90
 ```
 
-## Testes
+## Selected Subject Projects
+
+| Project | Pass-only packages | Characterization file |
+| --- | ---: | --- |
+| cli/cli | 233 | `data/characterization/cli.json` |
+| goreleaser/goreleaser | 116 | `data/characterization/goreleaser.json` |
+| grpc/grpc-go | 137 | `data/characterization/grpc-go.json` |
+| gohugoio/hugo | 142 | `data/characterization/hugo.json` |
+
+Only packages that pass under the characterization regime are included in the
+final experiments.
+
+## Testing
 
 ```powershell
-go test ./...
+go test ./cmd/... ./internal/... ./data/synthetic
+go vet ./...
 ```
 
-Cobertura: contratos genéricos (entrada vazia, 1 worker, P > N, preservação
-de pacotes) + propriedades específicas de cada algoritmo (cíclico, blocos
-contíguos, ordem por duração decrescente, peso `Duration*(1+CV)`, limite de
-Graham 4/3 − 1/(3p)) + métricas (Speedup, Efficiency, desvio).
+Avoid `go test ./...` as a blanket test command if external repositories are
+cloned under `repos/`. The scoped test command above validates this tool only.
 
-## Decisões de projeto
+## JSON Conventions
 
-Veja `docs/decisoes-tecnicas.md` para o registro completo de ADRs.
-Pontos centrais:
+All generated JSON follows the same conventions:
 
-- **ADR-007** — N = 10 execuções por coleta; mediana como valor canônico.
-- **ADR-010** — peso FFD = `Duration × (1 + CV)`.
-- **ADR-011** — duas baselines obrigatórias: `-p 1` (T1) e `-p P` (paralelo nativo).
-- **ADR-012** — strategy pattern via interface `Partitioner`.
-- **ADR-017 e ADR-018** — forçamos a simulação a ser sequencial por worker para fidelidade teórica, mas implementamos `"warm_cache": true` na config para separar a execução dos testes da compilação.
-
-## Convenções de JSON
-
-- Snake_case nos campos.
-- Durações em nanossegundos com sufixo `_ns` (`int64`).
-- `time.Time` em RFC3339.
-- Campos opcionais marcados com `omitempty`.
-
+- field names use `snake_case`;
+- `time.Duration` values are serialized as nanoseconds with `_ns` suffixes;
+- `time.Time` values use RFC3339 formatting;
+- optional fields use `omitempty` where appropriate.
