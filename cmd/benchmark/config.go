@@ -50,10 +50,9 @@ type Config struct {
 	// Verbose enables `go test -v` in "run" mode.
 	Verbose bool `json:"verbose,omitempty"`
 
-	// WarmCache, when true, pre-compiles all test binaries before
-	// each (project, algorithm, workers, rep) execution. This populates
-	// Go's build cache so workers measure only test execution time.
-	// Simulates a CI environment with a warm build cache.
+	// WarmCache, when true, pre-compiles the selected package set before
+	// each project run. This populates Go's build cache so workers measure
+	// mostly test execution time rather than compilation.
 	WarmCache bool `json:"warm_cache,omitempty"`
 
 	// Projects is the list of subjects to benchmark.

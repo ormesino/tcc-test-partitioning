@@ -1,0 +1,22 @@
+{
+  "mode": "run",
+  "workers": [
+    2,
+    4,
+    8
+  ],
+  "algorithms": [
+    "all"
+  ],
+  "repetitions": 3,
+  "timeout_minutes": 60,
+  "output_dir": "benchmarks/results/cli",
+  "projects": [
+    {
+      "name": "cli",
+      "data_file": "data/characterization/cli.json",
+      "baseline_seq_file": "data/baseline/cli-seq-passonly.json",
+      "project_path": "repos/cli"
+    }
+  ]
+}

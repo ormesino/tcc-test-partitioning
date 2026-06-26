@@ -1,0 +1,23 @@
+{
+  "mode": "run",
+  "workers": [
+    2,
+    4,
+    8
+  ],
+  "algorithms": [
+    "all"
+  ],
+  "repetitions": 3,
+  "timeout_minutes": 60,
+  "warm_cache": true,
+  "output_dir": "benchmarks/results/goreleaser",
+  "projects": [
+    {
+      "name": "goreleaser",
+      "data_file": "data/characterization/goreleaser.json",
+      "baseline_seq_file": "data/baseline/goreleaser-seq-warm-passonly.json",
+      "project_path": "repos/goreleaser"
+    }
+  ]
+}

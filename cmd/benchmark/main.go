@@ -22,8 +22,6 @@
 //
 //	go run cmd/benchmark/main.go --config benchmarks/example-config.json
 //	go run cmd/benchmark/main.go --config bench.json --mode run
-//
-// TODO: validar com ambiente Go (run mode requires `go` in PATH)
 package main
 
 import (
@@ -47,6 +45,8 @@ func main() {
 		"Override config.mode (\"simulate\" or \"run\"). Empty keeps config value.")
 	outputDirOverride := flag.String("output-dir", "",
 		"Override config.output_dir. Empty keeps config value.")
+	timeoutMinutesOverride := flag.Int("timeout-minutes", 0,
+		"Override config.timeout_minutes. Zero keeps config value.")
 	flag.Parse()
 
 	if *configPath == "" {
@@ -67,6 +67,9 @@ func main() {
 	}
 	if *outputDirOverride != "" {
 		cfg.OutputDir = *outputDirOverride
+	}
+	if *timeoutMinutesOverride > 0 {
+		cfg.TimeoutMinutes = *timeoutMinutesOverride
 	}
 
 	algorithms, err := resolveAlgorithms(cfg.Algorithms)
@@ -107,10 +110,10 @@ func main() {
 		fmt.Printf("  Packages: %d | T1 (%s): %v\n", len(packages), t1Source, t1)
 
 		if cfg.WarmCache {
-			executor.WarmBuildCache(executor.Config{
+			executor.WarmBuildCachePackages(executor.Config{
 				ProjectPath: proj.ProjectPath,
 				Timeout:     time.Duration(cfg.TimeoutMinutes) * time.Minute,
-			})
+			}, packageNames(packages))
 		}
 
 		for _, w := range cfg.Workers {
@@ -158,8 +161,6 @@ func main() {
 // returns the corresponding raw record. Independent of every other
 // tuple: it always calls Partition() fresh, and (in run mode) starts
 // a new executor.RunPartitioned.
-//
-// TODO: validar com ambiente Go (run mode)
 func runOne(cfg Config, proj ProjectSpec, packages []model.PackageInfo, t1 time.Duration, alg partitioner.Partitioner, workers, rep int) rawRecord {
 	partResult := alg.Partition(packages, workers)
 	plannedReport := metrics.Compute(partResult, t1)
@@ -238,6 +239,9 @@ func resolveT1(packages []model.PackageInfo, baselineSeqFile string) (time.Durat
 		if err != nil {
 			fatal("loading baseline %q: %v", baselineSeqFile, err)
 		}
+		if err := validateBaselineReport(baselineSeqFile, r); err != nil {
+			fatal("%v", err)
+		}
 		return r.Duration, fmt.Sprintf("measured (%s)", baselineSeqFile)
 	}
 	var sum time.Duration
@@ -248,6 +252,19 @@ func resolveT1(packages []model.PackageInfo, baselineSeqFile string) (time.Durat
 		"WARN: baseline_seq_file not set for a project. T1 = sum(Duration)\n"+
 			"      is an optimistic approximation; reported Speedup is biased upward.")
 	return sum, "approx (sum of durations)"
+}
+
+func validateBaselineReport(path string, r executor.BaselineReport) error {
+	if r.Duration <= 0 {
+		return fmt.Errorf("baseline file %s has non-positive duration", path)
+	}
+	if r.Error != "" {
+		return fmt.Errorf("baseline file %s records a failed run: %s", path, r.Error)
+	}
+	if r.PackageCount > 0 && !r.Success {
+		return fmt.Errorf("baseline file %s records success=false", path)
+	}
+	return nil
 }
 
 // loadPackages reads a JSON file containing []PackageInfo.
@@ -261,6 +278,14 @@ func loadPackages(path string) ([]model.PackageInfo, error) {
 		return nil, fmt.Errorf("parsing data file %s: %w", path, err)
 	}
 	return packages, nil
+}
+
+func packageNames(packages []model.PackageInfo) []string {
+	names := make([]string, len(packages))
+	for i, pkg := range packages {
+		names[i] = pkg.Name
+	}
+	return names
 }
 
 // makeRunDir creates "<base>/<YYYYmmdd-HHMMSS>/" and returns its path.

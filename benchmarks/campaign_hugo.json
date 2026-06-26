@@ -1,0 +1,22 @@
+{
+  "mode": "run",
+  "workers": [
+    2,
+    4,
+    8
+  ],
+  "algorithms": [
+    "all"
+  ],
+  "repetitions": 3,
+  "timeout_minutes": 60,
+  "output_dir": "benchmarks/results/hugo",
+  "projects": [
+    {
+      "name": "hugo",
+      "data_file": "data/characterization/hugo.json",
+      "baseline_seq_file": "data/baseline/hugo-seq-passonly.json",
+      "project_path": "repos/hugo"
+    }
+  ]
+}
