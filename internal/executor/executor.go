@@ -29,11 +29,15 @@ import (
 // modes and consumed by partitioning runs to obtain a methodologically
 // sound T1 for speedup computation (ADR-011).
 type BaselineReport struct {
-	Mode        string        `json:"mode"`        // "baseline-seq" or "baseline-par"
-	Parallelism int           `json:"parallelism"` // p for baseline-par; 1 for baseline-seq
-	Duration    time.Duration `json:"duration_ns"` // wall-clock, in nanoseconds
-	MeasuredAt  time.Time     `json:"measured_at"`
-	ProjectPath string        `json:"project_path"`
+	Mode          string        `json:"mode"`        // "baseline-seq" or "baseline-par"
+	Parallelism   int           `json:"parallelism"` // p for baseline-par; 1 for baseline-seq
+	Duration      time.Duration `json:"duration_ns"` // wall-clock, in nanoseconds
+	MeasuredAt    time.Time     `json:"measured_at"`
+	ProjectPath   string        `json:"project_path"`
+	PackageCount  int           `json:"package_count,omitempty"`
+	PackageSource string        `json:"package_source,omitempty"` // "./..." or a PackageInfo JSON path
+	Success       bool          `json:"success"`
+	Error         string        `json:"error,omitempty"`
 }
 
 // WriteBaselineReport serializes the report to path as indented JSON.
@@ -121,12 +125,8 @@ type Config struct {
 // RunPartitioned executes go test for each partition in parallel,
 // one goroutine per worker, and measures wall-clock time.
 //
-// When cfg.WarmCache is true, a pre-compilation step runs before
-// launching workers. This compiles all test binaries into Go's
-// build cache without executing any tests, so that the workers'
-// wall-clock time reflects only test execution, not compilation.
-// The pre-compilation uses default parallelism (all CPUs) for speed
-// and is NOT included in the makespan measurement.
+// Warm-cache preparation, when desired, is performed by the caller before this
+// function starts measuring the partitioned execution.
 func RunPartitioned(cfg Config, partResult model.PartitionResult) ExecutionResult {
 	workers := len(partResult.Partitions)
 	resultCh := make(chan WorkerResult, workers)
@@ -170,19 +170,24 @@ func RunPartitioned(cfg Config, partResult model.PartitionResult) ExecutionResul
 }
 
 // RunBaselineSeq executes go test sequentially (-p 1 -parallel 1)
-// to measure T1 for speedup calculation.
-//
-// TODO: validar com ambiente Go
+// over ./... to measure T1 for speedup calculation.
 func RunBaselineSeq(cfg Config) ExecutionResult {
+	return RunBaselineSeqPackages(cfg, nil)
+}
+
+// RunBaselineSeqPackages executes go test sequentially (-p 1 -parallel 1)
+// over an explicit package list. When packages is empty, it falls back to ./...
+// for backward compatibility.
+func RunBaselineSeqPackages(cfg Config, packages []string) ExecutionResult {
 	start := time.Now()
 
-	// Build command: go test -p 1 -parallel 1 -count=1 ./...
+	// Build command: go test -p 1 -parallel 1 -count=1 <packages|./...>
 	args := []string{"test", "-p", "1", "-parallel", "1",
 		"-count", fmt.Sprintf("%d", cfg.Count)}
 	if cfg.Verbose {
 		args = append(args, "-v")
 	}
-	args = append(args, "./...")
+	args = appendPackageArgs(args, packages)
 
 	output, err := runGoTest(cfg, args)
 	elapsed := time.Since(start)
@@ -190,7 +195,7 @@ func RunBaselineSeq(cfg Config) ExecutionResult {
 	wr := WorkerResult{
 		WorkerID:     0,
 		Elapsed:      elapsed,
-		PackageCount: 0, // unknown without parsing output
+		PackageCount: packageCount(packages),
 		Error:        err,
 		Output:       output,
 	}
@@ -205,21 +210,26 @@ func RunBaselineSeq(cfg Config) ExecutionResult {
 }
 
 // RunBaselinePar executes go test with native parallelism (-p P)
-// for direct comparison with partitioning algorithms at the same
+// over ./... for direct comparison with partitioning algorithms at the same
 // level of parallelism.
-//
-// TODO: validar com ambiente Go
 func RunBaselinePar(cfg Config, parallelism int) ExecutionResult {
+	return RunBaselineParPackages(cfg, parallelism, nil)
+}
+
+// RunBaselineParPackages executes go test with native parallelism (-p P)
+// over an explicit package list. When packages is empty, it falls back to ./...
+// for backward compatibility.
+func RunBaselineParPackages(cfg Config, parallelism int, packages []string) ExecutionResult {
 	start := time.Now()
 
-	// Build command: go test -p P -parallel 1 -count=1 ./...
+	// Build command: go test -p P -parallel 1 -count=1 <packages|./...>
 	args := []string{"test", "-p", fmt.Sprintf("%d", parallelism),
 		"-parallel", "1",
 		"-count", fmt.Sprintf("%d", cfg.Count)}
 	if cfg.Verbose {
 		args = append(args, "-v")
 	}
-	args = append(args, "./...")
+	args = appendPackageArgs(args, packages)
 
 	output, err := runGoTest(cfg, args)
 	elapsed := time.Since(start)
@@ -227,7 +237,7 @@ func RunBaselinePar(cfg Config, parallelism int) ExecutionResult {
 	wr := WorkerResult{
 		WorkerID:     0,
 		Elapsed:      elapsed,
-		PackageCount: 0,
+		PackageCount: packageCount(packages),
 		Error:        err,
 		Output:       output,
 	}
@@ -241,10 +251,22 @@ func RunBaselinePar(cfg Config, parallelism int) ExecutionResult {
 	}
 }
 
+func appendPackageArgs(args []string, packages []string) []string {
+	if len(packages) == 0 {
+		return append(args, "./...")
+	}
+	return append(args, packages...)
+}
+
+func packageCount(packages []string) int {
+	if len(packages) == 0 {
+		return 0
+	}
+	return len(packages)
+}
+
 // runWorker executes go test for a single partition and returns
 // the result with wall-clock timing.
-//
-// TODO: validar com ambiente Go
 func runWorker(cfg Config, partition model.Partition) WorkerResult {
 	if len(partition.Packages) == 0 {
 		return WorkerResult{
@@ -285,8 +307,6 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 
 // runGoTest executes a go test command with the given arguments
 // and returns combined output. Respects cfg.Timeout.
-//
-// TODO: validar com ambiente Go
 func runGoTest(cfg Config, args []string) (string, error) {
 	var ctx context.Context
 	var cancel context.CancelFunc
@@ -318,6 +338,12 @@ func runGoTest(cfg Config, args []string) (string, error) {
 // This simulates a CI environment where the build cache is warm
 // from a previous pipeline stage or a cached Docker layer.
 func WarmBuildCache(cfg Config) {
+	WarmBuildCachePackages(cfg, nil)
+}
+
+// WarmBuildCachePackages pre-compiles test binaries for an explicit package
+// list. When packages is empty, it falls back to ./...
+func WarmBuildCachePackages(cfg Config, packages []string) {
 	fmt.Fprintf(os.Stderr, "  [warm-cache] Pre-compiling test binaries for %s...\n", cfg.ProjectPath)
 	start := time.Now()
 
@@ -331,7 +357,8 @@ func WarmBuildCache(cfg Config) {
 	// -run=^$ matches no test, so nothing executes.
 	// -count=1 ensures the test cache is not used, but the build cache IS used.
 	// Default -p (GOMAXPROCS) gives maximum compilation parallelism.
-	cmd := exec.CommandContext(ctx, "go", "test", "-run=^$", "-count=1", "./...")
+	args := appendPackageArgs([]string{"test", "-run=^$", "-count=1"}, packages)
+	cmd := exec.CommandContext(ctx, "go", args...)
 	cmd.Dir = cfg.ProjectPath
 	cmd.Stdout = os.Stderr // Show compilation progress on stderr.
 	cmd.Stderr = os.Stderr

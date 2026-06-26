@@ -18,11 +18,14 @@ func TestBaselineReport_RoundTrip(t *testing.T) {
 	path := filepath.Join(dir, "baseline.json")
 
 	want := BaselineReport{
-		Mode:        "baseline-seq",
-		Parallelism: 1,
-		Duration:    1234567890 * time.Nanosecond,
-		MeasuredAt:  time.Date(2026, 6, 3, 12, 0, 0, 0, time.UTC),
-		ProjectPath: "C:/src/cli",
+		Mode:          "baseline-seq",
+		Parallelism:   1,
+		Duration:      1234567890 * time.Nanosecond,
+		MeasuredAt:    time.Date(2026, 6, 3, 12, 0, 0, 0, time.UTC),
+		ProjectPath:   "C:/src/cli",
+		PackageCount:  233,
+		PackageSource: "data/characterization/cli.json",
+		Success:       true,
 	}
 
 	if err := WriteBaselineReport(path, want); err != nil {
@@ -38,7 +41,11 @@ func TestBaselineReport_RoundTrip(t *testing.T) {
 		got.Parallelism != want.Parallelism ||
 		got.Duration != want.Duration ||
 		!got.MeasuredAt.Equal(want.MeasuredAt) ||
-		got.ProjectPath != want.ProjectPath {
+		got.ProjectPath != want.ProjectPath ||
+		got.PackageCount != want.PackageCount ||
+		got.PackageSource != want.PackageSource ||
+		got.Success != want.Success ||
+		got.Error != want.Error {
 		t.Fatalf("round-trip mismatch:\nwant=%+v\n got=%+v", want, got)
 	}
 }
@@ -110,5 +117,23 @@ func TestFormatExecutionResult_ContainsKeyFields(t *testing.T) {
 		if !strings.Contains(got, want) {
 			t.Errorf("missing %q in output:\n%s", want, got)
 		}
+	}
+}
+
+func TestAppendPackageArgs(t *testing.T) {
+	base := []string{"test", "-count=1"}
+
+	got := appendPackageArgs(append([]string{}, base...), nil)
+	if want := "./..."; got[len(got)-1] != want {
+		t.Fatalf("fallback package = %q, want %q", got[len(got)-1], want)
+	}
+
+	pkgs := []string{"example.com/a", "example.com/b"}
+	got = appendPackageArgs(append([]string{}, base...), pkgs)
+	if strings.Join(got[len(got)-2:], ",") != strings.Join(pkgs, ",") {
+		t.Fatalf("packages appended = %v, want suffix %v", got, pkgs)
+	}
+	if count := packageCount(pkgs); count != 2 {
+		t.Fatalf("packageCount = %d, want 2", count)
 	}
 }

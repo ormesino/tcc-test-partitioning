@@ -48,7 +48,7 @@ func main() {
 	mode := flag.String("mode", "simulate",
 		"Execution mode: simulate, run, baseline-seq, baseline-par")
 	dataFile := flag.String("data-file", "",
-		"Path to JSON file with pre-collected package durations (for simulate mode)")
+		"Path to JSON file with pre-collected package durations (simulate/run; optional pass-only scope for baseline modes)")
 	projectPath := flag.String("project-path", "",
 		"Path to Go project root (for run/baseline modes)")
 	timeout := flag.Int("timeout", 30,
@@ -107,9 +107,9 @@ func main() {
 	case "run":
 		runExecution(*dataFile, *projectPath, *algorithm, *workers, *timeout, *verbose, *warmCache, *baselineSeqFile, *outputJSON, *listPackages)
 	case "baseline-seq":
-		runBaselineSeq(*projectPath, *timeout, *verbose, *warmCache, *output)
+		runBaselineSeq(*projectPath, *dataFile, *timeout, *verbose, *warmCache, *output)
 	case "baseline-par":
-		runBaselinePar(*projectPath, *workers, *timeout, *verbose, *warmCache, *output)
+		runBaselinePar(*projectPath, *dataFile, *workers, *timeout, *verbose, *warmCache, *output)
 	}
 }
 
@@ -264,8 +264,6 @@ func runSimulate(dataFile, algName string, workers int, baselineSeqFile, outputJ
 //
 // Each algorithm's Partition() is called once and the result is
 // reused for both the human-readable text and the JSON report.
-//
-// TODO: validar com ambiente Go
 func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int, verbose, warmCache bool, baselineSeqFile, outputJSON string, listPackages bool) {
 	packages, err := loadPackages(dataFile)
 	if err != nil {
@@ -282,7 +280,7 @@ func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int
 	}
 
 	if warmCache {
-		executor.WarmBuildCache(cfg)
+		executor.WarmBuildCachePackages(cfg, packageNames(packages))
 	}
 
 	seqDuration, seqSource := resolveT1(packages, baselineSeqFile)
@@ -355,12 +353,12 @@ func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int
 	}
 }
 
-// runBaselineSeq executes go test in sequential mode (-p 1).
-// When output is non-empty, the wall-clock T1 is persisted as a
-// BaselineReport JSON for later reuse by --mode run.
-//
-// TODO: validar com ambiente Go
-func runBaselineSeq(projectPath string, timeoutMin int, verbose, warmCache bool, output string) {
+// runBaselineSeq executes go test in sequential mode (-p 1). When dataFile is
+// provided, it uses exactly the packages present in the characterization JSON
+// instead of ./..., producing a pass-only baseline comparable to partitioned runs.
+// When output is non-empty, the wall-clock T1 is persisted as a BaselineReport
+// JSON for later reuse by --mode run.
+func runBaselineSeq(projectPath, dataFile string, timeoutMin int, verbose, warmCache bool, output string) {
 	cfg := executor.Config{
 		ProjectPath: projectPath,
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
@@ -368,33 +366,44 @@ func runBaselineSeq(projectPath string, timeoutMin int, verbose, warmCache bool,
 		Verbose:     verbose,
 	}
 
+	packages, packageSource := loadBaselinePackageScope(dataFile)
+
 	if warmCache {
-		executor.WarmBuildCache(cfg)
+		executor.WarmBuildCachePackages(cfg, packages)
 	}
 
 	fmt.Println("=== Baseline Sequential (go test -p 1 -parallel 1) ===")
+	fmt.Printf("Package scope: %s", packageSource)
+	if len(packages) > 0 {
+		fmt.Printf(" (%d packages)", len(packages))
+	}
+	fmt.Println()
 	fmt.Println()
 
-	result := executor.RunBaselineSeq(cfg)
+	result := executor.RunBaselineSeqPackages(cfg, packages)
 	fmt.Println(executor.FormatExecutionResult(result))
 
 	if output != "" {
+		wr := result.WorkerResults[0]
 		writeBaselineReport(output, executor.BaselineReport{
-			Mode:        "baseline-seq",
-			Parallelism: 1,
-			Duration:    result.Makespan,
-			MeasuredAt:  time.Now(),
-			ProjectPath: projectPath,
+			Mode:          "baseline-seq",
+			Parallelism:   1,
+			Duration:      result.Makespan,
+			MeasuredAt:    time.Now(),
+			ProjectPath:   projectPath,
+			PackageCount:  wr.PackageCount,
+			PackageSource: packageSource,
+			Success:       wr.Error == nil,
+			Error:         errorString(wr.Error),
 		})
 	}
 }
 
-// runBaselinePar executes go test with native parallelism (-p P).
-// When output is non-empty, the wall-clock is persisted as a
-// BaselineReport JSON.
-//
-// TODO: validar com ambiente Go
-func runBaselinePar(projectPath string, workers, timeoutMin int, verbose, warmCache bool, output string) {
+// runBaselinePar executes go test with native parallelism (-p P). When dataFile
+// is provided, it uses exactly the packages present in the characterization JSON
+// instead of ./..., producing a pass-only native baseline.
+// When output is non-empty, the wall-clock is persisted as a BaselineReport JSON.
+func runBaselinePar(projectPath, dataFile string, workers, timeoutMin int, verbose, warmCache bool, output string) {
 	cfg := executor.Config{
 		ProjectPath: projectPath,
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
@@ -402,25 +411,68 @@ func runBaselinePar(projectPath string, workers, timeoutMin int, verbose, warmCa
 		Verbose:     verbose,
 	}
 
+	packages, packageSource := loadBaselinePackageScope(dataFile)
+
 	if warmCache {
-		executor.WarmBuildCache(cfg)
+		executor.WarmBuildCachePackages(cfg, packages)
 	}
 
 	fmt.Printf("=== Baseline Parallel (go test -p %d -parallel 1) ===\n", workers)
+	fmt.Printf("Package scope: %s", packageSource)
+	if len(packages) > 0 {
+		fmt.Printf(" (%d packages)", len(packages))
+	}
+	fmt.Println()
 	fmt.Println()
 
-	result := executor.RunBaselinePar(cfg, workers)
+	result := executor.RunBaselineParPackages(cfg, workers, packages)
 	fmt.Println(executor.FormatExecutionResult(result))
 
 	if output != "" {
+		wr := result.WorkerResults[0]
 		writeBaselineReport(output, executor.BaselineReport{
-			Mode:        "baseline-par",
-			Parallelism: workers,
-			Duration:    result.Makespan,
-			MeasuredAt:  time.Now(),
-			ProjectPath: projectPath,
+			Mode:          "baseline-par",
+			Parallelism:   workers,
+			Duration:      result.Makespan,
+			MeasuredAt:    time.Now(),
+			ProjectPath:   projectPath,
+			PackageCount:  wr.PackageCount,
+			PackageSource: packageSource,
+			Success:       wr.Error == nil,
+			Error:         errorString(wr.Error),
 		})
 	}
+}
+
+func loadBaselinePackageScope(dataFile string) ([]string, string) {
+	if dataFile == "" {
+		return nil, "./..."
+	}
+	packages, err := loadPackages(dataFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+	if len(packages) == 0 {
+		fmt.Fprintf(os.Stderr, "Error: --data-file %s has no packages\n", dataFile)
+		os.Exit(1)
+	}
+	return packageNames(packages), dataFile
+}
+
+func packageNames(packages []model.PackageInfo) []string {
+	names := make([]string, len(packages))
+	for i, pkg := range packages {
+		names[i] = pkg.Name
+	}
+	return names
+}
+
+func errorString(err error) string {
+	if err == nil {
+		return ""
+	}
+	return err.Error()
 }
 
 // resolveT1 returns the canonical sequential baseline used in
@@ -436,6 +488,10 @@ func resolveT1(packages []model.PackageInfo, baselineSeqFile string) (time.Durat
 			fmt.Fprintf(os.Stderr, "Error loading baseline file: %v\n", err)
 			os.Exit(1)
 		}
+		if err := validateBaselineReport(baselineSeqFile, r); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 		return r.Duration, fmt.Sprintf("measured (%s)", baselineSeqFile)
 	}
 
@@ -449,6 +505,19 @@ func resolveT1(packages []model.PackageInfo, baselineSeqFile string) (time.Durat
 			"      Reported Speedup will be biased upward. Run --mode baseline-seq\n"+
 			"      --output FILE once per project and pass --baseline-seq-file FILE.")
 	return sum, "approx (sum of durations)"
+}
+
+func validateBaselineReport(path string, r executor.BaselineReport) error {
+	if r.Duration <= 0 {
+		return fmt.Errorf("baseline file %s has non-positive duration", path)
+	}
+	if r.Error != "" {
+		return fmt.Errorf("baseline file %s records a failed run: %s", path, r.Error)
+	}
+	if r.PackageCount > 0 && !r.Success {
+		return fmt.Errorf("baseline file %s records success=false", path)
+	}
+	return nil
 }
 
 // writeBaselineReport persists a BaselineReport and reports the
