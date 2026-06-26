@@ -1,0 +1,10 @@
+{
+  "mode": "baseline-par",
+  "parallelism": 4,
+  "duration_ns": 310284148800,
+  "measured_at": "2026-06-26T06:31:39.8389016-03:00",
+  "project_path": "repos/hugo",
+  "package_count": 142,
+  "package_source": "data/characterization/hugo.json",
+  "success": true
+}

@@ -1,0 +1,10 @@
+{
+  "mode": "baseline-par",
+  "parallelism": 8,
+  "duration_ns": 152730795100,
+  "measured_at": "2026-06-26T04:38:38.8381118-03:00",
+  "project_path": "repos/grpc-go",
+  "package_count": 137,
+  "package_source": "data/characterization/grpc-go.json",
+  "success": true
+}

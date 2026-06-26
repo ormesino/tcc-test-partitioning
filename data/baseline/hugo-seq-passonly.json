@@ -1,0 +1,10 @@
+{
+  "mode": "baseline-seq",
+  "parallelism": 1,
+  "duration_ns": 1362456897500,
+  "measured_at": "2026-06-26T06:15:44.1435183-03:00",
+  "project_path": "repos/hugo",
+  "package_count": 142,
+  "package_source": "data/characterization/hugo.json",
+  "success": true
+}

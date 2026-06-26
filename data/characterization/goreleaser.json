@@ -1,0 +1,582 @@
+[
+  {
+    "name": "github.com/goreleaser/goreleaser/v2",
+    "duration_ns": 1971499999,
+    "cv": 0.31456387861970725
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/cmd",
+    "duration_ns": 23439500000,
+    "cv": 0.11589002260561826
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/archivefiles",
+    "duration_ns": 3457500000,
+    "cv": 0.013994871530091142
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/artifact",
+    "duration_ns": 2063499999,
+    "cv": 0.018442603008685065
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/builders/bun",
+    "duration_ns": 3470000000,
+    "cv": 0.00957775537299666
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/builders/deno",
+    "duration_ns": 3452000000,
+    "cv": 0.008270991270131844
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/builders/golang",
+    "duration_ns": 27317500000,
+    "cv": 0.1842999474857628
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/builders/golang/gomain",
+    "duration_ns": 1892000000,
+    "cv": 0.012878587894407403
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/builders/poetry",
+    "duration_ns": 3480500000,
+    "cv": 0.00693551835167256
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/builders/rust",
+    "duration_ns": 3497000000,
+    "cv": 0.006161102501567563
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/builders/uv",
+    "duration_ns": 3468000000,
+    "cv": 0.008002652542544226
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/builders/zig",
+    "duration_ns": 3451500000,
+    "cv": 0.004612518160382306
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/cargo",
+    "duration_ns": 1137500000,
+    "cv": 0.017088439720726
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/changelog",
+    "duration_ns": 1079000000,
+    "cv": 0.028068155997357614
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/client",
+    "duration_ns": 22236500000,
+    "cv": 0.010592484355653034
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/commitauthor",
+    "duration_ns": 3241000000,
+    "cv": 0.006483710509645028
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/deprecate",
+    "duration_ns": 3197500000,
+    "cv": 0.19983732403552334
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/elf",
+    "duration_ns": 1833500000,
+    "cv": 0.12434389370506073
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/exec",
+    "duration_ns": 3865000000,
+    "cv": 0.11824189360503942
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/experimental",
+    "duration_ns": 1073000000,
+    "cv": 0.15349375639404075
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/extrafiles",
+    "duration_ns": 3442000000,
+    "cv": 0.009635828841643159
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/gerrors",
+    "duration_ns": 1085500000,
+    "cv": 0.030733874980417526
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/http",
+    "duration_ns": 3855999999,
+    "cv": 0.009696519218855566
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/ids",
+    "duration_ns": 1041499999,
+    "cv": 0.018752477694395565
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/logext",
+    "duration_ns": 1253500000,
+    "cv": 0.017493624223187367
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/middleware/errhandler",
+    "duration_ns": 1680500000,
+    "cv": 0.08604492031112913
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/middleware/logging",
+    "duration_ns": 1663000000,
+    "cv": 0.011906178875685179
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/middleware/skip",
+    "duration_ns": 1706500000,
+    "cv": 0.4301747747798972
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/nodedist",
+    "duration_ns": 2572499999,
+    "cv": 0.17609599743019638
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/packagejson",
+    "duration_ns": 1145500000,
+    "cv": 0.014983301208398938
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe",
+    "duration_ns": 1052499999,
+    "cv": 0.016999800341095973
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/announce",
+    "duration_ns": 3932500000,
+    "cv": 0.010631284857549177
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/archive",
+    "duration_ns": 3916000000,
+    "cv": 0.036083461791805396
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/artifactory",
+    "duration_ns": 3870500000,
+    "cv": 0.005599091078527201
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/aur",
+    "duration_ns": 11972000000,
+    "cv": 0.029483853945162147
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/aursources",
+    "duration_ns": 11758500000,
+    "cv": 0.033881085572288534
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/before",
+    "duration_ns": 3718499999,
+    "cv": 0.45999691328331255
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/blob",
+    "duration_ns": 3697500000,
+    "cv": 0.016450688898333676
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/bluesky",
+    "duration_ns": 4188499999,
+    "cv": 0.012517485426829277
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/brew",
+    "duration_ns": 5494000000,
+    "cv": 0.20243695013607332
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/build",
+    "duration_ns": 4150500000,
+    "cv": 0.014254187717446553
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/cask",
+    "duration_ns": 5514500000,
+    "cv": 0.020925993332987485
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/checksums",
+    "duration_ns": 3661500000,
+    "cv": 0.016169956742334294
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/chocolatey",
+    "duration_ns": 3654500000,
+    "cv": 0.022446954880016197
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/custompublishers",
+    "duration_ns": 3285500000,
+    "cv": 0.010838361014300687
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/defaults",
+    "duration_ns": 4541500000,
+    "cv": 0.01166939893303459
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/discord",
+    "duration_ns": 3785500000,
+    "cv": 0.008047151168532605
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/discourse",
+    "duration_ns": 3764000000,
+    "cv": 0.00933974343382541
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/dist",
+    "duration_ns": 1702999999,
+    "cv": 0.01495537301960588
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/docker",
+    "duration_ns": 3512000000,
+    "cv": 0.01177318057072471
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/docker/v2",
+    "duration_ns": 3902000000,
+    "cv": 0.03531267565087474
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/dockerdigest",
+    "duration_ns": 3440500000,
+    "cv": 0.008795243471183661
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/effectiveconfig",
+    "duration_ns": 1890500000,
+    "cv": 0.021609007227432805
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/env",
+    "duration_ns": 3424000000,
+    "cv": 0.01426137614699115
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/flatpak",
+    "duration_ns": 3440000000,
+    "cv": 0.011072575998850032
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/git",
+    "duration_ns": 19000500000,
+    "cv": 0.015366936057293508
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/gomod",
+    "duration_ns": 8503499999,
+    "cv": 0.015659981661004616
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/ko",
+    "duration_ns": 9626000000,
+    "cv": 0.14374193379955566
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/krew",
+    "duration_ns": 5241000000,
+    "cv": 0.013524466201913504
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/linkedin",
+    "duration_ns": 3789500000,
+    "cv": 0.011462663075919225
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/makeself",
+    "duration_ns": 3460000000,
+    "cv": 0.01636641524743869
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/mastodon",
+    "duration_ns": 3446000000,
+    "cv": 0.02844153369194059
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/mattermost",
+    "duration_ns": 3772500000,
+    "cv": 0.03391828012525187
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/mcp",
+    "duration_ns": 4880500000,
+    "cv": 0.016698004754898313
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/metadata",
+    "duration_ns": 3460500000,
+    "cv": 0.01531710463664419
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/milestone",
+    "duration_ns": 4281000000,
+    "cv": 0.04388782105790139
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/nfpm",
+    "duration_ns": 4527500000,
+    "cv": 0.11810104058781808
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/nix",
+    "duration_ns": 5410500000,
+    "cv": 0.0472457380805534
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/notary",
+    "duration_ns": 4345500000,
+    "cv": 0.1568974680384712
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/opencollective",
+    "duration_ns": 3778000000,
+    "cv": 0.022130473639720562
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/partial",
+    "duration_ns": 1723000000,
+    "cv": 0.013973996626371082
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/prebuild",
+    "duration_ns": 3406000000,
+    "cv": 0.009908169989433934
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/project",
+    "duration_ns": 2463000000,
+    "cv": 0.012306759085454116
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/publish",
+    "duration_ns": 3697000000,
+    "cv": 0.007651299409282175
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/reddit",
+    "duration_ns": 3468999999,
+    "cv": 0.007771464541995415
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/release",
+    "duration_ns": 5626500000,
+    "cv": 0.013239589072400736
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/reportsizes",
+    "duration_ns": 1698000000,
+    "cv": 0.014730311710840212
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/sbom",
+    "duration_ns": 3964500000,
+    "cv": 0.0115601297794313
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/scoop",
+    "duration_ns": 5163000000,
+    "cv": 0.0202356653207767
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/semver",
+    "duration_ns": 1803000000,
+    "cv": 0.008955644038719403
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/slack",
+    "duration_ns": 3809000000,
+    "cv": 0.010238806405547795
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/smtp",
+    "duration_ns": 3253000000,
+    "cv": 0.011589058145407508
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/snapcraft",
+    "duration_ns": 3468000000,
+    "cv": 0.006903439106263125
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/snapshot",
+    "duration_ns": 3412500000,
+    "cv": 0.007641756311355845
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/sourcearchive",
+    "duration_ns": 4694500000,
+    "cv": 0.014996263829318207
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/srpm",
+    "duration_ns": 3558000000,
+    "cv": 0.1384565917850733
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/teams",
+    "duration_ns": 3458500000,
+    "cv": 0.006425239288353191
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/telegram",
+    "duration_ns": 3457000000,
+    "cv": 0.012457868358825194
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/twitter",
+    "duration_ns": 3466500000,
+    "cv": 0.014713924735818212
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/universalbinary",
+    "duration_ns": 5787500000,
+    "cv": 0.06202341689870064
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/upload",
+    "duration_ns": 3851499999,
+    "cv": 0.010251887986816224
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/upx",
+    "duration_ns": 3748000000,
+    "cv": 0.01282691241466388
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/webhook",
+    "duration_ns": 3803500000,
+    "cv": 0.007822879466471052
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pipe/winget",
+    "duration_ns": 5371000000,
+    "cv": 0.017797835013113356
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/pyproject",
+    "duration_ns": 1158500000,
+    "cv": 0.018116864399196565
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/redact",
+    "duration_ns": 1098000000,
+    "cv": 0.00774886195935178
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/retryx",
+    "duration_ns": 1709000000,
+    "cv": 0.012939588505410878
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/semerrgroup",
+    "duration_ns": 1087500000,
+    "cv": 0.01694788413390737
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/shell",
+    "duration_ns": 1855499999,
+    "cv": 0.0068492932065401
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/skips",
+    "duration_ns": 1708500000,
+    "cv": 0.009721020858456372
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/static",
+    "duration_ns": 1746000000,
+    "cv": 0.0064816185473418175
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/testlib",
+    "duration_ns": 2006000000,
+    "cv": 0.00840567852122623
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/tmpl",
+    "duration_ns": 3288500000,
+    "cv": 0.011024512934529704
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/internal/yaml",
+    "duration_ns": 1155000000,
+    "cv": 0.01094952852745557
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/archive",
+    "duration_ns": 2052999999,
+    "cv": 0.014424707875320023
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/archive/gzip",
+    "duration_ns": 1735000000,
+    "cv": 0.011431128856301709
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/archive/tar",
+    "duration_ns": 1905000000,
+    "cv": 0.0208458498536895
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/archive/targz",
+    "duration_ns": 1825499999,
+    "cv": 0.010902602331037185
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/archive/tarxz",
+    "duration_ns": 1878500000,
+    "cv": 0.00972510707373346
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/archive/tarzst",
+    "duration_ns": 1898500000,
+    "cv": 0.012755316852928873
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/archive/xz",
+    "duration_ns": 1744500000,
+    "cv": 0.00746340497980966
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/archive/zip",
+    "duration_ns": 1828000000,
+    "cv": 0.01642584713058394
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/build",
+    "duration_ns": 1707499999,
+    "cv": 0.008544800659855249
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/config",
+    "duration_ns": 1777000000,
+    "cv": 0.015457405035399925
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/context",
+    "duration_ns": 1698500000,
+    "cv": 0.013471310889509959
+  },
+  {
+    "name": "github.com/goreleaser/goreleaser/v2/pkg/healthcheck",
+    "duration_ns": 2033999999,
+    "cv": 0.012233994727088755
+  }
+]

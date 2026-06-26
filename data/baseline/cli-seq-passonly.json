@@ -1,0 +1,10 @@
+{
+  "mode": "baseline-seq",
+  "parallelism": 1,
+  "duration_ns": 1213375294700,
+  "measured_at": "2026-06-26T02:19:57.0486348-03:00",
+  "project_path": "repos/cli",
+  "package_count": 233,
+  "package_source": "data/characterization/cli.json",
+  "success": true
+}

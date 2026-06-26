@@ -1,0 +1,10 @@
+{
+  "mode": "baseline-par",
+  "parallelism": 8,
+  "duration_ns": 207148919700,
+  "measured_at": "2026-06-26T05:13:45.4364735-03:00",
+  "project_path": "repos/goreleaser",
+  "package_count": 116,
+  "package_source": "data/characterization/goreleaser.json",
+  "success": true
+}

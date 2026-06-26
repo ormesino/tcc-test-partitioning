@@ -1,0 +1,602 @@
+[
+  {
+    "name": "example.com/heavytail/fast/pkg001",
+    "duration_ns": 10000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg002",
+    "duration_ns": 12000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg003",
+    "duration_ns": 14000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg004",
+    "duration_ns": 16000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg005",
+    "duration_ns": 18000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg006",
+    "duration_ns": 20000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg007",
+    "duration_ns": 22000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg008",
+    "duration_ns": 24000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg009",
+    "duration_ns": 26000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg010",
+    "duration_ns": 28000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg011",
+    "duration_ns": 30000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg012",
+    "duration_ns": 32000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg013",
+    "duration_ns": 34000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg014",
+    "duration_ns": 36000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg015",
+    "duration_ns": 38000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg016",
+    "duration_ns": 40000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg017",
+    "duration_ns": 42000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg018",
+    "duration_ns": 44000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg019",
+    "duration_ns": 46000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg020",
+    "duration_ns": 48000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg021",
+    "duration_ns": 50000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg022",
+    "duration_ns": 52000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg023",
+    "duration_ns": 54000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg024",
+    "duration_ns": 56000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg025",
+    "duration_ns": 58000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg026",
+    "duration_ns": 60000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg027",
+    "duration_ns": 62000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg028",
+    "duration_ns": 64000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg029",
+    "duration_ns": 66000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg030",
+    "duration_ns": 68000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg031",
+    "duration_ns": 70000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg032",
+    "duration_ns": 72000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg033",
+    "duration_ns": 74000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg034",
+    "duration_ns": 76000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg035",
+    "duration_ns": 78000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg036",
+    "duration_ns": 80000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg037",
+    "duration_ns": 82000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg038",
+    "duration_ns": 84000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg039",
+    "duration_ns": 86000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg040",
+    "duration_ns": 88000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg041",
+    "duration_ns": 90000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg042",
+    "duration_ns": 92000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg043",
+    "duration_ns": 94000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg044",
+    "duration_ns": 96000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg045",
+    "duration_ns": 98000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg046",
+    "duration_ns": 100000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg047",
+    "duration_ns": 102000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg048",
+    "duration_ns": 104000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg049",
+    "duration_ns": 106000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg050",
+    "duration_ns": 108000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg051",
+    "duration_ns": 110000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg052",
+    "duration_ns": 112000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg053",
+    "duration_ns": 114000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg054",
+    "duration_ns": 116000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg055",
+    "duration_ns": 118000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg056",
+    "duration_ns": 120000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg057",
+    "duration_ns": 122000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg058",
+    "duration_ns": 124000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg059",
+    "duration_ns": 126000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg060",
+    "duration_ns": 128000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg061",
+    "duration_ns": 130000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg062",
+    "duration_ns": 132000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg063",
+    "duration_ns": 134000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg064",
+    "duration_ns": 136000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg065",
+    "duration_ns": 138000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg066",
+    "duration_ns": 140000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg067",
+    "duration_ns": 142000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg068",
+    "duration_ns": 144000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg069",
+    "duration_ns": 146000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg070",
+    "duration_ns": 148000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg071",
+    "duration_ns": 150000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg072",
+    "duration_ns": 152000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg073",
+    "duration_ns": 154000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg074",
+    "duration_ns": 156000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg075",
+    "duration_ns": 158000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg076",
+    "duration_ns": 160000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg077",
+    "duration_ns": 162000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg078",
+    "duration_ns": 164000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg079",
+    "duration_ns": 166000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg080",
+    "duration_ns": 168000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg081",
+    "duration_ns": 170000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg082",
+    "duration_ns": 172000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg083",
+    "duration_ns": 174000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg084",
+    "duration_ns": 176000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg085",
+    "duration_ns": 178000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg086",
+    "duration_ns": 180000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg087",
+    "duration_ns": 182000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg088",
+    "duration_ns": 184000000,
+    "cv": 0.29
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg089",
+    "duration_ns": 186000000,
+    "cv": 0.08
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg090",
+    "duration_ns": 188000000,
+    "cv": 0.11
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg091",
+    "duration_ns": 190000000,
+    "cv": 0.14
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg092",
+    "duration_ns": 192000000,
+    "cv": 0.16999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg093",
+    "duration_ns": 194000000,
+    "cv": 0.2
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg094",
+    "duration_ns": 196000000,
+    "cv": 0.22999999999999998
+  },
+  {
+    "name": "example.com/heavytail/fast/pkg095",
+    "duration_ns": 198000000,
+    "cv": 0.26
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg001",
+    "duration_ns": 200000000,
+    "cv": 0.25
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg002",
+    "duration_ns": 300000000,
+    "cv": 0.33
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg003",
+    "duration_ns": 400000000,
+    "cv": 0.41000000000000003
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg004",
+    "duration_ns": 500000000,
+    "cv": 0.49
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg005",
+    "duration_ns": 650000000,
+    "cv": 0.5700000000000001
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg006",
+    "duration_ns": 800000000,
+    "cv": 0.25
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg007",
+    "duration_ns": 950000000,
+    "cv": 0.33
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg008",
+    "duration_ns": 1100000000,
+    "cv": 0.41000000000000003
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg009",
+    "duration_ns": 1250000000,
+    "cv": 0.49
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg010",
+    "duration_ns": 1400000000,
+    "cv": 0.5700000000000001
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg011",
+    "duration_ns": 1550000000,
+    "cv": 0.25
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg012",
+    "duration_ns": 1700000000,
+    "cv": 0.33
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg013",
+    "duration_ns": 1850000000,
+    "cv": 0.41000000000000003
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg014",
+    "duration_ns": 1950000000,
+    "cv": 0.49
+  },
+  {
+    "name": "example.com/heavytail/mid/pkg015",
+    "duration_ns": 2000000000,
+    "cv": 0.5700000000000001
+  },
+  {
+    "name": "example.com/heavytail/heavy/pkg001",
+    "duration_ns": 5000000000,
+    "cv": 0.5
+  },
+  {
+    "name": "example.com/heavytail/heavy/pkg002",
+    "duration_ns": 8000000000,
+    "cv": 0.6
+  },
+  {
+    "name": "example.com/heavytail/heavy/pkg003",
+    "duration_ns": 11000000000,
+    "cv": 0.7
+  },
+  {
+    "name": "example.com/heavytail/heavy/pkg004",
+    "duration_ns": 14000000000,
+    "cv": 0.8
+  },
+  {
+    "name": "example.com/heavytail/heavy/pkg005",
+    "duration_ns": 17000000000,
+    "cv": 0.9
+  },
+  {
+    "name": "example.com/heavytail/heavy/pkg006",
+    "duration_ns": 20000000000,
+    "cv": 1
+  },
+  {
+    "name": "example.com/heavytail/heavy/pkg007",
+    "duration_ns": 25000000000,
+    "cv": 1.1
+  },
+  {
+    "name": "example.com/heavytail/heavy/pkg008",
+    "duration_ns": 30000000000,
+    "cv": 1.2000000000000002
+  },
+  {
+    "name": "example.com/heavytail/extreme/pkg001",
+    "duration_ns": 60000000000,
+    "cv": 1.5
+  },
+  {
+    "name": "example.com/heavytail/extreme/pkg002",
+    "duration_ns": 90000000000,
+    "cv": 2
+  }
+]
