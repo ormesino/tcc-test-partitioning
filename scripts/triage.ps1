@@ -1,14 +1,21 @@
 $ErrorActionPreference = "Continue"
 
-$Report = "data\repos\triage.csv"
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
+$reposRoot = Join-Path $repoRoot 'repos'
+$reportsRoot = Join-Path $repoRoot 'reports'
+New-Item -ItemType Directory -Force -Path $reposRoot | Out-Null
+New-Item -ItemType Directory -Force -Path $reportsRoot | Out-Null
+
+$Report = Join-Path $reportsRoot 'triage.csv'
 $run_started_at = (Get-Date).ToUniversalTime().ToString("o")
 "run_started_at,repo,clone_started_at,clone_finished_at,clone_ok,build_started_at,build_finished_at,build_ok,n_packages,n_test_packages,last_commit,last_commit_hash,size_mb" | Out-File -Encoding utf8 -FilePath $Report
 
-$repos = Get-Content "data\repos\repos.txt" | Where-Object { $_.Trim() -ne "" }
+$reposList = Join-Path $reposRoot 'repos.txt'
+$repos = Get-Content $reposList | Where-Object { $_.Trim() -ne "" }
 
 foreach ($repo in $repos) {
   $name = ($repo -split "/")[-1]
-  $dir = "data\repos\$name"
+  $dir = Join-Path $reposRoot $name
 
   $clone_ok = "no"
   $build_ok = "no"

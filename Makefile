@@ -24,7 +24,7 @@ tidy:
 	$(GO) mod tidy
 
 test:
-	$(GO) test ./...
+	$(GO) test ./cmd/... ./internal/... ./data/synthetic
 
 # Atalho recomendado antes de commit.
 check: fmt vet test
