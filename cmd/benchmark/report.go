@@ -292,6 +292,9 @@ func medianFloat(in []float64) float64 {
 }
 
 func minInt64(in []int64) int64 {
+	if len(in) == 0 {
+		return 0
+	}
 	m := in[0]
 	for _, v := range in[1:] {
 		if v < m {
@@ -302,6 +305,9 @@ func minInt64(in []int64) int64 {
 }
 
 func maxInt64(in []int64) int64 {
+	if len(in) == 0 {
+		return 0
+	}
 	m := in[0]
 	for _, v := range in[1:] {
 		if v > m {

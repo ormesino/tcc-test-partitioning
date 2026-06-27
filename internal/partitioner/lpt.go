@@ -45,6 +45,9 @@ func (l *LPT) Name() string {
 //   - packages may be empty (returns empty partitions)
 func (l *LPT) Partition(packages []model.PackageInfo, workers int) model.PartitionResult {
 	start := time.Now()
+	if workers < 1 {
+		return invalidWorkersResult(l.Name(), workers, time.Since(start))
+	}
 
 	// Initialize empty partitions for each worker.
 	partitions := make([]model.Partition, workers)

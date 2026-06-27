@@ -35,7 +35,14 @@ func (f *FFD) Name() string {
 
 // Partition distributes packages using the Multifit heuristic.
 func (f *FFD) Partition(packages []model.PackageInfo, workers int) model.PartitionResult {
+	return f.partition(packages, workers, 40)
+}
+
+func (f *FFD) partition(packages []model.PackageInfo, workers, searchIterations int) model.PartitionResult {
 	start := time.Now()
+	if workers < 1 {
+		return invalidWorkersResult(f.Name(), workers, time.Since(start))
+	}
 
 	if len(packages) == 0 {
 		return emptyPartitionResult(f.Name(), workers, time.Since(start))
@@ -69,7 +76,7 @@ func (f *FFD) Partition(packages []model.PackageInfo, workers int) model.Partiti
 	var bestMakespan time.Duration
 
 	// 3. Binary Search (Multifit loop) - typically 40 iterations is enough for high precision
-	for iter := 0; iter < 40; iter++ {
+	for iter := 0; iter < searchIterations; iter++ {
 		capacity := lowerBound + (upperBound-lowerBound)/2
 
 		allocation, fits := tryFFD(sortedPkgs, workers, capacity)
@@ -81,7 +88,7 @@ func (f *FFD) Partition(packages []model.PackageInfo, workers int) model.Partiti
 		}
 	}
 
-	// 4. Fallback in case binary search didn't find a perfect fit 
+	// 4. Fallback in case binary search didn't find a perfect fit
 	// (or bounds were too tight initially).
 	if bestAllocation == nil {
 		bestAllocation, _ = tryFFD(sortedPkgs, workers, sumDuration)
@@ -144,6 +151,15 @@ func emptyPartitionResult(name string, workers int, overhead time.Duration) mode
 		Algorithm:  name,
 		Workers:    workers,
 		Partitions: partitions,
+		Overhead:   overhead,
+	}
+}
+
+func invalidWorkersResult(name string, workers int, overhead time.Duration) model.PartitionResult {
+	return model.PartitionResult{
+		Algorithm:  name,
+		Workers:    workers,
+		Partitions: []model.Partition{},
 		Overhead:   overhead,
 	}
 }

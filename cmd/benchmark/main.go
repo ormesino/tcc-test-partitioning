@@ -278,6 +278,14 @@ func loadPackages(path string) ([]model.PackageInfo, error) {
 	if err := json.Unmarshal(data, &packages); err != nil {
 		return nil, fmt.Errorf("parsing data file %s: %w", path, err)
 	}
+	for _, pkg := range packages {
+		if pkg.Duration < 0 {
+			return nil, fmt.Errorf("package %q in data file %s has negative duration: %v", pkg.Name, path, pkg.Duration)
+		}
+		if pkg.Duration == 0 {
+			fmt.Fprintf(os.Stderr, "Warning: package %q in data file %s has zero duration\n", pkg.Name, path)
+		}
+	}
 	return packages, nil
 }
 

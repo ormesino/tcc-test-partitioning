@@ -38,6 +38,9 @@ func (r *RoundRobin) Name() string {
 //   - packages may be empty (returns empty partitions)
 func (r *RoundRobin) Partition(packages []model.PackageInfo, workers int) model.PartitionResult {
 	start := time.Now()
+	if workers < 1 {
+		return invalidWorkersResult(r.Name(), workers, time.Since(start))
+	}
 
 	// Initialize empty partitions for each worker.
 	partitions := make([]model.Partition, workers)

@@ -41,6 +41,9 @@ func (q *Quantity) Name() string {
 //   - packages may be empty (returns empty partitions)
 func (q *Quantity) Partition(packages []model.PackageInfo, workers int) model.PartitionResult {
 	start := time.Now()
+	if workers < 1 {
+		return invalidWorkersResult(q.Name(), workers, time.Since(start))
+	}
 	n := len(packages)
 
 	// Initialize empty partitions for each worker.

@@ -103,6 +103,20 @@ func TestContract_EmptyInput(t *testing.T) {
 	}
 }
 
+func TestContract_InvalidWorkersReturnsEmptyResult(t *testing.T) {
+	for _, alg := range allAlgorithms() {
+		t.Run(alg.Name(), func(t *testing.T) {
+			r := alg.Partition(mkPkgs(100), 0)
+			if r.Workers != 0 {
+				t.Errorf("Workers = %d, want 0", r.Workers)
+			}
+			if len(r.Partitions) != 0 {
+				t.Errorf("len(Partitions) = %d, want 0", len(r.Partitions))
+			}
+		})
+	}
+}
+
 // TestContract_SingleWorker verifies that, with exactly one worker,
 // every algorithm assigns every package to that worker and the
 // resulting Load (and Makespan) equals sum(Duration).

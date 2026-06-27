@@ -144,7 +144,7 @@ func resolveAlgorithms(name string) []partitioner.Partitioner {
 // objects in the canonical convention (ADR-014):
 //
 //	[
-//	  {"name": "pkg/path", "duration_ns": 1500000000, "cv": 0.15},
+//	  {"name": "pkg/path", "duration_ns": 1500000000},
 //	  ...
 //	]
 //
@@ -158,6 +158,14 @@ func loadPackages(path string) ([]model.PackageInfo, error) {
 	var packages []model.PackageInfo
 	if err := json.Unmarshal(data, &packages); err != nil {
 		return nil, fmt.Errorf("parsing data file: %w", err)
+	}
+	for _, pkg := range packages {
+		if pkg.Duration < 0 {
+			return nil, fmt.Errorf("package %q has negative duration: %v", pkg.Name, pkg.Duration)
+		}
+		if pkg.Duration == 0 {
+			fmt.Fprintf(os.Stderr, "Warning: package %q has zero duration\n", pkg.Name)
+		}
 	}
 
 	return packages, nil
