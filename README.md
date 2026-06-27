@@ -2,7 +2,7 @@
 
 Empirical evaluation of test-suite partitioning algorithms for Go projects.
 The tool compares four static partitioning strategies, Round-Robin, Quantity,
-LPT, and FFD-Weighted, against Go-native baselines under the P||Cmax scheduling
+LPT, and FFD-Multifit, against Go-native baselines under the P||Cmax scheduling
 model.
 
 The project is part of an undergraduate Computer Science thesis. The

@@ -72,36 +72,34 @@ The project compares four static partitioning algorithms:
    the currently least-loaded worker. This is a classical scheduling heuristic
    for P||Cmax and is expected to perform well when durations vary widely.
 
-4. **FFD-Weighted**
-   Sorts packages by a duration-and-variability weight and greedily assigns each
-   package to the worker with the smallest accumulated weight. This variant is
-   used to test whether incorporating variability improves results on unstable
-   or heavy-tailed suites.
+4. **FFD-Multifit**
+   Sorts packages by duration descending and searches for a feasible makespan
+   capacity using First-Fit Decreasing. This variant operates over the same
+   median durations as LPT but employs a bounded capacity search (up to 40
+   iterations) to pack exactly P bins, testing whether a tighter packing
+   improves results on heavy-tailed suites.
 
 Approaches based on regression or machine learning were excluded because they
 would require a larger historical dataset and would expand the thesis scope
 beyond the intended algorithmic comparison.
 
-## 5. FFD-Weighted Cost Function
+## 5. FFD-Multifit Packing Strategy
 
-The weighted algorithm uses:
+The multifit algorithm uses a binary search over the possible capacity $C$:
 
 ```text
-weight_i = median_duration_i * (1 + cv_i)
+lower_bound = max(max_duration, sum(durations)/p)
+upper_bound = sum(durations)
 ```
 
-where `cv_i` is the coefficient of variation for package `i` across repeated
-measurements.
+This makes FFD-Multifit meaningfully different from LPT. LPT greedily assigns
+jobs to the least loaded worker; FFD-Multifit tests an explicit capacity and
+only assigns a package if the worker's total load remains within that capacity.
+The intuition is that high-duration packages are more dangerous for the final
+makespan and should be placed using a stricter bin capacity.
 
-This makes FFD-Weighted meaningfully different from LPT. LPT only considers the
-median duration; FFD-Weighted also penalizes packages whose execution time is
-less predictable. The intuition is that high-duration, high-variance packages
-are more dangerous for the final makespan and should be placed earlier and more
-carefully.
-
-The formula is a design choice, not a theoretical optimum. It is intentionally
-simple, reproducible, and derived only from values already collected during
-characterization.
+The binary search is bounded to 40 iterations and the resolution is purely
+based on the median durations collected during characterization.
 
 ## 6. Subject Project Selection
 
