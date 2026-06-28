@@ -26,9 +26,12 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -188,7 +191,8 @@ func runSimulate(dataFile, algName string, workers int, baselineSeqFile, outputJ
 
 	algorithms := resolveAlgorithms(algName)
 
-	seqDuration, seqSource := resolveT1(packages, baselineSeqFile)
+	seqDuration := packageDurationSum(packages)
+	seqSource := "theoretical (sum of characterized durations)"
 	ideal := seqDuration / time.Duration(workers)
 
 	fmt.Println("================================================================")
@@ -250,6 +254,7 @@ func runSimulate(dataFile, algName string, workers int, baselineSeqFile, outputJ
 			Workers:      workers,
 			PackageCount: len(packages),
 			T1NS:         int64(seqDuration),
+			PlannedT1NS:  int64(seqDuration),
 			T1Source:     seqSource,
 			GeneratedAt:  time.Now(),
 			Algorithms:   entries,
@@ -289,10 +294,14 @@ func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int
 	}
 
 	if warmCache {
-		executor.WarmBuildCachePackages(cfg, packageNames(packages))
+		if err := executor.WarmBuildCachePackages(cfg, packageNames(packages)); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
-	seqDuration, seqSource := resolveT1(packages, baselineSeqFile)
+	seqDuration, seqSource := resolveT1(packages, baselineSeqFile, dataFile, warmCache)
+	plannedT1 := packageDurationSum(packages)
 	fmt.Printf("T1 source: %s | T1 = %v\n\n", seqSource, seqDuration)
 
 	entries := make([]algEntry, 0, len(algorithms))
@@ -336,7 +345,7 @@ func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int
 		fmt.Println()
 
 		if outputJSON != "" {
-			entry := buildPlannedEntry(partResult, seqDuration, listPackages)
+			entry := buildPlannedEntry(partResult, plannedT1, listPackages)
 			attachExecution(&entry, partResult, execResult, seqDuration)
 			entries = append(entries, entry)
 		}
@@ -350,6 +359,7 @@ func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int
 			Workers:      workers,
 			PackageCount: len(packages),
 			T1NS:         int64(seqDuration),
+			PlannedT1NS:  int64(plannedT1),
 			T1Source:     seqSource,
 			GeneratedAt:  time.Now(),
 			Algorithms:   entries,
@@ -360,6 +370,14 @@ func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int
 		}
 		fmt.Printf("JSON report written to %s\n", outputJSON)
 	}
+}
+
+func packageDurationSum(packages []model.PackageInfo) time.Duration {
+	var total time.Duration
+	for _, pkg := range packages {
+		total += pkg.Duration
+	}
+	return total
 }
 
 // runBaselineSeq executes go test in sequential mode (-p 1). When dataFile is
@@ -378,7 +396,10 @@ func runBaselineSeq(projectPath, dataFile string, timeoutMin int, verbose, warmC
 	packages, packageSource := loadBaselinePackageScope(dataFile)
 
 	if warmCache {
-		executor.WarmBuildCachePackages(cfg, packages)
+		if err := executor.WarmBuildCachePackages(cfg, packages); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	fmt.Println("=== Baseline Sequential (go test -p 1 -parallel 1) ===")
@@ -394,16 +415,22 @@ func runBaselineSeq(projectPath, dataFile string, timeoutMin int, verbose, warmC
 
 	if output != "" {
 		wr := result.WorkerResults[0]
+		regime := "cold"
+		if warmCache {
+			regime = "warm"
+		}
 		writeBaselineReport(output, executor.BaselineReport{
-			Mode:          "baseline-seq",
-			Parallelism:   1,
-			Duration:      result.Makespan,
-			MeasuredAt:    time.Now(),
-			ProjectPath:   projectPath,
-			PackageCount:  wr.PackageCount,
-			PackageSource: packageSource,
-			Success:       wr.Error == nil,
-			Error:         errorString(wr.Error),
+			Mode:           "baseline-seq",
+			Parallelism:    1,
+			Duration:       result.Makespan,
+			MeasuredAt:     time.Now(),
+			ProjectPath:    projectPath,
+			PackageCount:   wr.PackageCount,
+			PackageSource:  packageSource,
+			Success:        wr.Error == nil,
+			Error:          errorString(wr.Error),
+			DataFileSHA256: hashFile(dataFile),
+			CacheRegime:    regime,
 		})
 	}
 }
@@ -423,7 +450,10 @@ func runBaselinePar(projectPath, dataFile string, workers, timeoutMin int, verbo
 	packages, packageSource := loadBaselinePackageScope(dataFile)
 
 	if warmCache {
-		executor.WarmBuildCachePackages(cfg, packages)
+		if err := executor.WarmBuildCachePackages(cfg, packages); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	fmt.Printf("=== Baseline Parallel (go test -p %d -parallel 1) ===\n", workers)
@@ -439,16 +469,22 @@ func runBaselinePar(projectPath, dataFile string, workers, timeoutMin int, verbo
 
 	if output != "" {
 		wr := result.WorkerResults[0]
+		regime := "cold"
+		if warmCache {
+			regime = "warm"
+		}
 		writeBaselineReport(output, executor.BaselineReport{
-			Mode:          "baseline-par",
-			Parallelism:   workers,
-			Duration:      result.Makespan,
-			MeasuredAt:    time.Now(),
-			ProjectPath:   projectPath,
-			PackageCount:  wr.PackageCount,
-			PackageSource: packageSource,
-			Success:       wr.Error == nil,
-			Error:         errorString(wr.Error),
+			Mode:           "baseline-par",
+			Parallelism:    workers,
+			Duration:       result.Makespan,
+			MeasuredAt:     time.Now(),
+			ProjectPath:    projectPath,
+			PackageCount:   wr.PackageCount,
+			PackageSource:  packageSource,
+			Success:        wr.Error == nil,
+			Error:          errorString(wr.Error),
+			DataFileSHA256: hashFile(dataFile),
+			CacheRegime:    regime,
 		})
 	}
 }
@@ -484,20 +520,37 @@ func errorString(err error) string {
 	return err.Error()
 }
 
+func hashFile(path string) string {
+	if path == "" {
+		return ""
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(h.Sum(nil))
+}
+
 // resolveT1 returns the canonical sequential baseline used in
 // speedup computations and a label describing where it came from.
 //
 // Preference order:
 //  1. BaselineReport JSON at baselineSeqFile (methodologically sound).
 //  2. sum(packages.Duration) (approximation; emits a stderr warning).
-func resolveT1(packages []model.PackageInfo, baselineSeqFile string) (time.Duration, string) {
+func resolveT1(packages []model.PackageInfo, baselineSeqFile string, dataFile string, warmCache bool) (time.Duration, string) {
 	if baselineSeqFile != "" {
 		r, err := executor.LoadBaselineReport(baselineSeqFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error loading baseline file: %v\n", err)
 			os.Exit(1)
 		}
-		if err := validateBaselineReport(baselineSeqFile, r); err != nil {
+		if err := validateBaselineReport(baselineSeqFile, r, len(packages), dataFile, warmCache); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -516,16 +569,40 @@ func resolveT1(packages []model.PackageInfo, baselineSeqFile string) (time.Durat
 	return sum, "approx (sum of durations)"
 }
 
-func validateBaselineReport(path string, r executor.BaselineReport) error {
+func validateBaselineReport(path string, r executor.BaselineReport, expectedPackageCount int, dataFile string, warmCache bool) error {
 	if r.Duration <= 0 {
 		return fmt.Errorf("baseline file %s has non-positive duration", path)
+	}
+	if r.Mode != "baseline-seq" {
+		return fmt.Errorf("baseline file %s has mode %q, expected 'baseline-seq'", path, r.Mode)
 	}
 	if r.Error != "" {
 		return fmt.Errorf("baseline file %s records a failed run: %s", path, r.Error)
 	}
-	if r.PackageCount > 0 && !r.Success {
+	if !r.Success {
 		return fmt.Errorf("baseline file %s records success=false", path)
 	}
+	if r.PackageCount != expectedPackageCount {
+		return fmt.Errorf("baseline file %s has package_count=%d, expected %d from the data file",
+			path, r.PackageCount, expectedPackageCount)
+	}
+	if r.PackageSource == "" || r.PackageSource == "./..." {
+		return fmt.Errorf("baseline file %s is not pass-only (package_source=%q)", path, r.PackageSource)
+	}
+
+	expectedHash := hashFile(dataFile)
+	if r.DataFileSHA256 != expectedHash {
+		return fmt.Errorf("baseline file %s has data_file_sha256=%q, expected %q from current data file", path, r.DataFileSHA256, expectedHash)
+	}
+
+	expectedRegime := "cold"
+	if warmCache {
+		expectedRegime = "warm"
+	}
+	if r.CacheRegime != expectedRegime {
+		return fmt.Errorf("baseline file %s has cache_regime=%q, expected %q", path, r.CacheRegime, expectedRegime)
+	}
+
 	return nil
 }
 

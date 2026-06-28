@@ -30,6 +30,7 @@ type outputReport struct {
 	Workers      int        `json:"workers"`
 	PackageCount int        `json:"package_count"`
 	T1NS         int64      `json:"t1_ns"`
+	PlannedT1NS  int64      `json:"planned_t1_ns,omitempty"`
 	T1Source     string     `json:"t1_source"`
 	GeneratedAt  time.Time  `json:"generated_at"`
 	Algorithms   []algEntry `json:"algorithms"`
