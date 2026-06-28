@@ -8,8 +8,7 @@
       - ADR-006: pacotes que falham ou sao skipados sao excluidos
                  (filtragem feita por cmd/analyze).
       - ADR-007: executa N rodadas com `-count=1` (default N=10).
-      - ADR-008: mediana entre as rodadas como duracao canonica;
-                 CV = stddev/media entre as mesmas rodadas.
+      - ADR-008: mediana entre as rodadas como duracao canonica.
       - ADR-017: mede cada pacote sob `-p 1 -parallel 1`, alinhando
                  a caracterizacao historica ao modelo sequencial por
                  worker usado pelo executor.

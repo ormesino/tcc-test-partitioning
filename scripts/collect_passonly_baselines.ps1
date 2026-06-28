@@ -51,8 +51,10 @@ function Invoke-Baseline {
         [bool] $Warm
     )
 
-    $projectPath = Join-Path $repoRoot $projectPaths[$Project]
-    $dataFile = Join-Path $repoRoot "data/characterization/$Project.json"
+    # O comando roda a partir de $repoRoot; caminhos relativos mantêm os
+    # relatórios portáveis e evitam persistir o diretório pessoal do coletor.
+    $projectPath = $projectPaths[$Project]
+    $dataFile = "data/characterization/$Project.json"
     $suffix = if ($Warm) { '-warm-passonly' } else { '-passonly' }
 
     if ($Mode -eq 'baseline-seq') {

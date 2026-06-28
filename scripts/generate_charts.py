@@ -22,7 +22,7 @@ Gráficos gerados:
 
 Decisões metodológicas incorporadas:
     - Decisão 1: Speedup calculado com dois T1 (medido e teórico).
-    - Decisão 2: Boxplots com 5 repetições, mediana como tendência central.
+    - Decisão 2: Boxplots com 3 repetições, mediana como tendência central.
     - Decisão 4: p=8 mantido para mostrar saturação.
 """
 
@@ -162,7 +162,7 @@ def plot_makespan_boxplot(raw, charts_dir, project_name):
 
 # ---------- Gráfico 2: Barras de Makespan (mediana) -------------------------
 
-def plot_makespan_bars(agg, charts_dir, project_name):
+def plot_makespan_bars(agg, native, charts_dir, project_name):
     """Barras agrupadas de makespan mediano por workers × algoritmo."""
     workers_list = sorted(agg["workers"].unique())
     n_algos = len(ALGO_ORDER)
@@ -181,6 +181,12 @@ def plot_makespan_bars(agg, charts_dir, project_name):
         for bar, val in zip(bars, vals):
             ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1,
                     format_seconds(val), ha="center", va="bottom", fontsize=8)
+
+    if native is not None and not native.empty:
+        native = native.sort_values("workers")
+        ax.plot([xi + width * (n_algos - 1) / 2 for xi in x],
+                ns_to_seconds(native["duration_ns"]), "kD--",
+                label="Go Native", linewidth=1.5, markersize=6)
 
     ax.set_xlabel("Número de Workers (p)")
     ax.set_ylabel("Makespan Mediano (s)")
@@ -201,8 +207,8 @@ def plot_makespan_bars(agg, charts_dir, project_name):
 
 # ---------- Gráfico 3: Speedup ---------------------------------------------
 
-def plot_speedup(agg, t1_measured, t1_theoretical, charts_dir, project_name):
-    """Speedup vs. workers usando dois baselines T1."""
+def plot_speedup(raw, agg, native, t1_measured, charts_dir, project_name):
+    """Speedup empírico e planejado, sem misturar wall-clock e simulação."""
     workers_list = sorted(agg["workers"].unique())
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharey=False)
@@ -219,6 +225,10 @@ def plot_speedup(agg, t1_measured, t1_theoretical, charts_dir, project_name):
 
         ax.plot(workers_list, workers_list, "k--", alpha=0.4,
                 label="Ideal (linear)")
+        if native is not None and not native.empty:
+            native = native.sort_values("workers")
+            ax.plot(native["workers"], native["speedup"], "kD-.",
+                    label="Go Native", linewidth=1.5, markersize=6)
         ax.set_title("Speedup com T1 Medido\n(baseline-seq, inclui overhead)")
     else:
         ax.text(0.5, 0.5, "T1 medido não disponível",
@@ -230,23 +240,18 @@ def plot_speedup(agg, t1_measured, t1_theoretical, charts_dir, project_name):
     ax.legend(fontsize=9)
     ax.set_xticks(workers_list)
 
-    # Painel direito: T1 teórico (sum of durations)
+    # Painel direito: T1 teórico / makespan planejado, ambos simulados.
     ax = axes[1]
-    if t1_theoretical:
-        for algo in ALGO_ORDER:
-            subset = agg[agg["algorithm"] == algo].sort_values("workers")
-            makespans = ns_to_seconds(subset["exec_makespan_median_ns"].values)
-            speedups = [t1_theoretical / m for m in makespans]
-            ax.plot(workers_list, speedups, "o-", label=algo,
-                    color=ALGO_COLORS[algo], linewidth=2, markersize=6)
+    for algo in ALGO_ORDER:
+        subset = (raw[raw["algorithm"] == algo]
+                  .groupby("workers", as_index=False)["planned_speedup"].median()
+                  .sort_values("workers"))
+        ax.plot(subset["workers"], subset["planned_speedup"], "o-", label=algo,
+                color=ALGO_COLORS[algo], linewidth=2, markersize=6)
 
-        ax.plot(workers_list, workers_list, "k--", alpha=0.4,
-                label="Ideal (linear)")
-        ax.set_title("Speedup com T1 Teórico\n(soma das durações, sem overhead)")
-    else:
-        ax.text(0.5, 0.5, "T1 teórico não disponível",
-                transform=ax.transAxes, ha="center")
-        ax.set_title("Speedup com T1 Teórico")
+    ax.plot(workers_list, workers_list, "k--", alpha=0.4,
+            label="Ideal (linear)")
+    ax.set_title("Speedup Planejado\n(T1 e Tp caracterizados)")
 
     ax.set_xlabel("Workers (p)")
     ax.set_ylabel("Speedup S(p) = T1 / Tp")
@@ -361,7 +366,7 @@ def plot_load_stddev(agg, charts_dir, project_name):
 
 # ---------- Gráfico 6: Painel resumo (2×2) ---------------------------------
 
-def plot_summary_panel(raw, agg, t1_measured, t1_theoretical,
+def plot_summary_panel(raw, agg, native, t1_measured, t1_theoretical,
                        charts_dir, project_name):
     """Painel 2×2 com os 4 gráficos mais relevantes para a monografia."""
     workers_list = sorted(agg["workers"].unique())
@@ -379,6 +384,11 @@ def plot_summary_panel(raw, agg, t1_measured, t1_theoretical,
         positions = [xi + i * width for xi in x]
         ax.bar(positions, vals, width, label=algo,
                color=ALGO_COLORS[algo], alpha=0.85, edgecolor="white")
+    if native is not None and not native.empty:
+        native_sorted = native.sort_values("workers")
+        ax.plot([xi + width * (n_algos - 1) / 2 for xi in x],
+                ns_to_seconds(native_sorted["duration_ns"]), "kD--",
+                label="Go Native", linewidth=1.5, markersize=5)
     ax.set_xlabel("Workers (p)")
     ax.set_ylabel("Makespan (s)")
     ax.set_title("(a) Makespan Mediano")
@@ -390,8 +400,7 @@ def plot_summary_panel(raw, agg, t1_measured, t1_theoretical,
 
     # (0,1) — Speedup (T1 medido)
     ax = axes[0, 1]
-    t1 = t1_measured or t1_theoretical
-    t1_label = "medido" if t1_measured else "teórico"
+    t1 = t1_measured
     if t1:
         for algo in ALGO_ORDER:
             subset = agg[agg["algorithm"] == algo].sort_values("workers")
@@ -400,9 +409,13 @@ def plot_summary_panel(raw, agg, t1_measured, t1_theoretical,
             ax.plot(workers_list, speedups, "o-", label=algo,
                     color=ALGO_COLORS[algo], linewidth=2, markersize=5)
         ax.plot(workers_list, workers_list, "k--", alpha=0.4, label="Ideal")
+        if native is not None and not native.empty:
+            native_sorted = native.sort_values("workers")
+            ax.plot(native_sorted["workers"], native_sorted["speedup"], "kD-.",
+                    label="Go Native", linewidth=1.5, markersize=5)
     ax.set_xlabel("Workers (p)")
     ax.set_ylabel("Speedup S(p)")
-    ax.set_title(f"(b) Speedup (T1 {t1_label})")
+    ax.set_title("(b) Speedup Empírico (T1 medido)")
     ax.set_xticks(workers_list)
     ax.legend(fontsize=8)
 
@@ -470,7 +483,7 @@ def main():
     run_dir = sys.argv[1]
 
     # Validar que os arquivos existem.
-    for name in ("raw.csv", "aggregate.csv", "config.json"):
+    for name in ("raw.csv", "aggregate.csv", "native_baselines.csv", "config.json"):
         path = os.path.join(run_dir, name)
         if not os.path.exists(path):
             print(f"Erro: {path} não encontrado.")
@@ -479,6 +492,7 @@ def main():
     # Carregar dados.
     raw = pd.read_csv(os.path.join(run_dir, "raw.csv"))
     agg = pd.read_csv(os.path.join(run_dir, "aggregate.csv"))
+    native = pd.read_csv(os.path.join(run_dir, "native_baselines.csv"))
     with open(os.path.join(run_dir, "config.json")) as f:
         config = json.load(f)
 
@@ -502,11 +516,11 @@ def main():
     print(f"Gerando graficos em {charts_dir}/")
 
     plot_makespan_boxplot(raw, charts_dir, project_name)
-    plot_makespan_bars(agg, charts_dir, project_name)
-    plot_speedup(agg, t1_measured, t1_theoretical, charts_dir, project_name)
+    plot_makespan_bars(agg, native, charts_dir, project_name)
+    plot_speedup(raw, agg, native, t1_measured, charts_dir, project_name)
     plot_planned_vs_actual(raw, charts_dir, project_name)
     plot_load_stddev(agg, charts_dir, project_name)
-    plot_summary_panel(raw, agg, t1_measured, t1_theoretical,
+    plot_summary_panel(raw, agg, native, t1_measured, t1_theoretical,
                        charts_dir, project_name)
 
     print(f"\nConcluído! {6} gráficos salvos em {charts_dir}/")
