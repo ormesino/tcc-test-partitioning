@@ -1,752 +1,602 @@
 [
   {
     "name": "example.com/moderate/fast/pkg001",
-    "duration_ns": 50000000,
-    "cv": 0.1
+    "duration_ns": 50000000
   },
   {
     "name": "example.com/moderate/fast/pkg002",
-    "duration_ns": 55000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 55000000
   },
   {
     "name": "example.com/moderate/fast/pkg003",
-    "duration_ns": 60000000,
-    "cv": 0.14
+    "duration_ns": 60000000
   },
   {
     "name": "example.com/moderate/fast/pkg004",
-    "duration_ns": 62000000,
-    "cv": 0.16
+    "duration_ns": 62000000
   },
   {
     "name": "example.com/moderate/fast/pkg005",
-    "duration_ns": 65000000,
-    "cv": 0.18
+    "duration_ns": 65000000
   },
   {
     "name": "example.com/moderate/fast/pkg006",
-    "duration_ns": 68000000,
-    "cv": 0.2
+    "duration_ns": 68000000
   },
   {
     "name": "example.com/moderate/fast/pkg007",
-    "duration_ns": 70000000,
-    "cv": 0.22
+    "duration_ns": 70000000
   },
   {
     "name": "example.com/moderate/fast/pkg008",
-    "duration_ns": 72000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 72000000
   },
   {
     "name": "example.com/moderate/fast/pkg009",
-    "duration_ns": 75000000,
-    "cv": 0.26
+    "duration_ns": 75000000
   },
   {
     "name": "example.com/moderate/fast/pkg010",
-    "duration_ns": 78000000,
-    "cv": 0.28
+    "duration_ns": 78000000
   },
   {
     "name": "example.com/moderate/fast/pkg011",
-    "duration_ns": 80000000,
-    "cv": 0.1
+    "duration_ns": 80000000
   },
   {
     "name": "example.com/moderate/fast/pkg012",
-    "duration_ns": 82000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 82000000
   },
   {
     "name": "example.com/moderate/fast/pkg013",
-    "duration_ns": 85000000,
-    "cv": 0.14
+    "duration_ns": 85000000
   },
   {
     "name": "example.com/moderate/fast/pkg014",
-    "duration_ns": 88000000,
-    "cv": 0.16
+    "duration_ns": 88000000
   },
   {
     "name": "example.com/moderate/fast/pkg015",
-    "duration_ns": 90000000,
-    "cv": 0.18
+    "duration_ns": 90000000
   },
   {
     "name": "example.com/moderate/fast/pkg016",
-    "duration_ns": 92000000,
-    "cv": 0.2
+    "duration_ns": 92000000
   },
   {
     "name": "example.com/moderate/fast/pkg017",
-    "duration_ns": 95000000,
-    "cv": 0.22
+    "duration_ns": 95000000
   },
   {
     "name": "example.com/moderate/fast/pkg018",
-    "duration_ns": 98000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 98000000
   },
   {
     "name": "example.com/moderate/fast/pkg019",
-    "duration_ns": 100000000,
-    "cv": 0.26
+    "duration_ns": 100000000
   },
   {
     "name": "example.com/moderate/fast/pkg020",
-    "duration_ns": 105000000,
-    "cv": 0.28
+    "duration_ns": 105000000
   },
   {
     "name": "example.com/moderate/fast/pkg021",
-    "duration_ns": 108000000,
-    "cv": 0.1
+    "duration_ns": 108000000
   },
   {
     "name": "example.com/moderate/fast/pkg022",
-    "duration_ns": 110000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 110000000
   },
   {
     "name": "example.com/moderate/fast/pkg023",
-    "duration_ns": 112000000,
-    "cv": 0.14
+    "duration_ns": 112000000
   },
   {
     "name": "example.com/moderate/fast/pkg024",
-    "duration_ns": 115000000,
-    "cv": 0.16
+    "duration_ns": 115000000
   },
   {
     "name": "example.com/moderate/fast/pkg025",
-    "duration_ns": 118000000,
-    "cv": 0.18
+    "duration_ns": 118000000
   },
   {
     "name": "example.com/moderate/fast/pkg026",
-    "duration_ns": 120000000,
-    "cv": 0.2
+    "duration_ns": 120000000
   },
   {
     "name": "example.com/moderate/fast/pkg027",
-    "duration_ns": 122000000,
-    "cv": 0.22
+    "duration_ns": 122000000
   },
   {
     "name": "example.com/moderate/fast/pkg028",
-    "duration_ns": 125000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 125000000
   },
   {
     "name": "example.com/moderate/fast/pkg029",
-    "duration_ns": 128000000,
-    "cv": 0.26
+    "duration_ns": 128000000
   },
   {
     "name": "example.com/moderate/fast/pkg030",
-    "duration_ns": 130000000,
-    "cv": 0.28
+    "duration_ns": 130000000
   },
   {
     "name": "example.com/moderate/fast/pkg031",
-    "duration_ns": 132000000,
-    "cv": 0.1
+    "duration_ns": 132000000
   },
   {
     "name": "example.com/moderate/fast/pkg032",
-    "duration_ns": 135000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 135000000
   },
   {
     "name": "example.com/moderate/fast/pkg033",
-    "duration_ns": 138000000,
-    "cv": 0.14
+    "duration_ns": 138000000
   },
   {
     "name": "example.com/moderate/fast/pkg034",
-    "duration_ns": 140000000,
-    "cv": 0.16
+    "duration_ns": 140000000
   },
   {
     "name": "example.com/moderate/fast/pkg035",
-    "duration_ns": 142000000,
-    "cv": 0.18
+    "duration_ns": 142000000
   },
   {
     "name": "example.com/moderate/fast/pkg036",
-    "duration_ns": 145000000,
-    "cv": 0.2
+    "duration_ns": 145000000
   },
   {
     "name": "example.com/moderate/fast/pkg037",
-    "duration_ns": 148000000,
-    "cv": 0.22
+    "duration_ns": 148000000
   },
   {
     "name": "example.com/moderate/fast/pkg038",
-    "duration_ns": 150000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 150000000
   },
   {
     "name": "example.com/moderate/fast/pkg039",
-    "duration_ns": 152000000,
-    "cv": 0.26
+    "duration_ns": 152000000
   },
   {
     "name": "example.com/moderate/fast/pkg040",
-    "duration_ns": 155000000,
-    "cv": 0.28
+    "duration_ns": 155000000
   },
   {
     "name": "example.com/moderate/fast/pkg041",
-    "duration_ns": 158000000,
-    "cv": 0.1
+    "duration_ns": 158000000
   },
   {
     "name": "example.com/moderate/fast/pkg042",
-    "duration_ns": 160000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 160000000
   },
   {
     "name": "example.com/moderate/fast/pkg043",
-    "duration_ns": 162000000,
-    "cv": 0.14
+    "duration_ns": 162000000
   },
   {
     "name": "example.com/moderate/fast/pkg044",
-    "duration_ns": 165000000,
-    "cv": 0.16
+    "duration_ns": 165000000
   },
   {
     "name": "example.com/moderate/fast/pkg045",
-    "duration_ns": 168000000,
-    "cv": 0.18
+    "duration_ns": 168000000
   },
   {
     "name": "example.com/moderate/fast/pkg046",
-    "duration_ns": 170000000,
-    "cv": 0.2
+    "duration_ns": 170000000
   },
   {
     "name": "example.com/moderate/fast/pkg047",
-    "duration_ns": 172000000,
-    "cv": 0.22
+    "duration_ns": 172000000
   },
   {
     "name": "example.com/moderate/fast/pkg048",
-    "duration_ns": 175000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 175000000
   },
   {
     "name": "example.com/moderate/fast/pkg049",
-    "duration_ns": 178000000,
-    "cv": 0.26
+    "duration_ns": 178000000
   },
   {
     "name": "example.com/moderate/fast/pkg050",
-    "duration_ns": 180000000,
-    "cv": 0.28
+    "duration_ns": 180000000
   },
   {
     "name": "example.com/moderate/fast/pkg051",
-    "duration_ns": 185000000,
-    "cv": 0.1
+    "duration_ns": 185000000
   },
   {
     "name": "example.com/moderate/fast/pkg052",
-    "duration_ns": 190000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 190000000
   },
   {
     "name": "example.com/moderate/fast/pkg053",
-    "duration_ns": 195000000,
-    "cv": 0.14
+    "duration_ns": 195000000
   },
   {
     "name": "example.com/moderate/fast/pkg054",
-    "duration_ns": 200000000,
-    "cv": 0.16
+    "duration_ns": 200000000
   },
   {
     "name": "example.com/moderate/fast/pkg055",
-    "duration_ns": 205000000,
-    "cv": 0.18
+    "duration_ns": 205000000
   },
   {
     "name": "example.com/moderate/fast/pkg056",
-    "duration_ns": 210000000,
-    "cv": 0.2
+    "duration_ns": 210000000
   },
   {
     "name": "example.com/moderate/fast/pkg057",
-    "duration_ns": 215000000,
-    "cv": 0.22
+    "duration_ns": 215000000
   },
   {
     "name": "example.com/moderate/fast/pkg058",
-    "duration_ns": 220000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 220000000
   },
   {
     "name": "example.com/moderate/fast/pkg059",
-    "duration_ns": 225000000,
-    "cv": 0.26
+    "duration_ns": 225000000
   },
   {
     "name": "example.com/moderate/fast/pkg060",
-    "duration_ns": 230000000,
-    "cv": 0.28
+    "duration_ns": 230000000
   },
   {
     "name": "example.com/moderate/fast/pkg061",
-    "duration_ns": 235000000,
-    "cv": 0.1
+    "duration_ns": 235000000
   },
   {
     "name": "example.com/moderate/fast/pkg062",
-    "duration_ns": 240000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 240000000
   },
   {
     "name": "example.com/moderate/fast/pkg063",
-    "duration_ns": 245000000,
-    "cv": 0.14
+    "duration_ns": 245000000
   },
   {
     "name": "example.com/moderate/fast/pkg064",
-    "duration_ns": 250000000,
-    "cv": 0.16
+    "duration_ns": 250000000
   },
   {
     "name": "example.com/moderate/fast/pkg065",
-    "duration_ns": 255000000,
-    "cv": 0.18
+    "duration_ns": 255000000
   },
   {
     "name": "example.com/moderate/fast/pkg066",
-    "duration_ns": 260000000,
-    "cv": 0.2
+    "duration_ns": 260000000
   },
   {
     "name": "example.com/moderate/fast/pkg067",
-    "duration_ns": 265000000,
-    "cv": 0.22
+    "duration_ns": 265000000
   },
   {
     "name": "example.com/moderate/fast/pkg068",
-    "duration_ns": 270000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 270000000
   },
   {
     "name": "example.com/moderate/fast/pkg069",
-    "duration_ns": 280000000,
-    "cv": 0.26
+    "duration_ns": 280000000
   },
   {
     "name": "example.com/moderate/fast/pkg070",
-    "duration_ns": 290000000,
-    "cv": 0.28
+    "duration_ns": 290000000
   },
   {
     "name": "example.com/moderate/fast/pkg071",
-    "duration_ns": 300000000,
-    "cv": 0.1
+    "duration_ns": 300000000
   },
   {
     "name": "example.com/moderate/fast/pkg072",
-    "duration_ns": 310000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 310000000
   },
   {
     "name": "example.com/moderate/fast/pkg073",
-    "duration_ns": 320000000,
-    "cv": 0.14
+    "duration_ns": 320000000
   },
   {
     "name": "example.com/moderate/fast/pkg074",
-    "duration_ns": 330000000,
-    "cv": 0.16
+    "duration_ns": 330000000
   },
   {
     "name": "example.com/moderate/fast/pkg075",
-    "duration_ns": 340000000,
-    "cv": 0.18
+    "duration_ns": 340000000
   },
   {
     "name": "example.com/moderate/fast/pkg076",
-    "duration_ns": 350000000,
-    "cv": 0.2
+    "duration_ns": 350000000
   },
   {
     "name": "example.com/moderate/fast/pkg077",
-    "duration_ns": 355000000,
-    "cv": 0.22
+    "duration_ns": 355000000
   },
   {
     "name": "example.com/moderate/fast/pkg078",
-    "duration_ns": 360000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 360000000
   },
   {
     "name": "example.com/moderate/fast/pkg079",
-    "duration_ns": 365000000,
-    "cv": 0.26
+    "duration_ns": 365000000
   },
   {
     "name": "example.com/moderate/fast/pkg080",
-    "duration_ns": 370000000,
-    "cv": 0.28
+    "duration_ns": 370000000
   },
   {
     "name": "example.com/moderate/fast/pkg081",
-    "duration_ns": 375000000,
-    "cv": 0.1
+    "duration_ns": 375000000
   },
   {
     "name": "example.com/moderate/fast/pkg082",
-    "duration_ns": 380000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 380000000
   },
   {
     "name": "example.com/moderate/fast/pkg083",
-    "duration_ns": 385000000,
-    "cv": 0.14
+    "duration_ns": 385000000
   },
   {
     "name": "example.com/moderate/fast/pkg084",
-    "duration_ns": 390000000,
-    "cv": 0.16
+    "duration_ns": 390000000
   },
   {
     "name": "example.com/moderate/fast/pkg085",
-    "duration_ns": 395000000,
-    "cv": 0.18
+    "duration_ns": 395000000
   },
   {
     "name": "example.com/moderate/fast/pkg086",
-    "duration_ns": 400000000,
-    "cv": 0.2
+    "duration_ns": 400000000
   },
   {
     "name": "example.com/moderate/fast/pkg087",
-    "duration_ns": 405000000,
-    "cv": 0.22
+    "duration_ns": 405000000
   },
   {
     "name": "example.com/moderate/fast/pkg088",
-    "duration_ns": 410000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 410000000
   },
   {
     "name": "example.com/moderate/fast/pkg089",
-    "duration_ns": 415000000,
-    "cv": 0.26
+    "duration_ns": 415000000
   },
   {
     "name": "example.com/moderate/fast/pkg090",
-    "duration_ns": 420000000,
-    "cv": 0.28
+    "duration_ns": 420000000
   },
   {
     "name": "example.com/moderate/fast/pkg091",
-    "duration_ns": 425000000,
-    "cv": 0.1
+    "duration_ns": 425000000
   },
   {
     "name": "example.com/moderate/fast/pkg092",
-    "duration_ns": 430000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 430000000
   },
   {
     "name": "example.com/moderate/fast/pkg093",
-    "duration_ns": 435000000,
-    "cv": 0.14
+    "duration_ns": 435000000
   },
   {
     "name": "example.com/moderate/fast/pkg094",
-    "duration_ns": 440000000,
-    "cv": 0.16
+    "duration_ns": 440000000
   },
   {
     "name": "example.com/moderate/fast/pkg095",
-    "duration_ns": 445000000,
-    "cv": 0.18
+    "duration_ns": 445000000
   },
   {
     "name": "example.com/moderate/fast/pkg096",
-    "duration_ns": 450000000,
-    "cv": 0.2
+    "duration_ns": 450000000
   },
   {
     "name": "example.com/moderate/fast/pkg097",
-    "duration_ns": 455000000,
-    "cv": 0.22
+    "duration_ns": 455000000
   },
   {
     "name": "example.com/moderate/fast/pkg098",
-    "duration_ns": 460000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 460000000
   },
   {
     "name": "example.com/moderate/fast/pkg099",
-    "duration_ns": 465000000,
-    "cv": 0.26
+    "duration_ns": 465000000
   },
   {
     "name": "example.com/moderate/fast/pkg100",
-    "duration_ns": 470000000,
-    "cv": 0.28
+    "duration_ns": 470000000
   },
   {
     "name": "example.com/moderate/fast/pkg101",
-    "duration_ns": 475000000,
-    "cv": 0.1
+    "duration_ns": 475000000
   },
   {
     "name": "example.com/moderate/fast/pkg102",
-    "duration_ns": 480000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 480000000
   },
   {
     "name": "example.com/moderate/fast/pkg103",
-    "duration_ns": 485000000,
-    "cv": 0.14
+    "duration_ns": 485000000
   },
   {
     "name": "example.com/moderate/fast/pkg104",
-    "duration_ns": 490000000,
-    "cv": 0.16
+    "duration_ns": 490000000
   },
   {
     "name": "example.com/moderate/fast/pkg105",
-    "duration_ns": 495000000,
-    "cv": 0.18
+    "duration_ns": 495000000
   },
   {
     "name": "example.com/moderate/fast/pkg106",
-    "duration_ns": 500000000,
-    "cv": 0.2
+    "duration_ns": 500000000
   },
   {
     "name": "example.com/moderate/fast/pkg107",
-    "duration_ns": 60000000,
-    "cv": 0.22
+    "duration_ns": 60000000
   },
   {
     "name": "example.com/moderate/fast/pkg108",
-    "duration_ns": 70000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 70000000
   },
   {
     "name": "example.com/moderate/fast/pkg109",
-    "duration_ns": 80000000,
-    "cv": 0.26
+    "duration_ns": 80000000
   },
   {
     "name": "example.com/moderate/fast/pkg110",
-    "duration_ns": 90000000,
-    "cv": 0.28
+    "duration_ns": 90000000
   },
   {
     "name": "example.com/moderate/fast/pkg111",
-    "duration_ns": 100000000,
-    "cv": 0.1
+    "duration_ns": 100000000
   },
   {
     "name": "example.com/moderate/fast/pkg112",
-    "duration_ns": 110000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 110000000
   },
   {
     "name": "example.com/moderate/fast/pkg113",
-    "duration_ns": 120000000,
-    "cv": 0.14
+    "duration_ns": 120000000
   },
   {
     "name": "example.com/moderate/fast/pkg114",
-    "duration_ns": 130000000,
-    "cv": 0.16
+    "duration_ns": 130000000
   },
   {
     "name": "example.com/moderate/fast/pkg115",
-    "duration_ns": 140000000,
-    "cv": 0.18
+    "duration_ns": 140000000
   },
   {
     "name": "example.com/moderate/fast/pkg116",
-    "duration_ns": 150000000,
-    "cv": 0.2
+    "duration_ns": 150000000
   },
   {
     "name": "example.com/moderate/fast/pkg117",
-    "duration_ns": 160000000,
-    "cv": 0.22
+    "duration_ns": 160000000
   },
   {
     "name": "example.com/moderate/fast/pkg118",
-    "duration_ns": 170000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 170000000
   },
   {
     "name": "example.com/moderate/fast/pkg119",
-    "duration_ns": 180000000,
-    "cv": 0.26
+    "duration_ns": 180000000
   },
   {
     "name": "example.com/moderate/fast/pkg120",
-    "duration_ns": 190000000,
-    "cv": 0.28
+    "duration_ns": 190000000
   },
   {
     "name": "example.com/moderate/mid/pkg001",
-    "duration_ns": 520000000,
-    "cv": 0.2
+    "duration_ns": 520000000
   },
   {
     "name": "example.com/moderate/mid/pkg002",
-    "duration_ns": 580000000,
-    "cv": 0.25
+    "duration_ns": 580000000
   },
   {
     "name": "example.com/moderate/mid/pkg003",
-    "duration_ns": 650000000,
-    "cv": 0.30000000000000004
+    "duration_ns": 650000000
   },
   {
     "name": "example.com/moderate/mid/pkg004",
-    "duration_ns": 720000000,
-    "cv": 0.35000000000000003
+    "duration_ns": 720000000
   },
   {
     "name": "example.com/moderate/mid/pkg005",
-    "duration_ns": 800000000,
-    "cv": 0.4
+    "duration_ns": 800000000
   },
   {
     "name": "example.com/moderate/mid/pkg006",
-    "duration_ns": 880000000,
-    "cv": 0.2
+    "duration_ns": 880000000
   },
   {
     "name": "example.com/moderate/mid/pkg007",
-    "duration_ns": 950000000,
-    "cv": 0.25
+    "duration_ns": 950000000
   },
   {
     "name": "example.com/moderate/mid/pkg008",
-    "duration_ns": 1050000000,
-    "cv": 0.30000000000000004
+    "duration_ns": 1050000000
   },
   {
     "name": "example.com/moderate/mid/pkg009",
-    "duration_ns": 1150000000,
-    "cv": 0.35000000000000003
+    "duration_ns": 1150000000
   },
   {
     "name": "example.com/moderate/mid/pkg010",
-    "duration_ns": 1250000000,
-    "cv": 0.4
+    "duration_ns": 1250000000
   },
   {
     "name": "example.com/moderate/mid/pkg011",
-    "duration_ns": 1350000000,
-    "cv": 0.2
+    "duration_ns": 1350000000
   },
   {
     "name": "example.com/moderate/mid/pkg012",
-    "duration_ns": 1500000000,
-    "cv": 0.25
+    "duration_ns": 1500000000
   },
   {
     "name": "example.com/moderate/mid/pkg013",
-    "duration_ns": 1600000000,
-    "cv": 0.30000000000000004
+    "duration_ns": 1600000000
   },
   {
     "name": "example.com/moderate/mid/pkg014",
-    "duration_ns": 1750000000,
-    "cv": 0.35000000000000003
+    "duration_ns": 1750000000
   },
   {
     "name": "example.com/moderate/mid/pkg015",
-    "duration_ns": 1900000000,
-    "cv": 0.4
+    "duration_ns": 1900000000
   },
   {
     "name": "example.com/moderate/mid/pkg016",
-    "duration_ns": 2000000000,
-    "cv": 0.2
+    "duration_ns": 2000000000
   },
   {
     "name": "example.com/moderate/mid/pkg017",
-    "duration_ns": 2100000000,
-    "cv": 0.25
+    "duration_ns": 2100000000
   },
   {
     "name": "example.com/moderate/mid/pkg018",
-    "duration_ns": 2250000000,
-    "cv": 0.30000000000000004
+    "duration_ns": 2250000000
   },
   {
     "name": "example.com/moderate/mid/pkg019",
-    "duration_ns": 2400000000,
-    "cv": 0.35000000000000003
+    "duration_ns": 2400000000
   },
   {
     "name": "example.com/moderate/mid/pkg020",
-    "duration_ns": 2500000000,
-    "cv": 0.4
+    "duration_ns": 2500000000
   },
   {
     "name": "example.com/moderate/mid/pkg021",
-    "duration_ns": 2600000000,
-    "cv": 0.2
+    "duration_ns": 2600000000
   },
   {
     "name": "example.com/moderate/mid/pkg022",
-    "duration_ns": 2700000000,
-    "cv": 0.25
+    "duration_ns": 2700000000
   },
   {
     "name": "example.com/moderate/mid/pkg023",
-    "duration_ns": 2800000000,
-    "cv": 0.30000000000000004
+    "duration_ns": 2800000000
   },
   {
     "name": "example.com/moderate/mid/pkg024",
-    "duration_ns": 2900000000,
-    "cv": 0.35000000000000003
+    "duration_ns": 2900000000
   },
   {
     "name": "example.com/moderate/mid/pkg025",
-    "duration_ns": 3000000000,
-    "cv": 0.4
+    "duration_ns": 3000000000
   },
   {
     "name": "example.com/moderate/heavy/pkg001",
-    "duration_ns": 5000000000,
-    "cv": 0.3
+    "duration_ns": 5000000000
   },
   {
     "name": "example.com/moderate/heavy/pkg002",
-    "duration_ns": 6200000000,
-    "cv": 0.35
+    "duration_ns": 6200000000
   },
   {
     "name": "example.com/moderate/heavy/pkg003",
-    "duration_ns": 7500000000,
-    "cv": 0.4
+    "duration_ns": 7500000000
   },
   {
     "name": "example.com/moderate/heavy/pkg004",
-    "duration_ns": 8800000000,
-    "cv": 0.45
+    "duration_ns": 8800000000
   },
   {
     "name": "example.com/moderate/heavy/pkg005",
-    "duration_ns": 10000000000,
-    "cv": 0.5
+    "duration_ns": 10000000000
   }
 ]

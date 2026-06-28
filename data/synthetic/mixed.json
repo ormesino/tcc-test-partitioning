@@ -1,1002 +1,802 @@
 [
   {
     "name": "example.com/mixed/modpart/pkg001",
-    "duration_ns": 50000000,
-    "cv": 0.1
+    "duration_ns": 50000000
   },
   {
     "name": "example.com/mixed/modpart/pkg002",
-    "duration_ns": 55000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 55000000
   },
   {
     "name": "example.com/mixed/modpart/pkg003",
-    "duration_ns": 60000000,
-    "cv": 0.14
+    "duration_ns": 60000000
   },
   {
     "name": "example.com/mixed/modpart/pkg004",
-    "duration_ns": 62000000,
-    "cv": 0.16
+    "duration_ns": 62000000
   },
   {
     "name": "example.com/mixed/modpart/pkg005",
-    "duration_ns": 65000000,
-    "cv": 0.18
+    "duration_ns": 65000000
   },
   {
     "name": "example.com/mixed/modpart/pkg006",
-    "duration_ns": 68000000,
-    "cv": 0.2
+    "duration_ns": 68000000
   },
   {
     "name": "example.com/mixed/modpart/pkg007",
-    "duration_ns": 70000000,
-    "cv": 0.22
+    "duration_ns": 70000000
   },
   {
     "name": "example.com/mixed/modpart/pkg008",
-    "duration_ns": 72000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 72000000
   },
   {
     "name": "example.com/mixed/modpart/pkg009",
-    "duration_ns": 75000000,
-    "cv": 0.26
+    "duration_ns": 75000000
   },
   {
     "name": "example.com/mixed/modpart/pkg010",
-    "duration_ns": 78000000,
-    "cv": 0.28
+    "duration_ns": 78000000
   },
   {
     "name": "example.com/mixed/modpart/pkg011",
-    "duration_ns": 80000000,
-    "cv": 0.1
+    "duration_ns": 80000000
   },
   {
     "name": "example.com/mixed/modpart/pkg012",
-    "duration_ns": 82000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 82000000
   },
   {
     "name": "example.com/mixed/modpart/pkg013",
-    "duration_ns": 85000000,
-    "cv": 0.14
+    "duration_ns": 85000000
   },
   {
     "name": "example.com/mixed/modpart/pkg014",
-    "duration_ns": 88000000,
-    "cv": 0.16
+    "duration_ns": 88000000
   },
   {
     "name": "example.com/mixed/modpart/pkg015",
-    "duration_ns": 90000000,
-    "cv": 0.18
+    "duration_ns": 90000000
   },
   {
     "name": "example.com/mixed/modpart/pkg016",
-    "duration_ns": 92000000,
-    "cv": 0.2
+    "duration_ns": 92000000
   },
   {
     "name": "example.com/mixed/modpart/pkg017",
-    "duration_ns": 95000000,
-    "cv": 0.22
+    "duration_ns": 95000000
   },
   {
     "name": "example.com/mixed/modpart/pkg018",
-    "duration_ns": 98000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 98000000
   },
   {
     "name": "example.com/mixed/modpart/pkg019",
-    "duration_ns": 100000000,
-    "cv": 0.26
+    "duration_ns": 100000000
   },
   {
     "name": "example.com/mixed/modpart/pkg020",
-    "duration_ns": 105000000,
-    "cv": 0.28
+    "duration_ns": 105000000
   },
   {
     "name": "example.com/mixed/modpart/pkg021",
-    "duration_ns": 108000000,
-    "cv": 0.1
+    "duration_ns": 108000000
   },
   {
     "name": "example.com/mixed/modpart/pkg022",
-    "duration_ns": 110000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 110000000
   },
   {
     "name": "example.com/mixed/modpart/pkg023",
-    "duration_ns": 112000000,
-    "cv": 0.14
+    "duration_ns": 112000000
   },
   {
     "name": "example.com/mixed/modpart/pkg024",
-    "duration_ns": 115000000,
-    "cv": 0.16
+    "duration_ns": 115000000
   },
   {
     "name": "example.com/mixed/modpart/pkg025",
-    "duration_ns": 118000000,
-    "cv": 0.18
+    "duration_ns": 118000000
   },
   {
     "name": "example.com/mixed/modpart/pkg026",
-    "duration_ns": 120000000,
-    "cv": 0.2
+    "duration_ns": 120000000
   },
   {
     "name": "example.com/mixed/modpart/pkg027",
-    "duration_ns": 122000000,
-    "cv": 0.22
+    "duration_ns": 122000000
   },
   {
     "name": "example.com/mixed/modpart/pkg028",
-    "duration_ns": 125000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 125000000
   },
   {
     "name": "example.com/mixed/modpart/pkg029",
-    "duration_ns": 128000000,
-    "cv": 0.26
+    "duration_ns": 128000000
   },
   {
     "name": "example.com/mixed/modpart/pkg030",
-    "duration_ns": 130000000,
-    "cv": 0.28
+    "duration_ns": 130000000
   },
   {
     "name": "example.com/mixed/modpart/pkg031",
-    "duration_ns": 132000000,
-    "cv": 0.1
+    "duration_ns": 132000000
   },
   {
     "name": "example.com/mixed/modpart/pkg032",
-    "duration_ns": 135000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 135000000
   },
   {
     "name": "example.com/mixed/modpart/pkg033",
-    "duration_ns": 138000000,
-    "cv": 0.14
+    "duration_ns": 138000000
   },
   {
     "name": "example.com/mixed/modpart/pkg034",
-    "duration_ns": 140000000,
-    "cv": 0.16
+    "duration_ns": 140000000
   },
   {
     "name": "example.com/mixed/modpart/pkg035",
-    "duration_ns": 142000000,
-    "cv": 0.18
+    "duration_ns": 142000000
   },
   {
     "name": "example.com/mixed/modpart/pkg036",
-    "duration_ns": 145000000,
-    "cv": 0.2
+    "duration_ns": 145000000
   },
   {
     "name": "example.com/mixed/modpart/pkg037",
-    "duration_ns": 148000000,
-    "cv": 0.22
+    "duration_ns": 148000000
   },
   {
     "name": "example.com/mixed/modpart/pkg038",
-    "duration_ns": 150000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 150000000
   },
   {
     "name": "example.com/mixed/modpart/pkg039",
-    "duration_ns": 152000000,
-    "cv": 0.26
+    "duration_ns": 152000000
   },
   {
     "name": "example.com/mixed/modpart/pkg040",
-    "duration_ns": 155000000,
-    "cv": 0.28
+    "duration_ns": 155000000
   },
   {
     "name": "example.com/mixed/modpart/pkg041",
-    "duration_ns": 158000000,
-    "cv": 0.1
+    "duration_ns": 158000000
   },
   {
     "name": "example.com/mixed/modpart/pkg042",
-    "duration_ns": 160000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 160000000
   },
   {
     "name": "example.com/mixed/modpart/pkg043",
-    "duration_ns": 162000000,
-    "cv": 0.14
+    "duration_ns": 162000000
   },
   {
     "name": "example.com/mixed/modpart/pkg044",
-    "duration_ns": 165000000,
-    "cv": 0.16
+    "duration_ns": 165000000
   },
   {
     "name": "example.com/mixed/modpart/pkg045",
-    "duration_ns": 168000000,
-    "cv": 0.18
+    "duration_ns": 168000000
   },
   {
     "name": "example.com/mixed/modpart/pkg046",
-    "duration_ns": 170000000,
-    "cv": 0.2
+    "duration_ns": 170000000
   },
   {
     "name": "example.com/mixed/modpart/pkg047",
-    "duration_ns": 172000000,
-    "cv": 0.22
+    "duration_ns": 172000000
   },
   {
     "name": "example.com/mixed/modpart/pkg048",
-    "duration_ns": 175000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 175000000
   },
   {
     "name": "example.com/mixed/modpart/pkg049",
-    "duration_ns": 178000000,
-    "cv": 0.26
+    "duration_ns": 178000000
   },
   {
     "name": "example.com/mixed/modpart/pkg050",
-    "duration_ns": 180000000,
-    "cv": 0.28
+    "duration_ns": 180000000
   },
   {
     "name": "example.com/mixed/modpart/pkg051",
-    "duration_ns": 185000000,
-    "cv": 0.1
+    "duration_ns": 185000000
   },
   {
     "name": "example.com/mixed/modpart/pkg052",
-    "duration_ns": 190000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 190000000
   },
   {
     "name": "example.com/mixed/modpart/pkg053",
-    "duration_ns": 195000000,
-    "cv": 0.14
+    "duration_ns": 195000000
   },
   {
     "name": "example.com/mixed/modpart/pkg054",
-    "duration_ns": 200000000,
-    "cv": 0.16
+    "duration_ns": 200000000
   },
   {
     "name": "example.com/mixed/modpart/pkg055",
-    "duration_ns": 205000000,
-    "cv": 0.18
+    "duration_ns": 205000000
   },
   {
     "name": "example.com/mixed/modpart/pkg056",
-    "duration_ns": 210000000,
-    "cv": 0.2
+    "duration_ns": 210000000
   },
   {
     "name": "example.com/mixed/modpart/pkg057",
-    "duration_ns": 215000000,
-    "cv": 0.22
+    "duration_ns": 215000000
   },
   {
     "name": "example.com/mixed/modpart/pkg058",
-    "duration_ns": 220000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 220000000
   },
   {
     "name": "example.com/mixed/modpart/pkg059",
-    "duration_ns": 225000000,
-    "cv": 0.26
+    "duration_ns": 225000000
   },
   {
     "name": "example.com/mixed/modpart/pkg060",
-    "duration_ns": 230000000,
-    "cv": 0.28
+    "duration_ns": 230000000
   },
   {
     "name": "example.com/mixed/modpart/pkg061",
-    "duration_ns": 235000000,
-    "cv": 0.1
+    "duration_ns": 235000000
   },
   {
     "name": "example.com/mixed/modpart/pkg062",
-    "duration_ns": 240000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 240000000
   },
   {
     "name": "example.com/mixed/modpart/pkg063",
-    "duration_ns": 245000000,
-    "cv": 0.14
+    "duration_ns": 245000000
   },
   {
     "name": "example.com/mixed/modpart/pkg064",
-    "duration_ns": 250000000,
-    "cv": 0.16
+    "duration_ns": 250000000
   },
   {
     "name": "example.com/mixed/modpart/pkg065",
-    "duration_ns": 255000000,
-    "cv": 0.18
+    "duration_ns": 255000000
   },
   {
     "name": "example.com/mixed/modpart/pkg066",
-    "duration_ns": 260000000,
-    "cv": 0.2
+    "duration_ns": 260000000
   },
   {
     "name": "example.com/mixed/modpart/pkg067",
-    "duration_ns": 265000000,
-    "cv": 0.22
+    "duration_ns": 265000000
   },
   {
     "name": "example.com/mixed/modpart/pkg068",
-    "duration_ns": 270000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 270000000
   },
   {
     "name": "example.com/mixed/modpart/pkg069",
-    "duration_ns": 280000000,
-    "cv": 0.26
+    "duration_ns": 280000000
   },
   {
     "name": "example.com/mixed/modpart/pkg070",
-    "duration_ns": 290000000,
-    "cv": 0.28
+    "duration_ns": 290000000
   },
   {
     "name": "example.com/mixed/modpart/pkg071",
-    "duration_ns": 300000000,
-    "cv": 0.1
+    "duration_ns": 300000000
   },
   {
     "name": "example.com/mixed/modpart/pkg072",
-    "duration_ns": 310000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 310000000
   },
   {
     "name": "example.com/mixed/modpart/pkg073",
-    "duration_ns": 320000000,
-    "cv": 0.14
+    "duration_ns": 320000000
   },
   {
     "name": "example.com/mixed/modpart/pkg074",
-    "duration_ns": 330000000,
-    "cv": 0.16
+    "duration_ns": 330000000
   },
   {
     "name": "example.com/mixed/modpart/pkg075",
-    "duration_ns": 340000000,
-    "cv": 0.18
+    "duration_ns": 340000000
   },
   {
     "name": "example.com/mixed/modpart/pkg076",
-    "duration_ns": 350000000,
-    "cv": 0.2
+    "duration_ns": 350000000
   },
   {
     "name": "example.com/mixed/modpart/pkg077",
-    "duration_ns": 355000000,
-    "cv": 0.22
+    "duration_ns": 355000000
   },
   {
     "name": "example.com/mixed/modpart/pkg078",
-    "duration_ns": 360000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 360000000
   },
   {
     "name": "example.com/mixed/modpart/pkg079",
-    "duration_ns": 365000000,
-    "cv": 0.26
+    "duration_ns": 365000000
   },
   {
     "name": "example.com/mixed/modpart/pkg080",
-    "duration_ns": 370000000,
-    "cv": 0.28
+    "duration_ns": 370000000
   },
   {
     "name": "example.com/mixed/modpart/pkg081",
-    "duration_ns": 375000000,
-    "cv": 0.1
+    "duration_ns": 375000000
   },
   {
     "name": "example.com/mixed/modpart/pkg082",
-    "duration_ns": 380000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 380000000
   },
   {
     "name": "example.com/mixed/modpart/pkg083",
-    "duration_ns": 385000000,
-    "cv": 0.14
+    "duration_ns": 385000000
   },
   {
     "name": "example.com/mixed/modpart/pkg084",
-    "duration_ns": 390000000,
-    "cv": 0.16
+    "duration_ns": 390000000
   },
   {
     "name": "example.com/mixed/modpart/pkg085",
-    "duration_ns": 395000000,
-    "cv": 0.18
+    "duration_ns": 395000000
   },
   {
     "name": "example.com/mixed/modpart/pkg086",
-    "duration_ns": 400000000,
-    "cv": 0.2
+    "duration_ns": 400000000
   },
   {
     "name": "example.com/mixed/modpart/pkg087",
-    "duration_ns": 405000000,
-    "cv": 0.22
+    "duration_ns": 405000000
   },
   {
     "name": "example.com/mixed/modpart/pkg088",
-    "duration_ns": 410000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 410000000
   },
   {
     "name": "example.com/mixed/modpart/pkg089",
-    "duration_ns": 415000000,
-    "cv": 0.26
+    "duration_ns": 415000000
   },
   {
     "name": "example.com/mixed/modpart/pkg090",
-    "duration_ns": 420000000,
-    "cv": 0.28
+    "duration_ns": 420000000
   },
   {
     "name": "example.com/mixed/modpart/pkg091",
-    "duration_ns": 425000000,
-    "cv": 0.1
+    "duration_ns": 425000000
   },
   {
     "name": "example.com/mixed/modpart/pkg092",
-    "duration_ns": 430000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 430000000
   },
   {
     "name": "example.com/mixed/modpart/pkg093",
-    "duration_ns": 435000000,
-    "cv": 0.14
+    "duration_ns": 435000000
   },
   {
     "name": "example.com/mixed/modpart/pkg094",
-    "duration_ns": 440000000,
-    "cv": 0.16
+    "duration_ns": 440000000
   },
   {
     "name": "example.com/mixed/modpart/pkg095",
-    "duration_ns": 445000000,
-    "cv": 0.18
+    "duration_ns": 445000000
   },
   {
     "name": "example.com/mixed/modpart/pkg096",
-    "duration_ns": 450000000,
-    "cv": 0.2
+    "duration_ns": 450000000
   },
   {
     "name": "example.com/mixed/modpart/pkg097",
-    "duration_ns": 455000000,
-    "cv": 0.22
+    "duration_ns": 455000000
   },
   {
     "name": "example.com/mixed/modpart/pkg098",
-    "duration_ns": 460000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 460000000
   },
   {
     "name": "example.com/mixed/modpart/pkg099",
-    "duration_ns": 465000000,
-    "cv": 0.26
+    "duration_ns": 465000000
   },
   {
     "name": "example.com/mixed/modpart/pkg100",
-    "duration_ns": 470000000,
-    "cv": 0.28
+    "duration_ns": 470000000
   },
   {
     "name": "example.com/mixed/modpart/pkg101",
-    "duration_ns": 475000000,
-    "cv": 0.1
+    "duration_ns": 475000000
   },
   {
     "name": "example.com/mixed/modpart/pkg102",
-    "duration_ns": 480000000,
-    "cv": 0.12000000000000001
+    "duration_ns": 480000000
   },
   {
     "name": "example.com/mixed/modpart/pkg103",
-    "duration_ns": 485000000,
-    "cv": 0.14
+    "duration_ns": 485000000
   },
   {
     "name": "example.com/mixed/modpart/pkg104",
-    "duration_ns": 490000000,
-    "cv": 0.16
+    "duration_ns": 490000000
   },
   {
     "name": "example.com/mixed/modpart/pkg105",
-    "duration_ns": 495000000,
-    "cv": 0.18
+    "duration_ns": 495000000
   },
   {
     "name": "example.com/mixed/modpart/pkg106",
-    "duration_ns": 500000000,
-    "cv": 0.2
+    "duration_ns": 500000000
   },
   {
     "name": "example.com/mixed/modpart/pkg107",
-    "duration_ns": 60000000,
-    "cv": 0.22
+    "duration_ns": 60000000
   },
   {
     "name": "example.com/mixed/modpart/pkg108",
-    "duration_ns": 70000000,
-    "cv": 0.24000000000000002
+    "duration_ns": 70000000
   },
   {
     "name": "example.com/mixed/modpart/pkg109",
-    "duration_ns": 80000000,
-    "cv": 0.26
+    "duration_ns": 80000000
   },
   {
     "name": "example.com/mixed/modpart/pkg110",
-    "duration_ns": 90000000,
-    "cv": 0.28
+    "duration_ns": 90000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg001",
-    "duration_ns": 10000000,
-    "cv": 0.08
+    "duration_ns": 10000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg002",
-    "duration_ns": 12000000,
-    "cv": 0.11
+    "duration_ns": 12000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg003",
-    "duration_ns": 14000000,
-    "cv": 0.14
+    "duration_ns": 14000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg004",
-    "duration_ns": 16000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 16000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg005",
-    "duration_ns": 18000000,
-    "cv": 0.2
+    "duration_ns": 18000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg006",
-    "duration_ns": 20000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 20000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg007",
-    "duration_ns": 22000000,
-    "cv": 0.26
+    "duration_ns": 22000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg008",
-    "duration_ns": 24000000,
-    "cv": 0.29
+    "duration_ns": 24000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg009",
-    "duration_ns": 26000000,
-    "cv": 0.08
+    "duration_ns": 26000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg010",
-    "duration_ns": 28000000,
-    "cv": 0.11
+    "duration_ns": 28000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg011",
-    "duration_ns": 30000000,
-    "cv": 0.14
+    "duration_ns": 30000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg012",
-    "duration_ns": 32000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 32000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg013",
-    "duration_ns": 34000000,
-    "cv": 0.2
+    "duration_ns": 34000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg014",
-    "duration_ns": 36000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 36000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg015",
-    "duration_ns": 38000000,
-    "cv": 0.26
+    "duration_ns": 38000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg016",
-    "duration_ns": 40000000,
-    "cv": 0.29
+    "duration_ns": 40000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg017",
-    "duration_ns": 42000000,
-    "cv": 0.08
+    "duration_ns": 42000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg018",
-    "duration_ns": 44000000,
-    "cv": 0.11
+    "duration_ns": 44000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg019",
-    "duration_ns": 46000000,
-    "cv": 0.14
+    "duration_ns": 46000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg020",
-    "duration_ns": 48000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 48000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg021",
-    "duration_ns": 50000000,
-    "cv": 0.2
+    "duration_ns": 50000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg022",
-    "duration_ns": 52000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 52000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg023",
-    "duration_ns": 54000000,
-    "cv": 0.26
+    "duration_ns": 54000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg024",
-    "duration_ns": 56000000,
-    "cv": 0.29
+    "duration_ns": 56000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg025",
-    "duration_ns": 58000000,
-    "cv": 0.08
+    "duration_ns": 58000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg026",
-    "duration_ns": 60000000,
-    "cv": 0.11
+    "duration_ns": 60000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg027",
-    "duration_ns": 62000000,
-    "cv": 0.14
+    "duration_ns": 62000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg028",
-    "duration_ns": 64000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 64000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg029",
-    "duration_ns": 66000000,
-    "cv": 0.2
+    "duration_ns": 66000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg030",
-    "duration_ns": 68000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 68000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg031",
-    "duration_ns": 70000000,
-    "cv": 0.26
+    "duration_ns": 70000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg032",
-    "duration_ns": 72000000,
-    "cv": 0.29
+    "duration_ns": 72000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg033",
-    "duration_ns": 74000000,
-    "cv": 0.08
+    "duration_ns": 74000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg034",
-    "duration_ns": 76000000,
-    "cv": 0.11
+    "duration_ns": 76000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg035",
-    "duration_ns": 78000000,
-    "cv": 0.14
+    "duration_ns": 78000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg036",
-    "duration_ns": 80000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 80000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg037",
-    "duration_ns": 82000000,
-    "cv": 0.2
+    "duration_ns": 82000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg038",
-    "duration_ns": 84000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 84000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg039",
-    "duration_ns": 86000000,
-    "cv": 0.26
+    "duration_ns": 86000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg040",
-    "duration_ns": 88000000,
-    "cv": 0.29
+    "duration_ns": 88000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg041",
-    "duration_ns": 90000000,
-    "cv": 0.08
+    "duration_ns": 90000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg042",
-    "duration_ns": 92000000,
-    "cv": 0.11
+    "duration_ns": 92000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg043",
-    "duration_ns": 94000000,
-    "cv": 0.14
+    "duration_ns": 94000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg044",
-    "duration_ns": 96000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 96000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg045",
-    "duration_ns": 98000000,
-    "cv": 0.2
+    "duration_ns": 98000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg046",
-    "duration_ns": 100000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 100000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg047",
-    "duration_ns": 102000000,
-    "cv": 0.26
+    "duration_ns": 102000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg048",
-    "duration_ns": 104000000,
-    "cv": 0.29
+    "duration_ns": 104000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg049",
-    "duration_ns": 106000000,
-    "cv": 0.08
+    "duration_ns": 106000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg050",
-    "duration_ns": 108000000,
-    "cv": 0.11
+    "duration_ns": 108000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg051",
-    "duration_ns": 110000000,
-    "cv": 0.14
+    "duration_ns": 110000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg052",
-    "duration_ns": 112000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 112000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg053",
-    "duration_ns": 114000000,
-    "cv": 0.2
+    "duration_ns": 114000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg054",
-    "duration_ns": 116000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 116000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg055",
-    "duration_ns": 118000000,
-    "cv": 0.26
+    "duration_ns": 118000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg056",
-    "duration_ns": 120000000,
-    "cv": 0.29
+    "duration_ns": 120000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg057",
-    "duration_ns": 122000000,
-    "cv": 0.08
+    "duration_ns": 122000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg058",
-    "duration_ns": 124000000,
-    "cv": 0.11
+    "duration_ns": 124000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg059",
-    "duration_ns": 126000000,
-    "cv": 0.14
+    "duration_ns": 126000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg060",
-    "duration_ns": 128000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 128000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg061",
-    "duration_ns": 130000000,
-    "cv": 0.2
+    "duration_ns": 130000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg062",
-    "duration_ns": 132000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 132000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg063",
-    "duration_ns": 134000000,
-    "cv": 0.26
+    "duration_ns": 134000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg064",
-    "duration_ns": 136000000,
-    "cv": 0.29
+    "duration_ns": 136000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg065",
-    "duration_ns": 138000000,
-    "cv": 0.08
+    "duration_ns": 138000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg066",
-    "duration_ns": 140000000,
-    "cv": 0.11
+    "duration_ns": 140000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg067",
-    "duration_ns": 142000000,
-    "cv": 0.14
+    "duration_ns": 142000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg068",
-    "duration_ns": 144000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 144000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg069",
-    "duration_ns": 146000000,
-    "cv": 0.2
+    "duration_ns": 146000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg070",
-    "duration_ns": 148000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 148000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg071",
-    "duration_ns": 150000000,
-    "cv": 0.26
+    "duration_ns": 150000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg072",
-    "duration_ns": 152000000,
-    "cv": 0.29
+    "duration_ns": 152000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg073",
-    "duration_ns": 154000000,
-    "cv": 0.08
+    "duration_ns": 154000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg074",
-    "duration_ns": 156000000,
-    "cv": 0.11
+    "duration_ns": 156000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg075",
-    "duration_ns": 158000000,
-    "cv": 0.14
+    "duration_ns": 158000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg076",
-    "duration_ns": 160000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 160000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg077",
-    "duration_ns": 162000000,
-    "cv": 0.2
+    "duration_ns": 162000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg078",
-    "duration_ns": 164000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 164000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg079",
-    "duration_ns": 166000000,
-    "cv": 0.26
+    "duration_ns": 166000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg080",
-    "duration_ns": 168000000,
-    "cv": 0.29
+    "duration_ns": 168000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg081",
-    "duration_ns": 170000000,
-    "cv": 0.08
+    "duration_ns": 170000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg082",
-    "duration_ns": 172000000,
-    "cv": 0.11
+    "duration_ns": 172000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg083",
-    "duration_ns": 174000000,
-    "cv": 0.14
+    "duration_ns": 174000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg084",
-    "duration_ns": 176000000,
-    "cv": 0.16999999999999998
+    "duration_ns": 176000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg085",
-    "duration_ns": 178000000,
-    "cv": 0.2
+    "duration_ns": 178000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg086",
-    "duration_ns": 180000000,
-    "cv": 0.22999999999999998
+    "duration_ns": 180000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg087",
-    "duration_ns": 182000000,
-    "cv": 0.26
+    "duration_ns": 182000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg088",
-    "duration_ns": 184000000,
-    "cv": 0.29
+    "duration_ns": 184000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg089",
-    "duration_ns": 186000000,
-    "cv": 0.08
+    "duration_ns": 186000000
   },
   {
     "name": "example.com/mixed/heavypart/pkg090",
-    "duration_ns": 188000000,
-    "cv": 0.11
+    "duration_ns": 188000000
   }
 ]

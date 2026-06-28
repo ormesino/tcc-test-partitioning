@@ -46,7 +46,6 @@ func ProfileModerate() []model.PackageInfo {
 		pkgs = append(pkgs, model.PackageInfo{
 			Name:     fmt.Sprintf("example.com/moderate/fast/pkg%03d", i+1),
 			Duration: d * time.Millisecond,
-
 		})
 	}
 
@@ -60,7 +59,6 @@ func ProfileModerate() []model.PackageInfo {
 		pkgs = append(pkgs, model.PackageInfo{
 			Name:     fmt.Sprintf("example.com/moderate/mid/pkg%03d", i+1),
 			Duration: d * time.Millisecond,
-
 		})
 	}
 
@@ -70,7 +68,6 @@ func ProfileModerate() []model.PackageInfo {
 		pkgs = append(pkgs, model.PackageInfo{
 			Name:     fmt.Sprintf("example.com/moderate/heavy/pkg%03d", i+1),
 			Duration: d * time.Millisecond,
-
 		})
 	}
 
@@ -99,7 +96,6 @@ func ProfileHeavyTail() []model.PackageInfo {
 		pkgs = append(pkgs, model.PackageInfo{
 			Name:     fmt.Sprintf("example.com/heavytail/fast/pkg%03d", i+1),
 			Duration: d,
-
 		})
 	}
 
@@ -112,7 +108,6 @@ func ProfileHeavyTail() []model.PackageInfo {
 		pkgs = append(pkgs, model.PackageInfo{
 			Name:     fmt.Sprintf("example.com/heavytail/mid/pkg%03d", i+1),
 			Duration: d * time.Millisecond,
-
 		})
 	}
 
@@ -122,7 +117,6 @@ func ProfileHeavyTail() []model.PackageInfo {
 		pkgs = append(pkgs, model.PackageInfo{
 			Name:     fmt.Sprintf("example.com/heavytail/heavy/pkg%03d", i+1),
 			Duration: d * time.Millisecond,
-
 		})
 	}
 
@@ -132,7 +126,6 @@ func ProfileHeavyTail() []model.PackageInfo {
 		pkgs = append(pkgs, model.PackageInfo{
 			Name:     fmt.Sprintf("example.com/heavytail/extreme/pkg%03d", i+1),
 			Duration: d * time.Millisecond,
-
 		})
 	}
 
