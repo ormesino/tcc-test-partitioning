@@ -24,20 +24,26 @@ import (
 	"tcc-test-partitioning/internal/model"
 )
 
+// Hook for testing cold cache fallback
+var mkdirTemp = os.MkdirTemp
+var removeAll = os.RemoveAll
+
 // BaselineReport is the persisted form of a baseline measurement
 // (sequential or native-parallel). It is written by the baseline
 // modes and consumed by partitioning runs to obtain a methodologically
 // sound T1 for speedup computation (ADR-011).
 type BaselineReport struct {
-	Mode          string        `json:"mode"`        // "baseline-seq" or "baseline-par"
-	Parallelism   int           `json:"parallelism"` // p for baseline-par; 1 for baseline-seq
-	Duration      time.Duration `json:"duration_ns"` // wall-clock, in nanoseconds
-	MeasuredAt    time.Time     `json:"measured_at"`
-	ProjectPath   string        `json:"project_path"`
-	PackageCount  int           `json:"package_count,omitempty"`
-	PackageSource string        `json:"package_source,omitempty"` // "./..." or a PackageInfo JSON path
-	Success       bool          `json:"success"`
-	Error         string        `json:"error,omitempty"`
+	Mode           string        `json:"mode"`        // "baseline-seq" or "baseline-par"
+	Parallelism    int           `json:"parallelism"` // p for baseline-par; 1 for baseline-seq
+	Duration       time.Duration `json:"duration_ns"` // wall-clock, in nanoseconds
+	MeasuredAt     time.Time     `json:"measured_at"`
+	ProjectPath    string        `json:"project_path"`
+	PackageCount   int           `json:"package_count,omitempty"`
+	PackageSource  string        `json:"package_source,omitempty"` // "./..." or a PackageInfo JSON path
+	Success        bool          `json:"success"`
+	Error          string        `json:"error,omitempty"`
+	DataFileSHA256 string        `json:"data_file_sha256,omitempty"`
+	CacheRegime    string        `json:"cache_regime,omitempty"`
 }
 
 // WriteBaselineReport serializes the report to path as indented JSON.
@@ -111,7 +117,9 @@ type Config struct {
 	// ProjectPath is the root directory of the Go project under test.
 	ProjectPath string
 
-	// Timeout is the maximum time allowed for the entire execution.
+	// Timeout is the maximum duration of each go test command. In a
+	// partitioned repetition, all worker commands receive the same limit and
+	// start concurrently, bounding that repetition rather than the campaign.
 	// Zero means no timeout.
 	Timeout time.Duration
 
@@ -187,6 +195,9 @@ func RunBaselineSeqPackages(cfg Config, packages []string) ExecutionResult {
 	// Build command: go test -p 1 -parallel 1 -count=1 <packages|./...>
 	args := []string{"test", "-p", "1", "-parallel", "1",
 		"-count", fmt.Sprintf("%d", cfg.Count)}
+	if cfg.Timeout > 0 {
+		args = append(args, "-timeout", fmt.Sprintf("%dm", int(cfg.Timeout.Minutes())))
+	}
 	if cfg.Verbose {
 		args = append(args, "-v")
 	}
@@ -229,6 +240,9 @@ func RunBaselineParPackages(cfg Config, parallelism int, packages []string) Exec
 	args := []string{"test", "-p", fmt.Sprintf("%d", parallelism),
 		"-parallel", "1",
 		"-count", fmt.Sprintf("%d", cfg.Count)}
+	if cfg.Timeout > 0 {
+		args = append(args, "-timeout", fmt.Sprintf("%dm", int(cfg.Timeout.Minutes())))
+	}
 	if cfg.Verbose {
 		args = append(args, "-v")
 	}
@@ -290,23 +304,42 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 	// sequential processor, matching the theoretical P||Cmax scheduling model
 	// and avoiding combinatorial explosion of parallelism that causes OOM.
 	args := []string{"test", "-p", "1", "-parallel", "1", "-count", fmt.Sprintf("%d", cfg.Count)}
+	if cfg.Timeout > 0 {
+		args = append(args, "-timeout", fmt.Sprintf("%dm", int(cfg.Timeout.Minutes())))
+	}
 	if cfg.Verbose {
 		args = append(args, "-v")
 	}
 	args = append(args, pkgPaths...)
 
 	var env []string
+	var coldCacheDir string
 	if !cfg.WarmCache {
-		tempDir, err := os.MkdirTemp("", fmt.Sprintf("tcc-worker-%d-*", partition.WorkerID))
-		if err == nil {
-			defer os.RemoveAll(tempDir)
-			env = append(os.Environ(), "GOCACHE="+tempDir)
+		tempDir, err := mkdirTemp("", fmt.Sprintf("tcc-worker-%d-*", partition.WorkerID))
+		if err != nil {
+			return WorkerResult{
+				WorkerID:     partition.WorkerID,
+				Elapsed:      0,
+				PackageCount: len(partition.Packages),
+				Error:        fmt.Errorf("failed to create cold cache: %w", err),
+			}
 		}
+		coldCacheDir = tempDir
+		env = append(os.Environ(), "GOCACHE="+tempDir)
 	}
 
 	start := time.Now()
 	output, err := runGoTest(cfg, args, env)
 	elapsed := time.Since(start)
+	if coldCacheDir != "" {
+		if cleanupErr := removeAll(coldCacheDir); cleanupErr != nil {
+			if err != nil {
+				err = fmt.Errorf("go test failed: %v; failed to remove cold cache: %w", err, cleanupErr)
+			} else {
+				err = fmt.Errorf("failed to remove cold cache: %w", cleanupErr)
+			}
+		}
+	}
 
 	return WorkerResult{
 		WorkerID:     partition.WorkerID,
@@ -336,9 +369,23 @@ func runGoTest(cfg Config, args []string, env []string) (string, error) {
 		cmd.Env = env
 	}
 
-	out, err := cmd.CombinedOutput()
+	type result struct {
+		out []byte
+		err error
+	}
+	resCh := make(chan result, 1)
 
-	return string(out), err
+	go func() {
+		out, err := cmd.CombinedOutput()
+		resCh <- result{out, err}
+	}()
+
+	select {
+	case res := <-resCh:
+		return string(res.out), res.err
+	case <-ctx.Done():
+		return "", fmt.Errorf("timeout or context canceled: %w", ctx.Err())
+	}
 }
 
 // WarmBuildCache pre-compiles all test binaries in the project
@@ -352,13 +399,13 @@ func runGoTest(cfg Config, args []string, env []string) (string, error) {
 //
 // This simulates a CI environment where the build cache is warm
 // from a previous pipeline stage or a cached Docker layer.
-func WarmBuildCache(cfg Config) {
-	WarmBuildCachePackages(cfg, nil)
+func WarmBuildCache(cfg Config) error {
+	return WarmBuildCachePackages(cfg, nil)
 }
 
 // WarmBuildCachePackages pre-compiles test binaries for an explicit package
 // list. When packages is empty, it falls back to ./...
-func WarmBuildCachePackages(cfg Config, packages []string) {
+func WarmBuildCachePackages(cfg Config, packages []string) error {
 	fmt.Fprintf(os.Stderr, "  [warm-cache] Pre-compiling test binaries for %s...\n", cfg.ProjectPath)
 	start := time.Now()
 
@@ -379,11 +426,11 @@ func WarmBuildCachePackages(cfg Config, packages []string) {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "  [warm-cache] WARNING: pre-compilation had errors: %v\n", err)
-		// Continue anyway — partial cache is still useful.
+		return fmt.Errorf("warm-cache pre-compilation failed: %w", err)
 	}
 
 	fmt.Fprintf(os.Stderr, "  [warm-cache] Done in %v\n", time.Since(start))
+	return nil
 }
 
 // FormatExecutionResult returns a human-readable summary of an

@@ -51,7 +51,10 @@ type Report struct {
 // time (sum of all package durations, or measured baseline-seq time).
 // If seqDuration <= 0, Speedup and Efficiency are set to 0.
 func Compute(result model.PartitionResult, seqDuration time.Duration) Report {
-	makespan := Makespan(result)
+	makespan := result.Makespan
+	if makespan <= 0 {
+		makespan = Makespan(result)
+	}
 	variance := LoadVariance(result)
 
 	var speedup, efficiency float64

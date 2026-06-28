@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -18,14 +19,16 @@ func TestBaselineReport_RoundTrip(t *testing.T) {
 	path := filepath.Join(dir, "baseline.json")
 
 	want := BaselineReport{
-		Mode:          "baseline-seq",
-		Parallelism:   1,
-		Duration:      1234567890 * time.Nanosecond,
-		MeasuredAt:    time.Date(2026, 6, 3, 12, 0, 0, 0, time.UTC),
-		ProjectPath:   "C:/src/cli",
-		PackageCount:  233,
-		PackageSource: "data/characterization/cli.json",
-		Success:       true,
+		Mode:           "baseline-seq",
+		Parallelism:    1,
+		Duration:       1234567890 * time.Nanosecond,
+		MeasuredAt:     time.Date(2026, 6, 3, 12, 0, 0, 0, time.UTC),
+		ProjectPath:    "C:/src/cli",
+		PackageCount:   233,
+		PackageSource:  "data/characterization/cli.json",
+		Success:        true,
+		DataFileSHA256: "deadbeef",
+		CacheRegime:    "cold",
 	}
 
 	if err := WriteBaselineReport(path, want); err != nil {
@@ -45,7 +48,9 @@ func TestBaselineReport_RoundTrip(t *testing.T) {
 		got.PackageCount != want.PackageCount ||
 		got.PackageSource != want.PackageSource ||
 		got.Success != want.Success ||
-		got.Error != want.Error {
+		got.Error != want.Error ||
+		got.DataFileSHA256 != want.DataFileSHA256 ||
+		got.CacheRegime != want.CacheRegime {
 		t.Fatalf("round-trip mismatch:\nwant=%+v\n got=%+v", want, got)
 	}
 }
@@ -135,5 +140,51 @@ func TestAppendPackageArgs(t *testing.T) {
 	}
 	if count := packageCount(pkgs); count != 2 {
 		t.Fatalf("packageCount = %d, want 2", count)
+	}
+}
+
+func TestRunWorker_ColdCacheFailure(t *testing.T) {
+	origMkdirTemp := mkdirTemp
+	defer func() { mkdirTemp = origMkdirTemp }()
+
+	// Force mkdirTemp to fail
+	mkdirTemp = func(dir, pattern string) (string, error) {
+		return "", fmt.Errorf("injected permission error")
+	}
+
+	cfg := Config{
+		WarmCache: false, // ensure we trigger the cold cache creation
+	}
+	part := model.Partition{
+		WorkerID: 42,
+		Packages: []model.PackageInfo{{Name: "example.com/a"}},
+	}
+
+	wr := runWorker(cfg, part)
+	if wr.WorkerID != 42 {
+		t.Errorf("WorkerID = %d, want 42", wr.WorkerID)
+	}
+	if wr.Elapsed != 0 {
+		t.Errorf("Elapsed = %v, want 0", wr.Elapsed)
+	}
+	if wr.Error == nil || !strings.Contains(wr.Error.Error(), "failed to create cold cache") {
+		t.Errorf("Error = %v, want 'failed to create cold cache'", wr.Error)
+	}
+}
+
+func TestRunWorker_ColdCacheCleanupFailureIsReported(t *testing.T) {
+	originalRemoveAll := removeAll
+	defer func() { removeAll = originalRemoveAll }()
+	removeAll = func(path string) error {
+		_ = originalRemoveAll(path)
+		return fmt.Errorf("injected cleanup error")
+	}
+
+	wr := runWorker(Config{ProjectPath: t.TempDir(), Count: 1, WarmCache: false}, model.Partition{
+		WorkerID: 0,
+		Packages: []model.PackageInfo{{Name: "example.invalid/package"}},
+	})
+	if wr.Error == nil || !strings.Contains(wr.Error.Error(), "failed to remove cold cache") {
+		t.Fatalf("Error = %v, want cleanup failure", wr.Error)
 	}
 }
