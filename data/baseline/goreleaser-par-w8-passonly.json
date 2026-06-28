@@ -1,10 +1,12 @@
 {
   "mode": "baseline-par",
   "parallelism": 8,
-  "duration_ns": 207148919700,
-  "measured_at": "2026-06-26T05:13:45.4364735-03:00",
+  "duration_ns": 1165453902900,
+  "measured_at": "2026-06-27T19:29:30.1362582-03:00",
   "project_path": "repos/goreleaser",
   "package_count": 116,
   "package_source": "data/characterization/goreleaser.json",
-  "success": true
+  "success": true,
+  "data_file_sha256": "96384b91609e3390cf34a6c032e2dcc2bfd44b6d46b28bd703f8bfc29c8cad55",
+  "cache_regime": "cold"
 }

@@ -1,10 +1,12 @@
 {
   "mode": "baseline-seq",
   "parallelism": 1,
-  "duration_ns": 953687879900,
-  "measured_at": "2026-06-26T03:51:02.4525085-03:00",
+  "duration_ns": 1057142172400,
+  "measured_at": "2026-06-27T16:53:55.6424231-03:00",
   "project_path": "repos/grpc-go",
   "package_count": 137,
   "package_source": "data/characterization/grpc-go.json",
-  "success": true
+  "success": true,
+  "data_file_sha256": "c2d2d8aab6d5d7eeb81e88e80afca7e9f8bdcee9836922b37ac421d351060ea4",
+  "cache_regime": "cold"
 }
