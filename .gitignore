@@ -41,8 +41,7 @@ go.work.sum
 # Raw and historical experimental data
 /data/probe/
 /data/characterization/old/
-/data/baseline/*.json
-!/data/baseline/*passonly.json
+/archive/
 
 # Benchmark results are generated; configs are versioned.
 /benchmarks/results/
