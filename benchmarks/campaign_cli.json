@@ -16,6 +16,11 @@
       "name": "cli",
       "data_file": "data/characterization/cli.json",
       "baseline_seq_file": "data/baseline/cli-seq-passonly.json",
+      "baseline_par_files": {
+        "2": "data/baseline/cli-par-w2-passonly.json",
+        "4": "data/baseline/cli-par-w4-passonly.json",
+        "8": "data/baseline/cli-par-w8-passonly.json"
+      },
       "project_path": "repos/cli"
     }
   ]

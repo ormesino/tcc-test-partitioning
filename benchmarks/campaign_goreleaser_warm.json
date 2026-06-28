@@ -17,6 +17,11 @@
       "name": "goreleaser",
       "data_file": "data/characterization/goreleaser.json",
       "baseline_seq_file": "data/baseline/goreleaser-seq-warm-passonly.json",
+      "baseline_par_files": {
+        "2": "data/baseline/goreleaser-par-w2-warm-passonly.json",
+        "4": "data/baseline/goreleaser-par-w4-warm-passonly.json",
+        "8": "data/baseline/goreleaser-par-w8-warm-passonly.json"
+      },
       "project_path": "repos/goreleaser"
     }
   ]

@@ -16,6 +16,11 @@
       "name": "grpc-go",
       "data_file": "data/characterization/grpc-go.json",
       "baseline_seq_file": "data/baseline/grpc-go-seq-passonly.json",
+      "baseline_par_files": {
+        "2": "data/baseline/grpc-go-par-w2-passonly.json",
+        "4": "data/baseline/grpc-go-par-w4-passonly.json",
+        "8": "data/baseline/grpc-go-par-w8-passonly.json"
+      },
       "project_path": "repos/grpc-go"
     }
   ]
