@@ -68,11 +68,41 @@ type aggregateRecord struct {
 
 // fullReport is the top-level JSON written to results.json.
 type fullReport struct {
-	StartedAt  time.Time         `json:"started_at"`
-	FinishedAt time.Time         `json:"finished_at"`
-	Config     Config            `json:"config"`
-	Raw        []rawRecord       `json:"raw"`
-	Aggregate  []aggregateRecord `json:"aggregate"`
+	StartedAt       time.Time              `json:"started_at"`
+	FinishedAt      time.Time              `json:"finished_at"`
+	Config          Config                 `json:"config"`
+	Environment     environmentReport      `json:"environment"`
+	NativeBaselines []nativeBaselineRecord `json:"native_baselines"`
+	Raw             []rawRecord            `json:"raw"`
+	Aggregate       []aggregateRecord      `json:"aggregate"`
+}
+
+type environmentReport struct {
+	CollectedAt        time.Time         `json:"collected_at"`
+	GoVersion          string            `json:"go_version"`
+	GOOS               string            `json:"goos"`
+	GOARCH             string            `json:"goarch"`
+	NumCPU             int               `json:"num_cpu"`
+	CPUModel           string            `json:"cpu_model,omitempty"`
+	TotalMemoryBytes   uint64            `json:"total_memory_bytes,omitempty"`
+	Hostname           string            `json:"hostname,omitempty"`
+	ApplicationVersion string            `json:"application_version,omitempty"`
+	ApplicationCommit  string            `json:"application_commit,omitempty"`
+	ApplicationDirty   bool              `json:"application_dirty"`
+	ProjectCommits     map[string]string `json:"project_commits"`
+}
+
+type nativeBaselineRecord struct {
+	Project        string    `json:"project"`
+	Workers        int       `json:"workers"`
+	DurationNS     int64     `json:"duration_ns"`
+	Speedup        float64   `json:"speedup"`
+	Efficiency     float64   `json:"efficiency"`
+	BaselineFile   string    `json:"baseline_file"`
+	CacheRegime    string    `json:"cache_regime"`
+	PackageCount   int       `json:"package_count"`
+	DataFileSHA256 string    `json:"data_file_sha256"`
+	MeasuredAt     time.Time `json:"measured_at"`
 }
 
 // aggregate groups raw records by (project, algorithm, workers) and
@@ -121,6 +151,7 @@ func summarize(mode, project, algorithm string, workers int, reps []rawRecord) a
 		overheads[i] = r.PartitioningOverheadNS
 		if r.ExecError != "" {
 			errCount++
+			continue // Do not aggregate failed executions
 		}
 		if r.ExecMakespanNS != nil {
 			execMakespans = append(execMakespans, *r.ExecMakespanNS)
@@ -261,6 +292,36 @@ func writeAggregateCSV(path string, agg []aggregateRecord) error {
 		}
 	}
 	return nil
+}
+
+func writeNativeBaselineCSV(path string, records []nativeBaselineRecord) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	w := csv.NewWriter(f)
+	defer w.Flush()
+	if err := w.Write([]string{"project", "workers", "duration_ns", "speedup", "efficiency", "cache_regime", "package_count", "data_file_sha256", "measured_at", "baseline_file"}); err != nil {
+		return err
+	}
+	for _, r := range records {
+		if err := w.Write([]string{
+			r.Project,
+			strconv.Itoa(r.Workers),
+			strconv.FormatInt(r.DurationNS, 10),
+			formatFloat(r.Speedup),
+			formatFloat(r.Efficiency),
+			r.CacheRegime,
+			strconv.Itoa(r.PackageCount),
+			r.DataFileSHA256,
+			r.MeasuredAt.Format(time.RFC3339Nano),
+			r.BaselineFile,
+		}); err != nil {
+			return err
+		}
+	}
+	return w.Error()
 }
 
 // -- numeric helpers -------------------------------------------------

@@ -39,8 +39,10 @@ type Config struct {
 	// (project, algorithm, workers) combination. >=1.
 	Repetitions int `json:"repetitions"`
 
-	// TimeoutMinutes is the per-worker `go test` timeout. Used only
-	// in "run" mode.
+	// TimeoutMinutes is the timeout for one experimental repetition
+	// (one project, algorithm and worker-count combination). The same
+	// deadline is applied to the concurrently launched worker commands.
+	// Used only in "run" mode.
 	TimeoutMinutes int `json:"timeout_minutes"`
 
 	// OutputDir is the base directory; the runner creates a
@@ -73,6 +75,10 @@ type ProjectSpec struct {
 	// by `cmd/partitioner --mode baseline-seq --output FILE`). When
 	// empty, T1 falls back to sum(Duration) with a stderr warning.
 	BaselineSeqFile string `json:"baseline_seq_file,omitempty"`
+
+	// BaselineParFiles maps each configured worker count to the matching
+	// Go-native parallel baseline report.
+	BaselineParFiles map[string]string `json:"baseline_par_files,omitempty"`
 
 	// ProjectPath is the Go project root passed to the executor.
 	// Required in "run" mode; ignored in "simulate".
@@ -130,6 +136,17 @@ func (c *Config) validate() error {
 		}
 		if c.Mode == "run" && p.ProjectPath == "" {
 			return fmt.Errorf("config.projects[%d].project_path is required in run mode", i)
+		}
+		if c.Mode == "run" && p.BaselineSeqFile == "" {
+			return fmt.Errorf("config.projects[%d].baseline_seq_file is required in run mode", i)
+		}
+		if c.Mode == "run" {
+			for _, workers := range c.Workers {
+				key := fmt.Sprintf("%d", workers)
+				if p.BaselineParFiles[key] == "" {
+					return fmt.Errorf("config.projects[%d].baseline_par_files[%q] is required in run mode", i, key)
+				}
+			}
 		}
 	}
 	return nil
