@@ -1,12 +1,12 @@
 // Command analyze parses one or more `go test -json` output files,
-// aggregates per-package median durations and coefficient of variation
-// across runs, and emits a PackageInfo[] JSON consumable by the
+// aggregates per-package median durations across runs and emits a
+// PackageInfo[] JSON consumable by the
 // partitioner CLI (cmd/partitioner --mode simulate).
 //
 // Behavior is governed by the project's ADRs:
 //   - ADR-006: packages whose status is "fail" or "skip" in *any* run
 //     are excluded from the output. Packages missing from any
-//     run are also excluded (we need N samples for CV).
+//     run are also excluded (the canonical median requires N samples).
 //   - ADR-007: expects N runs (default workflow uses N=10).
 //   - ADR-008: median across the N runs is the canonical duration.
 //
@@ -265,8 +265,6 @@ func median(in []time.Duration) time.Duration {
 	}
 	return (s[n/2-1] + s[n/2]) / 2
 }
-
-
 
 // emit serializes pkgs as indented JSON to the given path, or stdout
 // when path is empty.

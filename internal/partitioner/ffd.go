@@ -7,10 +7,11 @@ package partitioner
 //   "An Application of Bin-Packing to Multiprocessor Scheduling."
 //   SIAM Journal on Computing, 7(1), 1-17.
 //
-//   Multifit uses binary search on the target makespan C, and applies
+//   Multifit searches the target makespan C, and applies
 //   First Fit Decreasing (FFD) to try to pack all jobs into p bins
-//   of capacity C. It has a theoretical upper bound of 11/9 OPT + 6/9,
-//   which is tighter than LPT's 4/3 OPT - 1/3p.
+//   of capacity C. This implementation is heuristic: it returns the
+//   best feasible FFD allocation found within a fixed search budget
+//   and does not claim to find the optimal P||Cmax schedule.
 //
 // Complexity:
 //   - Time:  O(n log n) for sorting + O(k * n * p) for k binary search iterations
@@ -75,7 +76,9 @@ func (f *FFD) partition(packages []model.PackageInfo, workers, searchIterations 
 	var bestAllocation []model.Partition
 	var bestMakespan time.Duration
 
-	// 3. Binary Search (Multifit loop) - typically 40 iterations is enough for high precision
+	// 3. Bounded binary search (Multifit loop). Forty iterations are
+	// sufficient to narrow the duration ranges used by this study, but
+	// do not turn the heuristic into an exact optimizer.
 	for iter := 0; iter < searchIterations; iter++ {
 		capacity := lowerBound + (upperBound-lowerBound)/2
 

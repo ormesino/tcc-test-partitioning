@@ -22,7 +22,7 @@ type PackageInfo struct {
 
 // Partition represents the workload assigned to a single worker
 // (machine M_k in scheduling notation). The Load field is the sum
-// of processing times (or weights) of its packages; the makespan
+// of processing times of its packages; the makespan
 // of the overall schedule is max(Load) across all partitions.
 type Partition struct {
 	// WorkerID identifies this worker (0-indexed).
@@ -34,9 +34,7 @@ type Partition struct {
 	// Load is the total estimated processing time on this worker:
 	// Load = sum(Packages[i].Duration). Every algorithm reports Load
 	// in raw Duration so that Makespan is directly comparable across
-	// strategies. Weight-based algorithms (FFD) may use internal
-	// weights for assignment decisions, but those weights are not
-	// exposed in this field.
+	// strategies.
 	Load time.Duration `json:"load_ns"`
 }
 
