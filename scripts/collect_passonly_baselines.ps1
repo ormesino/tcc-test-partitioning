@@ -31,7 +31,9 @@ if ($ColdOnly -and $WarmOnly) {
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $logDir = Join-Path $repoRoot "logs/baseline-passonly/$timestamp"
+$backupDir = Join-Path $repoRoot "archive/baselines-replaced/$timestamp"
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+New-Item -ItemType Directory -Force -Path $backupDir | Out-Null
 
 $projectPaths = @{
     'cli'        = 'repos/cli'
@@ -58,7 +60,9 @@ function Invoke-Baseline {
     $suffix = if ($Warm) { '-warm-passonly' } else { '-passonly' }
 
     if ($Mode -eq 'baseline-seq') {
-        $outFile = Join-Path $repoRoot "data/baseline/$Project-seq$suffix.json"
+        $fileName = "$Project-seq$suffix.json"
+        $outFile = Join-Path $repoRoot "data/baseline/$fileName"
+        $stagedFile = Join-Path $logDir "$fileName.staged"
         $logFile = Join-Path $logDir "$Project-seq$suffix.log"
         $args = @(
             'run', './cmd/partitioner',
@@ -66,10 +70,12 @@ function Invoke-Baseline {
             '--project-path', $projectPath,
             '--data-file', $dataFile,
             '--timeout', "$TimeoutMinutes",
-            '--output', $outFile
+            '--output', $stagedFile
         )
     } else {
-        $outFile = Join-Path $repoRoot "data/baseline/$Project-par-w$WorkersValue$suffix.json"
+        $fileName = "$Project-par-w$WorkersValue$suffix.json"
+        $outFile = Join-Path $repoRoot "data/baseline/$fileName"
+        $stagedFile = Join-Path $logDir "$fileName.staged"
         $logFile = Join-Path $logDir "$Project-par-w$WorkersValue$suffix.log"
         $args = @(
             'run', './cmd/partitioner',
@@ -78,16 +84,12 @@ function Invoke-Baseline {
             '--project-path', $projectPath,
             '--data-file', $dataFile,
             '--timeout', "$TimeoutMinutes",
-            '--output', $outFile
+            '--output', $stagedFile
         )
     }
 
     if ($Warm) {
         $args += '--warm-cache'
-    } else {
-        Write-Host "==> Limpando cache do Go (cold start)..."
-        & go clean -cache
-        & go clean -testcache
     }
 
     Write-Host "==> $Project $Mode $(if ($Mode -eq 'baseline-par') { "w=$WorkersValue " })$(if ($Warm) { 'warm' } else { 'cold' })"
@@ -95,6 +97,31 @@ function Invoke-Baseline {
     if ($LASTEXITCODE -ne 0) {
         throw "Falha ao coletar $outFile (exit=$LASTEXITCODE). Veja $logFile"
     }
+    if (-not (Test-Path -LiteralPath $stagedFile)) {
+        throw "Coleta terminou sem produzir o artefato temporario: $stagedFile"
+    }
+
+    $report = Get-Content -Raw -LiteralPath $stagedFile | ConvertFrom-Json
+    if (-not $report.success) {
+        throw "Baseline falhou e nao substituira o artefato atual: $($report.error). Diagnostico: $stagedFile"
+    }
+
+    $backupFile = Join-Path $backupDir $fileName
+    $previousMoved = $false
+    if (Test-Path -LiteralPath $outFile) {
+        Move-Item -LiteralPath $outFile -Destination $backupFile
+        $previousMoved = $true
+    }
+    try {
+        Move-Item -LiteralPath $stagedFile -Destination $outFile
+    }
+    catch {
+        if ($previousMoved -and -not (Test-Path -LiteralPath $outFile)) {
+            Move-Item -LiteralPath $backupFile -Destination $outFile
+        }
+        throw
+    }
+    Write-Host "==> Baseline publicado: $outFile"
 }
 
 Push-Location $repoRoot

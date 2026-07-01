@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -27,6 +28,7 @@ import (
 // Hook for testing cold cache fallback
 var mkdirTemp = os.MkdirTemp
 var removeAll = os.RemoveAll
+var runGoTestCommand = runGoTest
 
 // BaselineReport is the persisted form of a baseline measurement
 // (sequential or native-parallel). It is written by the baseline
@@ -47,12 +49,44 @@ type BaselineReport struct {
 }
 
 // WriteBaselineReport serializes the report to path as indented JSON.
+// Publication is atomic and refuses to overwrite an existing report.
 func WriteBaselineReport(path string, r BaselineReport) error {
 	data, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal baseline: %w", err)
 	}
-	return os.WriteFile(path, append(data, '\n'), 0o644)
+
+	dir := filepath.Dir(path)
+	tmp, err := os.CreateTemp(dir, "."+filepath.Base(path)+".tmp-*")
+	if err != nil {
+		return fmt.Errorf("create temporary baseline: %w", err)
+	}
+	tmpPath := tmp.Name()
+	defer os.Remove(tmpPath)
+
+	if err := tmp.Chmod(0o644); err != nil {
+		tmp.Close()
+		return fmt.Errorf("set temporary baseline permissions: %w", err)
+	}
+	if _, err := tmp.Write(append(data, '\n')); err != nil {
+		tmp.Close()
+		return fmt.Errorf("write temporary baseline: %w", err)
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return fmt.Errorf("sync temporary baseline: %w", err)
+	}
+	if err := tmp.Close(); err != nil {
+		return fmt.Errorf("close temporary baseline: %w", err)
+	}
+
+	// Linking publishes only a fully written file and fails atomically when the
+	// destination already exists. The baseline collection script stages reports
+	// under unique names before replacing canonical artifacts with a backup.
+	if err := os.Link(tmpPath, path); err != nil {
+		return fmt.Errorf("publish baseline without overwrite: %w", err)
+	}
+	return nil
 }
 
 // LoadBaselineReport reads a BaselineReport previously written by
@@ -88,6 +122,11 @@ type WorkerResult struct {
 
 	// Output holds the combined stdout+stderr of go test.
 	Output string
+
+	// executionStarted and executionFinished delimit only the measured go test
+	// process. Cold-cache preparation and cleanup are intentionally excluded.
+	executionStarted  time.Time
+	executionFinished time.Time
 }
 
 // ExecutionResult holds the aggregated outcome of running all
@@ -103,8 +142,8 @@ type ExecutionResult struct {
 	// WorkerResults holds one result per worker, indexed by WorkerID.
 	WorkerResults []WorkerResult
 
-	// Makespan is the wall-clock time from launching the first
-	// worker to the last worker finishing.
+	// Makespan is the wall-clock interval from the start of the first measured
+	// go test process to the end of the last. Cache setup/cleanup is excluded.
 	Makespan time.Duration
 
 	// TotalElapsed is the sum of all workers' Elapsed times.
@@ -143,8 +182,6 @@ func RunPartitioned(cfg Config, partResult model.PartitionResult) ExecutionResul
 	resultCh := make(chan WorkerResult, workers)
 	var wg sync.WaitGroup
 
-	overallStart := time.Now()
-
 	for _, partition := range partResult.Partitions {
 		wg.Add(1)
 		go func(p model.Partition) {
@@ -164,12 +201,24 @@ func RunPartitioned(cfg Config, partResult model.PartitionResult) ExecutionResul
 	// Collect results.
 	workerResults := make([]WorkerResult, workers)
 	var totalElapsed time.Duration
+	var firstExecutionStart time.Time
+	var lastExecutionFinish time.Time
 	for wr := range resultCh {
 		workerResults[wr.WorkerID] = wr
 		totalElapsed += wr.Elapsed
+		if !wr.executionStarted.IsZero() &&
+			(firstExecutionStart.IsZero() || wr.executionStarted.Before(firstExecutionStart)) {
+			firstExecutionStart = wr.executionStarted
+		}
+		if wr.executionFinished.After(lastExecutionFinish) {
+			lastExecutionFinish = wr.executionFinished
+		}
 	}
 
-	makespan := time.Since(overallStart)
+	var makespan time.Duration
+	if !firstExecutionStart.IsZero() && !lastExecutionFinish.IsZero() {
+		makespan = lastExecutionFinish.Sub(firstExecutionStart)
+	}
 
 	return ExecutionResult{
 		Mode:          "partitioned",
@@ -190,8 +239,6 @@ func RunBaselineSeq(cfg Config) ExecutionResult {
 // over an explicit package list. When packages is empty, it falls back to ./...
 // for backward compatibility.
 func RunBaselineSeqPackages(cfg Config, packages []string) ExecutionResult {
-	start := time.Now()
-
 	// Build command: go test -p 1 -parallel 1 -count=1 <packages|./...>
 	args := []string{"test", "-p", "1", "-parallel", "1",
 		"-count", fmt.Sprintf("%d", cfg.Count)}
@@ -203,23 +250,14 @@ func RunBaselineSeqPackages(cfg Config, packages []string) ExecutionResult {
 	}
 	args = appendPackageArgs(args, packages)
 
-	output, err := runGoTest(cfg, args, nil)
-	elapsed := time.Since(start)
-
-	wr := WorkerResult{
-		WorkerID:     0,
-		Elapsed:      elapsed,
-		PackageCount: packageCount(packages),
-		Error:        err,
-		Output:       output,
-	}
+	wr := runTimedGoTest(cfg, args, 0, packageCount(packages), "tcc-baseline-seq-*")
 
 	return ExecutionResult{
 		Mode:          "baseline-seq",
 		Workers:       1,
 		WorkerResults: []WorkerResult{wr},
-		Makespan:      elapsed,
-		TotalElapsed:  elapsed,
+		Makespan:      wr.Elapsed,
+		TotalElapsed:  wr.Elapsed,
 	}
 }
 
@@ -234,8 +272,6 @@ func RunBaselinePar(cfg Config, parallelism int) ExecutionResult {
 // over an explicit package list. When packages is empty, it falls back to ./...
 // for backward compatibility.
 func RunBaselineParPackages(cfg Config, parallelism int, packages []string) ExecutionResult {
-	start := time.Now()
-
 	// Build command: go test -p P -parallel 1 -count=1 <packages|./...>
 	args := []string{"test", "-p", fmt.Sprintf("%d", parallelism),
 		"-parallel", "1",
@@ -248,23 +284,14 @@ func RunBaselineParPackages(cfg Config, parallelism int, packages []string) Exec
 	}
 	args = appendPackageArgs(args, packages)
 
-	output, err := runGoTest(cfg, args, nil)
-	elapsed := time.Since(start)
-
-	wr := WorkerResult{
-		WorkerID:     0,
-		Elapsed:      elapsed,
-		PackageCount: packageCount(packages),
-		Error:        err,
-		Output:       output,
-	}
+	wr := runTimedGoTest(cfg, args, 0, packageCount(packages), "tcc-baseline-par-*")
 
 	return ExecutionResult{
 		Mode:          "baseline-par",
 		Workers:       parallelism,
 		WorkerResults: []WorkerResult{wr},
-		Makespan:      elapsed,
-		TotalElapsed:  elapsed,
+		Makespan:      wr.Elapsed,
+		TotalElapsed:  wr.Elapsed,
 	}
 }
 
@@ -312,25 +339,38 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 	}
 	args = append(args, pkgPaths...)
 
+	return runTimedGoTest(
+		cfg,
+		args,
+		partition.WorkerID,
+		len(partition.Packages),
+		fmt.Sprintf("tcc-worker-%d-*", partition.WorkerID),
+	)
+}
+
+// runTimedGoTest prepares the cache regime, measures only the go test process,
+// and performs cleanup after the measured region. Cold runs always receive a
+// fresh isolated GOCACHE; warm runs inherit the cache populated by the caller.
+func runTimedGoTest(cfg Config, args []string, workerID, packageCount int, tempPattern string) WorkerResult {
 	var env []string
 	var coldCacheDir string
 	if !cfg.WarmCache {
-		tempDir, err := mkdirTemp("", fmt.Sprintf("tcc-worker-%d-*", partition.WorkerID))
+		tempDir, err := mkdirTemp("", tempPattern)
 		if err != nil {
 			return WorkerResult{
-				WorkerID:     partition.WorkerID,
-				Elapsed:      0,
-				PackageCount: len(partition.Packages),
+				WorkerID:     workerID,
+				PackageCount: packageCount,
 				Error:        fmt.Errorf("failed to create cold cache: %w", err),
 			}
 		}
 		coldCacheDir = tempDir
-		env = append(os.Environ(), "GOCACHE="+tempDir)
+		env = withEnvValue(os.Environ(), "GOCACHE", tempDir)
 	}
 
-	start := time.Now()
-	output, err := runGoTest(cfg, args, env)
-	elapsed := time.Since(start)
+	started := time.Now()
+	output, err := runGoTestCommand(cfg, args, env)
+	finished := time.Now()
+	elapsed := finished.Sub(started)
 	if coldCacheDir != "" {
 		if cleanupErr := removeAll(coldCacheDir); cleanupErr != nil {
 			if err != nil {
@@ -342,12 +382,30 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 	}
 
 	return WorkerResult{
-		WorkerID:     partition.WorkerID,
-		Elapsed:      elapsed,
-		PackageCount: len(partition.Packages),
-		Error:        err,
-		Output:       output,
+		WorkerID:          workerID,
+		Elapsed:           elapsed,
+		PackageCount:      packageCount,
+		Error:             err,
+		Output:            output,
+		executionStarted:  started,
+		executionFinished: finished,
 	}
+}
+
+// withEnvValue replaces all inherited definitions of key and appends exactly
+// one canonical value. EqualFold is required because environment keys are
+// case-insensitive on Windows.
+func withEnvValue(environ []string, key, value string) []string {
+	prefix := key + "="
+	out := make([]string, 0, len(environ)+1)
+	for _, entry := range environ {
+		name, _, found := strings.Cut(entry, "=")
+		if found && strings.EqualFold(name, key) {
+			continue
+		}
+		out = append(out, entry)
+	}
+	return append(out, prefix+value)
 }
 
 // runGoTest executes a go test command with the given arguments

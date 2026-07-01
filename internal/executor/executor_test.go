@@ -2,6 +2,7 @@ package executor
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -186,5 +187,118 @@ func TestRunWorker_ColdCacheCleanupFailureIsReported(t *testing.T) {
 	})
 	if wr.Error == nil || !strings.Contains(wr.Error.Error(), "failed to remove cold cache") {
 		t.Fatalf("Error = %v, want cleanup failure", wr.Error)
+	}
+}
+
+func TestWriteBaselineReport_RefusesOverwrite(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "baseline.json")
+	first := BaselineReport{Mode: "baseline-seq", Duration: time.Second, Success: true}
+	if err := WriteBaselineReport(path, first); err != nil {
+		t.Fatalf("first write: %v", err)
+	}
+	if err := WriteBaselineReport(path, BaselineReport{Mode: "baseline-par", Duration: 2 * time.Second, Success: true}); err == nil {
+		t.Fatal("second write unexpectedly replaced an existing baseline")
+	}
+	got, err := LoadBaselineReport(path)
+	if err != nil {
+		t.Fatalf("load preserved baseline: %v", err)
+	}
+	if got.Mode != first.Mode || got.Duration != first.Duration {
+		t.Fatalf("existing baseline changed: got=%+v want=%+v", got, first)
+	}
+}
+
+func TestRunBaselineSeq_ColdCacheFailurePreventsExecution(t *testing.T) {
+	originalMkdirTemp := mkdirTemp
+	originalRunGoTest := runGoTestCommand
+	defer func() {
+		mkdirTemp = originalMkdirTemp
+		runGoTestCommand = originalRunGoTest
+	}()
+
+	mkdirTemp = func(dir, pattern string) (string, error) {
+		return "", fmt.Errorf("injected cache creation error")
+	}
+	executed := false
+	runGoTestCommand = func(Config, []string, []string) (string, error) {
+		executed = true
+		return "", nil
+	}
+
+	result := RunBaselineSeqPackages(Config{WarmCache: false}, []string{"example.com/a"})
+	if executed {
+		t.Fatal("go test executed after cold cache creation failed")
+	}
+	if result.WorkerResults[0].Error == nil || !strings.Contains(result.WorkerResults[0].Error.Error(), "failed to create cold cache") {
+		t.Fatalf("error = %v, want cold cache creation failure", result.WorkerResults[0].Error)
+	}
+}
+
+func TestRunPartitioned_MakespanExcludesColdCacheCleanup(t *testing.T) {
+	originalRunGoTest := runGoTestCommand
+	originalRemoveAll := removeAll
+	defer func() {
+		runGoTestCommand = originalRunGoTest
+		removeAll = originalRemoveAll
+	}()
+
+	var cacheDir string
+	runGoTestCommand = func(_ Config, _ []string, env []string) (string, error) {
+		for _, entry := range env {
+			if strings.HasPrefix(entry, "GOCACHE=") {
+				cacheDir = strings.TrimPrefix(entry, "GOCACHE=")
+			}
+		}
+		if cacheDir == "" {
+			return "", fmt.Errorf("isolated GOCACHE not provided")
+		}
+		if _, err := os.Stat(cacheDir); err != nil {
+			return "", fmt.Errorf("cold cache unavailable during execution: %w", err)
+		}
+		time.Sleep(5 * time.Millisecond)
+		return "ok", nil
+	}
+	removeAll = func(path string) error {
+		time.Sleep(80 * time.Millisecond)
+		return originalRemoveAll(path)
+	}
+
+	started := time.Now()
+	result := RunPartitioned(Config{WarmCache: false}, model.PartitionResult{
+		Workers: 1,
+		Partitions: []model.Partition{{
+			WorkerID: 0,
+			Packages: []model.PackageInfo{{Name: "example.com/a"}},
+		}},
+	})
+	wallClock := time.Since(started)
+
+	if result.WorkerResults[0].Error != nil {
+		t.Fatalf("worker error: %v", result.WorkerResults[0].Error)
+	}
+	if result.Makespan >= 50*time.Millisecond {
+		t.Fatalf("makespan %v includes the 80ms cleanup", result.Makespan)
+	}
+	if wallClock < 80*time.Millisecond {
+		t.Fatalf("test did not exercise delayed cleanup; wall-clock=%v", wallClock)
+	}
+	if _, err := os.Stat(cacheDir); !os.IsNotExist(err) {
+		t.Fatalf("cold cache still exists after cleanup: err=%v", err)
+	}
+}
+
+func TestWithEnvValue_ReplacesCaseInsensitiveDuplicates(t *testing.T) {
+	got := withEnvValue([]string{"Path=C:/bin", "gocache=old", "GOCACHE=older"}, "GOCACHE", "isolated")
+	count := 0
+	for _, entry := range got {
+		if strings.EqualFold(strings.SplitN(entry, "=", 2)[0], "GOCACHE") {
+			count++
+			if entry != "GOCACHE=isolated" {
+				t.Fatalf("GOCACHE entry = %q, want canonical isolated value", entry)
+			}
+		}
+	}
+	if count != 1 {
+		t.Fatalf("GOCACHE entries = %d, want exactly 1: %v", count, got)
 	}
 }

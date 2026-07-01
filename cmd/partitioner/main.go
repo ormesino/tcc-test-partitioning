@@ -391,6 +391,7 @@ func runBaselineSeq(projectPath, dataFile string, timeoutMin int, verbose, warmC
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
 		Count:       1,
 		Verbose:     verbose,
+		WarmCache:   warmCache,
 	}
 
 	packages, packageSource := loadBaselinePackageScope(dataFile)
@@ -445,6 +446,7 @@ func runBaselinePar(projectPath, dataFile string, workers, timeoutMin int, verbo
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
 		Count:       1,
 		Verbose:     verbose,
+		WarmCache:   warmCache,
 	}
 
 	packages, packageSource := loadBaselinePackageScope(dataFile)

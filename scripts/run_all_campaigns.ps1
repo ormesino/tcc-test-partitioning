@@ -123,9 +123,7 @@ try {
     if ('cold' -in $Regimes) {
         Write-Log "=== CAMPANHAS COLD ==="
         foreach ($c in $coldConfigs) {
-            Write-Log "  Limpando caches do Go antes da campanha $($c.Name)"
-            & go clean -cache
-            & go clean -testcache
+            Write-Log "  Regime cold: cada worker usara um GOCACHE temporario e isolado"
 
             $campaignIndex++
             $exitCode = Run-Step -Name $c.Name `
