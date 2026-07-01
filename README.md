@@ -134,13 +134,20 @@ pwsh -ExecutionPolicy Bypass -File scripts/collect_passonly_baselines.ps1 -Timeo
 ```
 
 The baseline commands use the same package list as the characterization file.
-This keeps `T1` and `Tp` comparable when computing speedup.
+This keeps `T1` and `Tp` comparable when computing speedup. Cold baselines use a
+fresh isolated `GOCACHE`; reports are first staged and validated, and an existing
+canonical report is backed up before replacement.
 
 ### 4. Run benchmark campaigns
 
 ```powershell
 go run ./cmd/benchmark --config benchmarks/campaign_cli_warm.json
 ```
+
+A real benchmark retries a failed logical repetition up to three total attempts
+by default (`max_attempts`). Every failure is logged. Failed attempts are not
+aggregated; if the third attempt also fails, the repetition remains marked as
+failed and the command returns an error after preserving all reports.
 
 A benchmark run writes:
 

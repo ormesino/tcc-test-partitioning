@@ -198,15 +198,20 @@ population against a baseline over another.
 
 Baseline reports include duration, package count, package source, success state,
 and error text when a run fails. The CLIs reject failed baseline reports when
-those reports are used as `T1` inputs.
+those reports are used as `T1` inputs. Cold baselines execute with a fresh,
+isolated `GOCACHE`; warm baselines inherit the cache populated by their
+successful warm-up. Reports are staged and published without directly
+truncating an existing valid artifact.
 
 ## 11. Cold and Warm Cache Campaigns
 
 The final methodology distinguishes two regimes.
 
 **Cold runs** include the normal cost of building and executing test binaries.
-This reflects a less controlled environment where compilation contributes to the
-observed wall-clock time.
+Each partitioned worker receives its own initially empty `GOCACHE`, matching the
+independent-runner interpretation of ADR-017. Cache-directory creation and
+cleanup are outside the measured makespan; compilation performed by `go test`
+remains inside it.
 
 **Warm runs** pre-compile the selected test binaries before measurement using a
 no-test command that populates Go's build cache. The partitioned execution then
@@ -250,7 +255,13 @@ JSON configuration file. It sweeps:
 projects x workers x algorithms x repetitions
 ```
 
-Each tuple is treated independently. The driver writes:
+Each tuple is treated independently. In run mode, one logical repetition may be
+attempted up to three times when execution fails. Failed attempts are logged but
+are not statistical samples; only a successful attempt is retained. If the third
+attempt also fails, the logical repetition is preserved as failed, excluded from
+aggregates, and the campaign exits unsuccessfully after writing diagnostics.
+
+The driver writes:
 
 - `config.json`, a copy of the resolved configuration;
 - `results.json`, the full structured report;
