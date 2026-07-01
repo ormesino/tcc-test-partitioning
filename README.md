@@ -20,7 +20,8 @@ This repository contains a small research toolchain for:
 - running full benchmark campaigns and exporting JSON/CSV results.
 
 For the consolidated research and design rationale, see
-[DECISIONS.md](DECISIONS.md).
+[DECISIONS.md](DECISIONS.md). The private working-document index and document
+hierarchy are in [docs/README.md](docs/README.md).
 
 ## Repository Layout
 
@@ -127,6 +128,17 @@ This runs `go test -json -p 1 -parallel 1 -count=1` repeatedly, stores raw probe
 files under `data/probe/<project>/`, and writes the aggregated pass-only dataset
 to `data/characterization/<project>.json`.
 
+The build cache is intentionally retained across the ten characterization runs.
+`-count=1` disables test-result caching, while package-level `Elapsed` excludes
+the preceding test-binary build. Cold campaign isolation is a separate regime.
+
+### Current experimental state
+
+The four characterization files and 16 warm baselines are current. The 16 cold
+baselines predate the isolated-cache measurement boundary and must be collected
+again before final cold campaigns. Existing campaign outputs are diagnostic or
+historical and must not be presented as final results.
+
 ### 3. Collect pass-only baselines
 
 ```powershell
@@ -164,12 +176,12 @@ pwsh -ExecutionPolicy Bypass -File scripts/run_all_campaigns.ps1 -TimeoutMinutes
 
 ## Selected Subject Projects
 
-| Project | Pass-only packages | Characterization file |
-| --- | ---: | --- |
-| cli/cli | 233 | `data/characterization/cli.json` |
-| goreleaser/goreleaser | 116 | `data/characterization/goreleaser.json` |
-| grpc/grpc-go | 137 | `data/characterization/grpc-go.json` |
-| gohugoio/hugo | 142 | `data/characterization/hugo.json` |
+| Project | Pass-only packages | Suite CV | Max/median | Characterization file |
+| --- | ---: | ---: | ---: | --- |
+| cli/cli | 233 | 0.373819 | 2.398634 | `data/characterization/cli.json` |
+| goreleaser/goreleaser | 116 | 1.028068 | 7.901511 | `data/characterization/goreleaser.json` |
+| grpc/grpc-go | 137 | 0.997441 | 8.780870 | `data/characterization/grpc-go.json` |
+| gohugoio/hugo | 142 | 1.721672 | 26.518223 | `data/characterization/hugo.json` |
 
 Only packages that pass under the characterization regime are included in the
 final experiments.

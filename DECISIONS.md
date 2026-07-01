@@ -105,21 +105,22 @@ based on the median durations collected during characterization.
 
 The empirical study uses four open source Go projects:
 
-| Project | Pass-only packages | Characterization file |
-| --- | ---: | --- |
-| cli/cli | 233 | `data/characterization/cli.json` |
-| goreleaser/goreleaser | 116 | `data/characterization/goreleaser.json` |
-| grpc/grpc-go | 137 | `data/characterization/grpc-go.json` |
-| gohugoio/hugo | 142 | `data/characterization/hugo.json` |
+| Project | Pass-only packages | Suite CV | Max/median | Characterization file |
+| --- | ---: | ---: | ---: | --- |
+| cli/cli | 233 | 0.373819 | 2.398634 | `data/characterization/cli.json` |
+| goreleaser/goreleaser | 116 | 1.028068 | 7.901511 | `data/characterization/goreleaser.json` |
+| grpc/grpc-go | 137 | 0.997441 | 8.780870 | `data/characterization/grpc-go.json` |
+| gohugoio/hugo | 142 | 1.721672 | 26.518223 | `data/characterization/hugo.json` |
 
 The projects were selected from a broader candidate set using build viability,
 number of testable packages, pass rate, and duration-distribution diversity.
 The final set provides medium-to-large Go suites with non-trivial duration
-variance, including heavy-tailed profiles.
+variance, including markedly dispersed profiles.
 
-A recognized limitation is that the selected projects do not include a clearly
-low-variance suite. The conclusions therefore apply primarily to suites in the
-observed range of package counts and variability.
+The current characterization includes one relatively low-dispersion suite
+(`cli`, CV 0.373819) and three more dispersed suites. This is useful diversity,
+but one low-CV subject is not enough to generalize by distribution class. The
+observed package-count range is 116 to 233.
 
 ## 7. Pass-Only Experimental Scope
 
@@ -143,8 +144,8 @@ Package durations are collected with repeated executions of:
 go test -json -p 1 -parallel 1 -count=1
 ```
 
-The final duration for each package is the median across 10 runs. The coefficient
-of variation is also computed from those runs.
+The final duration for each package is the median across 10 runs. Suite-level
+dispersion is descriptive and is not stored in `PackageInfo`.
 
 The choices are deliberate:
 
@@ -153,6 +154,12 @@ The choices are deliberate:
 - `-parallel 1` avoids intra-package parallelism during characterization;
 - the median is robust to occasional noisy runs;
 - 10 runs provide a practical balance between stability and collection cost.
+
+`GOCACHE` is intentionally retained between characterization runs. The
+aggregator uses package-level `Elapsed` events, whose interval starts after the
+test binary has been built. Clearing the build cache would add collection cost
+without improving the package-duration estimate. This differs from a cold
+campaign, which measures the complete `go test` command with an isolated cache.
 
 ## 9. Worker Execution Regime
 
@@ -302,7 +309,7 @@ style. No external Go dependencies are required.
 The study is intentionally scoped. The most important limitations are:
 
 - results are based on four Go projects, not a broad benchmark corpus;
-- the selected projects do not cover low-variance suites;
+- only one selected project has suite CV below 0.5;
 - package-level partitioning cannot split a single very slow package;
 - local goroutines simulate distributed workers but are not a real cluster;
 - warm-cache behavior approximates, but does not fully reproduce, CI caching;
