@@ -1,570 +1,570 @@
 [
   {
     "name": "github.com/gohugoio/hugo",
-    "duration_ns": 83128000000
+    "duration_ns": 51757500000
   },
   {
     "name": "github.com/gohugoio/hugo/bufferpool",
-    "duration_ns": 1231000000
+    "duration_ns": 3500000
   },
   {
     "name": "github.com/gohugoio/hugo/cache/dynacache",
-    "duration_ns": 2575499999
+    "duration_ns": 28500000
   },
   {
     "name": "github.com/gohugoio/hugo/cache/filecache",
-    "duration_ns": 5091000000
+    "duration_ns": 62500000
   },
   {
     "name": "github.com/gohugoio/hugo/cache/httpcache",
-    "duration_ns": 5014000000
+    "duration_ns": 76000000
   },
   {
     "name": "github.com/gohugoio/hugo/codegen",
-    "duration_ns": 1716000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/collections",
-    "duration_ns": 1410000000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/hashing",
-    "duration_ns": 1410500000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/herrors",
-    "duration_ns": 1715499999
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/hexec",
-    "duration_ns": 5244500000
+    "duration_ns": 43000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/hmaps",
-    "duration_ns": 1440500000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/hreflect",
-    "duration_ns": 1407000000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/hstore",
-    "duration_ns": 1390500000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/hstrings",
-    "duration_ns": 1242000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/hsync",
-    "duration_ns": 1237500000
+    "duration_ns": 3500000
   },
   {
     "name": "github.com/gohugoio/hugo/common/htime",
-    "duration_ns": 2531500000
+    "duration_ns": 51500000
   },
   {
     "name": "github.com/gohugoio/hugo/common/hugio",
-    "duration_ns": 1368499999
+    "duration_ns": 4500000
   },
   {
     "name": "github.com/gohugoio/hugo/common/hugo",
-    "duration_ns": 2556500000
+    "duration_ns": 99500000
   },
   {
     "name": "github.com/gohugoio/hugo/common/loggers",
-    "duration_ns": 1439500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/math",
-    "duration_ns": 1229000000
+    "duration_ns": 3000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/para",
-    "duration_ns": 1381000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/paths",
-    "duration_ns": 2572500000
+    "duration_ns": 115500000
   },
   {
     "name": "github.com/gohugoio/hugo/common/predicate",
-    "duration_ns": 1435000000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/rungroup",
-    "duration_ns": 1235999999
+    "duration_ns": 3000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/text",
-    "duration_ns": 1277500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/types",
-    "duration_ns": 1293000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/types/hstring",
-    "duration_ns": 1269000000
+    "duration_ns": 3500000
   },
   {
     "name": "github.com/gohugoio/hugo/common/urls",
-    "duration_ns": 1273000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/common/version",
-    "duration_ns": 1280000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/compare",
-    "duration_ns": 1240000000
+    "duration_ns": 3500000
   },
   {
     "name": "github.com/gohugoio/hugo/config",
-    "duration_ns": 2127500000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/gohugoio/hugo/config/allconfig",
-    "duration_ns": 3942000000
+    "duration_ns": 246500000
   },
   {
     "name": "github.com/gohugoio/hugo/config/privacy",
-    "duration_ns": 2094999999
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/gohugoio/hugo/config/security",
-    "duration_ns": 2157000000
+    "duration_ns": 11500000
   },
   {
     "name": "github.com/gohugoio/hugo/config/services",
-    "duration_ns": 2085500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/gohugoio/hugo/create",
-    "duration_ns": 5208000000
+    "duration_ns": 371500000
   },
   {
     "name": "github.com/gohugoio/hugo/deps",
-    "duration_ns": 3305000000
+    "duration_ns": 29000000
   },
   {
     "name": "github.com/gohugoio/hugo/helpers",
-    "duration_ns": 3907000000
+    "duration_ns": 432500000
   },
   {
     "name": "github.com/gohugoio/hugo/htesting",
-    "duration_ns": 1381500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/hugofs",
-    "duration_ns": 2741500000
+    "duration_ns": 120000000
   },
   {
     "name": "github.com/gohugoio/hugo/hugofs/files",
-    "duration_ns": 1237999999
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/hugofs/hglob",
-    "duration_ns": 1436000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/hugolib",
-    "duration_ns": 15213000000
+    "duration_ns": 9157000000
   },
   {
     "name": "github.com/gohugoio/hugo/hugolib/doctree",
-    "duration_ns": 2598000000
+    "duration_ns": 26500000
   },
   {
     "name": "github.com/gohugoio/hugo/hugolib/filesystems",
-    "duration_ns": 5117500000
+    "duration_ns": 164500000
   },
   {
     "name": "github.com/gohugoio/hugo/hugolib/roles",
-    "duration_ns": 5042000000
+    "duration_ns": 115500000
   },
   {
     "name": "github.com/gohugoio/hugo/hugolib/segments",
-    "duration_ns": 2703500000
+    "duration_ns": 72000000
   },
   {
     "name": "github.com/gohugoio/hugo/hugolib/sitesmatrix",
-    "duration_ns": 2997500000
+    "duration_ns": 783000000
   },
   {
     "name": "github.com/gohugoio/hugo/hugolib/versions",
-    "duration_ns": 4982000000
+    "duration_ns": 37500000
   },
   {
     "name": "github.com/gohugoio/hugo/identity",
-    "duration_ns": 1290500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/internal/js/esbuild",
-    "duration_ns": 9122000000
+    "duration_ns": 439500000
   },
   {
     "name": "github.com/gohugoio/hugo/internal/warpc",
-    "duration_ns": 13480000000
+    "duration_ns": 9634000000
   },
   {
     "name": "github.com/gohugoio/hugo/langs",
-    "duration_ns": 2623000000
+    "duration_ns": 192500000
   },
   {
     "name": "github.com/gohugoio/hugo/langs/i18n",
-    "duration_ns": 5130500000
+    "duration_ns": 236000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup",
-    "duration_ns": 3617000000
+    "duration_ns": 30000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/asciidocext",
-    "duration_ns": 5034000000
+    "duration_ns": 51000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/goldmark",
-    "duration_ns": 2929500000
+    "duration_ns": 638000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/goldmark/blockquotes",
-    "duration_ns": 2572499999
+    "duration_ns": 116000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/goldmark/codeblocks",
-    "duration_ns": 5147500000
+    "duration_ns": 270500000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/goldmark/hugocontext",
-    "duration_ns": 2481000000
+    "duration_ns": 22000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/goldmark/images",
-    "duration_ns": 5047000000
+    "duration_ns": 93000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/goldmark/internal/extensions/attributes",
-    "duration_ns": 5005500000
+    "duration_ns": 65000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/goldmark/passthrough",
-    "duration_ns": 5024000000
+    "duration_ns": 53000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/goldmark/tables",
-    "duration_ns": 5065000000
+    "duration_ns": 107500000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/highlight",
-    "duration_ns": 2655500000
+    "duration_ns": 203000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/markup_config",
-    "duration_ns": 2268500000
+    "duration_ns": 21000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/org",
-    "duration_ns": 3564000000
+    "duration_ns": 30000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/pandoc",
-    "duration_ns": 2449500000
+    "duration_ns": 21000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/rst",
-    "duration_ns": 2461000000
+    "duration_ns": 21000000
   },
   {
     "name": "github.com/gohugoio/hugo/markup/tableofcontents",
-    "duration_ns": 2559000000
+    "duration_ns": 92000000
   },
   {
     "name": "github.com/gohugoio/hugo/media",
-    "duration_ns": 2094000000
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/gohugoio/hugo/metrics",
-    "duration_ns": 2685000000
+    "duration_ns": 26500000
   },
   {
     "name": "github.com/gohugoio/hugo/minifiers",
-    "duration_ns": 3551000000
+    "duration_ns": 39000000
   },
   {
     "name": "github.com/gohugoio/hugo/modules",
-    "duration_ns": 2934500000
+    "duration_ns": 121500000
   },
   {
     "name": "github.com/gohugoio/hugo/modules/npm",
-    "duration_ns": 2551500000
+    "duration_ns": 53000000
   },
   {
     "name": "github.com/gohugoio/hugo/navigation",
-    "duration_ns": 1875000000
+    "duration_ns": 55000000
   },
   {
     "name": "github.com/gohugoio/hugo/output",
-    "duration_ns": 5006000000
+    "duration_ns": 52000000
   },
   {
     "name": "github.com/gohugoio/hugo/parser",
-    "duration_ns": 1929500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/gohugoio/hugo/parser/metadecoders",
-    "duration_ns": 2549000000
+    "duration_ns": 65500000
   },
   {
     "name": "github.com/gohugoio/hugo/parser/pageparser",
-    "duration_ns": 1787000000
+    "duration_ns": 8500000
   },
   {
     "name": "github.com/gohugoio/hugo/publisher",
-    "duration_ns": 3598000000
+    "duration_ns": 60000000
   },
   {
     "name": "github.com/gohugoio/hugo/related",
-    "duration_ns": 2563500000
+    "duration_ns": 68000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources",
-    "duration_ns": 6610500000
+    "duration_ns": 1751500000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/images",
-    "duration_ns": 19202500000
+    "duration_ns": 15567000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/images/meta",
-    "duration_ns": 5048000000
+    "duration_ns": 130000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/internal",
-    "duration_ns": 1406000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/jsconfig",
-    "duration_ns": 1237499999
+    "duration_ns": 3500000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/kinds",
-    "duration_ns": 1227500000
+    "duration_ns": 3500000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/page",
-    "duration_ns": 4406000000
+    "duration_ns": 694000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/page/pagemeta",
-    "duration_ns": 3866000000
+    "duration_ns": 164000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/postpub",
-    "duration_ns": 2528000000
+    "duration_ns": 26000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource",
-    "duration_ns": 5003500000
+    "duration_ns": 64500000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_factories/bundler",
-    "duration_ns": 3272000000
+    "duration_ns": 27000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_factories/create",
-    "duration_ns": 7910000000
+    "duration_ns": 2589000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_transformers/babel",
-    "duration_ns": 4994500000
+    "duration_ns": 39000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_transformers/cssjs",
-    "duration_ns": 5012500000
+    "duration_ns": 38000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_transformers/integrity",
-    "duration_ns": 3956500000
+    "duration_ns": 31000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_transformers/js",
-    "duration_ns": 6392500000
+    "duration_ns": 229500000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_transformers/minifier",
-    "duration_ns": 5000500000
+    "duration_ns": 52000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_transformers/templates",
-    "duration_ns": 5030500000
+    "duration_ns": 54500000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_transformers/tocss/dartsass",
-    "duration_ns": 4991000000
+    "duration_ns": 39000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_transformers/tocss/sass",
-    "duration_ns": 1389000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/gohugoio/hugo/resources/resource_transformers/tocss/scss",
-    "duration_ns": 4994500000
+    "duration_ns": 39000000
   },
   {
     "name": "github.com/gohugoio/hugo/source",
-    "duration_ns": 3606500000
+    "duration_ns": 42500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl",
-    "duration_ns": 1807000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/cast",
-    "duration_ns": 3977499999
+    "duration_ns": 30000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/collections",
-    "duration_ns": 5188500000
+    "duration_ns": 389500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/compare",
-    "duration_ns": 3342000000
+    "duration_ns": 30500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/crypto",
-    "duration_ns": 3325500000
+    "duration_ns": 28000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/css",
-    "duration_ns": 7093000000
+    "duration_ns": 436500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/debug",
-    "duration_ns": 5022500000
+    "duration_ns": 66000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/encoding",
-    "duration_ns": 3335000000
+    "duration_ns": 28500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/fmt",
-    "duration_ns": 5024500000
+    "duration_ns": 62000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/hash",
-    "duration_ns": 3330000000
+    "duration_ns": 28000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/images",
-    "duration_ns": 5496000000
+    "duration_ns": 350500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/inflect",
-    "duration_ns": 3329000000
+    "duration_ns": 31000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/internal",
-    "duration_ns": 3306000000
+    "duration_ns": 28000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/internal/go_templates/fmtsort",
-    "duration_ns": 785500000
+    "duration_ns": 3000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/internal/go_templates/htmltemplate",
-    "duration_ns": 1789500000
+    "duration_ns": 205500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/internal/go_templates/texttemplate",
-    "duration_ns": 1852500000
+    "duration_ns": 173500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/internal/go_templates/texttemplate/parse",
-    "duration_ns": 830500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/lang",
-    "duration_ns": 3909500000
+    "duration_ns": 30000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/math",
-    "duration_ns": 3987000000
+    "duration_ns": 30500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/openapi/openapi3",
-    "duration_ns": 6062500000
+    "duration_ns": 915000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/os",
-    "duration_ns": 5118500000
+    "duration_ns": 108500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/page",
-    "duration_ns": 5027000000
+    "duration_ns": 110500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/partials",
-    "duration_ns": 5068000000
+    "duration_ns": 145000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/path",
-    "duration_ns": 3952000000
+    "duration_ns": 38000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/reflect",
-    "duration_ns": 5027000000
+    "duration_ns": 52500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/resources",
-    "duration_ns": 5034500000
+    "duration_ns": 118000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/safe",
-    "duration_ns": 3331500000
+    "duration_ns": 28500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/strings",
-    "duration_ns": 3982000000
+    "duration_ns": 33000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/templates",
-    "duration_ns": 5471500000
+    "duration_ns": 813500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/time",
-    "duration_ns": 5048500000
+    "duration_ns": 103000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/tplimpl",
-    "duration_ns": 7115000000
+    "duration_ns": 2618500000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/transform",
-    "duration_ns": 6649500000
+    "duration_ns": 2257000000
   },
   {
     "name": "github.com/gohugoio/hugo/tpl/urls",
-    "duration_ns": 3961000000
+    "duration_ns": 35000000
   },
   {
     "name": "github.com/gohugoio/hugo/transform",
-    "duration_ns": 1893500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/gohugoio/hugo/transform/livereloadinject",
-    "duration_ns": 1900000000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/gohugoio/hugo/transform/metainject",
-    "duration_ns": 1776500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/gohugoio/hugo/transform/urlreplacers",
-    "duration_ns": 2543000000
+    "duration_ns": 26000000
   },
   {
     "name": "github.com/gohugoio/hugo/watcher/filenotify",
-    "duration_ns": 2040000000
+    "duration_ns": 308000000
   }
 ]

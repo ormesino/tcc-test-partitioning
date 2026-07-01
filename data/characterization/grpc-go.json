@@ -1,550 +1,578 @@
 [
   {
+    "name": "google.golang.org/grpc",
+    "duration_ns": 13217000000
+  },
+  {
     "name": "google.golang.org/grpc/admin",
-    "duration_ns": 4020499999
+    "duration_ns": 12000000
   },
   {
     "name": "google.golang.org/grpc/admin/test",
-    "duration_ns": 5105500000
+    "duration_ns": 13000000
   },
   {
     "name": "google.golang.org/grpc/attributes",
-    "duration_ns": 762000000
+    "duration_ns": 3000000
   },
   {
     "name": "google.golang.org/grpc/authz",
-    "duration_ns": 4677000000
+    "duration_ns": 507000000
   },
   {
     "name": "google.golang.org/grpc/authz/audit",
-    "duration_ns": 4209499999
+    "duration_ns": 96500000
   },
   {
     "name": "google.golang.org/grpc/authz/audit/stdout",
-    "duration_ns": 1242500000
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/balancer",
-    "duration_ns": 1314500000
+    "duration_ns": 8000000
   },
   {
     "name": "google.golang.org/grpc/balancer/base",
-    "duration_ns": 971500000
+    "duration_ns": 3000000
   },
   {
     "name": "google.golang.org/grpc/balancer/endpointsharding",
-    "duration_ns": 3478500000
+    "duration_ns": 60000000
   },
   {
     "name": "google.golang.org/grpc/balancer/grpclb",
-    "duration_ns": 9523000000
+    "duration_ns": 6081500000
   },
   {
     "name": "google.golang.org/grpc/balancer/lazy",
-    "duration_ns": 3587000000
+    "duration_ns": 427000000
   },
   {
     "name": "google.golang.org/grpc/balancer/leastrequest",
-    "duration_ns": 3292500000
+    "duration_ns": 72000000
   },
   {
     "name": "google.golang.org/grpc/balancer/pickfirst",
-    "duration_ns": 13354000000
+    "duration_ns": 9313000000
   },
   {
     "name": "google.golang.org/grpc/balancer/randomsubsetting",
-    "duration_ns": 1690000000
+    "duration_ns": 9000000
   },
   {
     "name": "google.golang.org/grpc/balancer/ringhash",
-    "duration_ns": 8585499999
+    "duration_ns": 3812500000
   },
   {
     "name": "google.golang.org/grpc/balancer/rls",
-    "duration_ns": 7778500000
+    "duration_ns": 4102499999
   },
   {
     "name": "google.golang.org/grpc/balancer/rls/internal/adaptive",
-    "duration_ns": 2760000000
+    "duration_ns": 2003000000
   },
   {
     "name": "google.golang.org/grpc/balancer/rls/internal/keys",
-    "duration_ns": 2341000000
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/balancer/weightedroundrobin",
-    "duration_ns": 6086000000
+    "duration_ns": 2477499999
   },
   {
     "name": "google.golang.org/grpc/balancer/weightedtarget",
-    "duration_ns": 2596499999
+    "duration_ns": 128500000
   },
   {
     "name": "google.golang.org/grpc/benchmark/flags",
-    "duration_ns": 1169500000
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/benchmark/latency",
-    "duration_ns": 2303500000
+    "duration_ns": 1010999999
   },
   {
     "name": "google.golang.org/grpc/benchmark/primitives",
-    "duration_ns": 818000000
+    "duration_ns": 3000000
   },
   {
     "name": "google.golang.org/grpc/binarylog",
-    "duration_ns": 3213500000
+    "duration_ns": 55500000
   },
   {
     "name": "google.golang.org/grpc/channelz/service",
-    "duration_ns": 2495500000
+    "duration_ns": 18000000
   },
   {
     "name": "google.golang.org/grpc/codes",
-    "duration_ns": 1330500000
+    "duration_ns": 9000000
   },
   {
     "name": "google.golang.org/grpc/credentials",
-    "duration_ns": 3567000000
+    "duration_ns": 502000000
   },
   {
     "name": "google.golang.org/grpc/credentials/alts",
-    "duration_ns": 3230500000
+    "duration_ns": 40000000
   },
   {
     "name": "google.golang.org/grpc/credentials/alts/internal/authinfo",
-    "duration_ns": 2309000000
+    "duration_ns": 5000000
   },
   {
     "name": "google.golang.org/grpc/credentials/alts/internal/conn",
-    "duration_ns": 1356499999
+    "duration_ns": 23500000
   },
   {
     "name": "google.golang.org/grpc/credentials/alts/internal/handshaker",
-    "duration_ns": 2425000000
+    "duration_ns": 79000000
   },
   {
     "name": "google.golang.org/grpc/credentials/alts/internal/handshaker/service",
-    "duration_ns": 2314500000
+    "duration_ns": 5000000
   },
   {
     "name": "google.golang.org/grpc/credentials/google",
-    "duration_ns": 3514500000
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/credentials/jwt",
-    "duration_ns": 3365500000
+    "duration_ns": 51000000
   },
   {
     "name": "google.golang.org/grpc/credentials/local",
-    "duration_ns": 1431500000
+    "duration_ns": 6500000
   },
   {
     "name": "google.golang.org/grpc/credentials/oauth",
-    "duration_ns": 1301000000
+    "duration_ns": 3500000
   },
   {
     "name": "google.golang.org/grpc/credentials/sts",
-    "duration_ns": 4546000000
+    "duration_ns": 2041000000
   },
   {
     "name": "google.golang.org/grpc/credentials/tls/certprovider",
-    "duration_ns": 1908000000
+    "duration_ns": 154000000
+  },
+  {
+    "name": "google.golang.org/grpc/credentials/tls/certprovider/pemfile",
+    "duration_ns": 2400000000
   },
   {
     "name": "google.golang.org/grpc/credentials/xds",
-    "duration_ns": 2508000000
+    "duration_ns": 357000000
   },
   {
     "name": "google.golang.org/grpc/encoding",
-    "duration_ns": 3229000000
+    "duration_ns": 46000000
   },
   {
     "name": "google.golang.org/grpc/encoding/proto",
-    "duration_ns": 1325000000
+    "duration_ns": 17500000
   },
   {
     "name": "google.golang.org/grpc/experimental",
-    "duration_ns": 3152500000
+    "duration_ns": 5000000
   },
   {
     "name": "google.golang.org/grpc/experimental/balancer/hostname",
-    "duration_ns": 1316000000
+    "duration_ns": 4000000
   },
   {
     "name": "google.golang.org/grpc/experimental/balancer/weight",
-    "duration_ns": 1343000000
+    "duration_ns": 4000000
   },
   {
     "name": "google.golang.org/grpc/experimental/credentials",
-    "duration_ns": 3343500000
+    "duration_ns": 185500000
   },
   {
     "name": "google.golang.org/grpc/experimental/credentials/internal",
-    "duration_ns": 1357500000
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/experimental/stats",
-    "duration_ns": 1238999999
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/grpclog/internal",
-    "duration_ns": 842000000
+    "duration_ns": 4000000
   },
   {
     "name": "google.golang.org/grpc/health",
-    "duration_ns": 2963500000
+    "duration_ns": 167000000
   },
   {
     "name": "google.golang.org/grpc/internal/balancer/gracefulswitch",
-    "duration_ns": 1757000000
+    "duration_ns": 100500000
   },
   {
     "name": "google.golang.org/grpc/internal/balancergroup",
-    "duration_ns": 5461000000
+    "duration_ns": 3782000000
   },
   {
     "name": "google.golang.org/grpc/internal/binarylog",
-    "duration_ns": 1426000000
+    "duration_ns": 25000000
   },
   {
     "name": "google.golang.org/grpc/internal/buffer",
-    "duration_ns": 1173000000
+    "duration_ns": 6000000
   },
   {
     "name": "google.golang.org/grpc/internal/cache",
-    "duration_ns": 1874000000
+    "duration_ns": 662000000
+  },
+  {
+    "name": "google.golang.org/grpc/internal/channelz",
+    "duration_ns": 5000000
   },
   {
     "name": "google.golang.org/grpc/internal/credentials",
-    "duration_ns": 1365500000
+    "duration_ns": 8000000
   },
   {
     "name": "google.golang.org/grpc/internal/credentials/spiffe",
-    "duration_ns": 1071000000
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/internal/credentials/xds",
-    "duration_ns": 2086500000
+    "duration_ns": 98500000
   },
   {
     "name": "google.golang.org/grpc/internal/envconfig",
-    "duration_ns": 1166500000
+    "duration_ns": 6000000
   },
   {
     "name": "google.golang.org/grpc/internal/googlecloud",
-    "duration_ns": 761500000
+    "duration_ns": 2000000
   },
   {
     "name": "google.golang.org/grpc/internal/grpcsync",
-    "duration_ns": 1293000000
+    "duration_ns": 70500000
   },
   {
     "name": "google.golang.org/grpc/internal/grpctest",
-    "duration_ns": 1168000000
+    "duration_ns": 12500000
   },
   {
     "name": "google.golang.org/grpc/internal/grpcutil",
-    "duration_ns": 789000000
+    "duration_ns": 3000000
   },
   {
     "name": "google.golang.org/grpc/internal/hierarchy",
-    "duration_ns": 1361500000
+    "duration_ns": 5000000
   },
   {
     "name": "google.golang.org/grpc/internal/idle",
-    "duration_ns": 17083499999
+    "duration_ns": 13852000000
   },
   {
     "name": "google.golang.org/grpc/internal/leakcheck",
-    "duration_ns": 4922500000
+    "duration_ns": 4063999999
   },
   {
     "name": "google.golang.org/grpc/internal/mem",
-    "duration_ns": 1161000000
+    "duration_ns": 4000000
   },
   {
     "name": "google.golang.org/grpc/internal/metadata",
-    "duration_ns": 1330000000
+    "duration_ns": 4000000
   },
   {
     "name": "google.golang.org/grpc/internal/optional",
-    "duration_ns": 1158500000
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/internal/profiling",
-    "duration_ns": 1808999999
+    "duration_ns": 29000000
   },
   {
     "name": "google.golang.org/grpc/internal/profiling/buffer",
-    "duration_ns": 1187500000
+    "duration_ns": 33000000
   },
   {
     "name": "google.golang.org/grpc/internal/proxyattributes",
-    "duration_ns": 1324500000
+    "duration_ns": 4000000
   },
   {
     "name": "google.golang.org/grpc/internal/resolver",
-    "duration_ns": 1547000000
+    "duration_ns": 159000000
   },
   {
     "name": "google.golang.org/grpc/internal/resolver/delegatingresolver",
-    "duration_ns": 1800500000
+    "duration_ns": 106500000
   },
   {
     "name": "google.golang.org/grpc/internal/resolver/dns",
-    "duration_ns": 2713000000
+    "duration_ns": 216000000
   },
   {
     "name": "google.golang.org/grpc/internal/serviceconfig",
-    "duration_ns": 1379500000
+    "duration_ns": 4000000
   },
   {
     "name": "google.golang.org/grpc/internal/stats",
-    "duration_ns": 2439000000
+    "duration_ns": 11000000
   },
   {
     "name": "google.golang.org/grpc/internal/status",
-    "duration_ns": 1283500000
+    "duration_ns": 3500000
   },
   {
     "name": "google.golang.org/grpc/internal/testutils",
-    "duration_ns": 1613000000
+    "duration_ns": 36000000
   },
   {
     "name": "google.golang.org/grpc/internal/transport",
-    "duration_ns": 14854000000
+    "duration_ns": 11372500000
   },
   {
     "name": "google.golang.org/grpc/internal/transport/readyreader",
-    "duration_ns": 1594499999
+    "duration_ns": 23000000
   },
   {
     "name": "google.golang.org/grpc/internal/wrr",
-    "duration_ns": 1238499999
+    "duration_ns": 9000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds",
-    "duration_ns": 1899500000
+    "duration_ns": 5000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/cdsbalancer",
-    "duration_ns": 18164000000
+    "duration_ns": 434000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/cdsbalancer/e2e_test",
-    "duration_ns": 13637500000
+    "duration_ns": 8996000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/clusterimpl",
-    "duration_ns": 5049000000
+    "duration_ns": 14000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/clusterimpl/tests",
-    "duration_ns": 9131000000
+    "duration_ns": 3940000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/clustermanager",
-    "duration_ns": 5571000000
+    "duration_ns": 534000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/clustermanager/e2e_test",
-    "duration_ns": 5087000000
+    "duration_ns": 31500000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/outlierdetection",
-    "duration_ns": 5143000000
+    "duration_ns": 216000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/outlierdetection/e2e_test",
-    "duration_ns": 3592500000
+    "duration_ns": 385500000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/priority",
-    "duration_ns": 4292000000
+    "duration_ns": 2558500000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/balancer/wrrlocality",
-    "duration_ns": 1700499999
+    "duration_ns": 6000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/bootstrap",
-    "duration_ns": 5882000000
+    "duration_ns": 33000000
+  },
+  {
+    "name": "google.golang.org/grpc/internal/xds/bootstrap/jwtcreds",
+    "duration_ns": 7000000
+  },
+  {
+    "name": "google.golang.org/grpc/internal/xds/bootstrap/tlscreds",
+    "duration_ns": 205000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/clients/grpctransport",
-    "duration_ns": 6132000000
+    "duration_ns": 508000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/clients/internal",
-    "duration_ns": 2021999999
+    "duration_ns": 9000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/clients/internal/buffer",
-    "duration_ns": 1202000000
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/clients/internal/syncutil",
-    "duration_ns": 1253500000
+    "duration_ns": 22000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/clients/lrsclient",
-    "duration_ns": 4525500000
+    "duration_ns": 307500000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/clients/xdsclient",
-    "duration_ns": 4720500000
+    "duration_ns": 67000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/clients/xdsclient/test",
-    "duration_ns": 17940500000
+    "duration_ns": 12886000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/clusterspecifier/rls",
-    "duration_ns": 5058500000
+    "duration_ns": 10000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/httpfilter",
-    "duration_ns": 2119999999
+    "duration_ns": 6000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/httpfilter/extproc",
-    "duration_ns": 5125000000
+    "duration_ns": 18500000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/httpfilter/fault",
-    "duration_ns": 5208500000
+    "duration_ns": 209000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/matcher",
-    "duration_ns": 1573499999
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/rbac",
-    "duration_ns": 3415500000
+    "duration_ns": 23500000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/resolver",
-    "duration_ns": 5424500000
+    "duration_ns": 283000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/server",
-    "duration_ns": 5119500000
+    "duration_ns": 55500000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/test/e2e",
-    "duration_ns": 5041000000
+    "duration_ns": 9000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/testutils",
-    "duration_ns": 5010500000
+    "duration_ns": 8000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/xdsclient",
-    "duration_ns": 5356000000
+    "duration_ns": 275000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/xdsclient/pool",
-    "duration_ns": 5073000000
+    "duration_ns": 29500000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/xdsclient/tests",
-    "duration_ns": 19362000000
+    "duration_ns": 13875000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/xdsclient/tests/fallback",
-    "duration_ns": 23822500000
+    "duration_ns": 17984000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/xdsclient/xdslbregistry",
-    "duration_ns": 5082000000
+    "duration_ns": 383000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/xdsclient/xdsresource",
-    "duration_ns": 5102000000
+    "duration_ns": 189000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/xdsclient/xdsresource/tests",
-    "duration_ns": 5080000000
+    "duration_ns": 13000000
   },
   {
     "name": "google.golang.org/grpc/internal/xds/xdsdepmgr",
-    "duration_ns": 5279000000
+    "duration_ns": 199000000
   },
   {
     "name": "google.golang.org/grpc/interop",
-    "duration_ns": 8083999999
+    "duration_ns": 3439500000
   },
   {
     "name": "google.golang.org/grpc/mem",
-    "duration_ns": 1201000000
+    "duration_ns": 25500000
   },
   {
     "name": "google.golang.org/grpc/metadata",
-    "duration_ns": 1171500000
+    "duration_ns": 14000000
   },
   {
     "name": "google.golang.org/grpc/orca",
-    "duration_ns": 3498500000
+    "duration_ns": 205000000
   },
   {
     "name": "google.golang.org/grpc/peer",
-    "duration_ns": 879000000
+    "duration_ns": 3000000
   },
   {
     "name": "google.golang.org/grpc/reflection/test",
-    "duration_ns": 2467500000
+    "duration_ns": 27000000
   },
   {
     "name": "google.golang.org/grpc/resolver",
-    "duration_ns": 1403000000
+    "duration_ns": 16000000
   },
   {
     "name": "google.golang.org/grpc/resolver/manual",
-    "duration_ns": 2306000000
+    "duration_ns": 5000000
   },
   {
     "name": "google.golang.org/grpc/stats",
-    "duration_ns": 3295000000
+    "duration_ns": 74500000
   },
   {
     "name": "google.golang.org/grpc/stats/opentelemetry",
-    "duration_ns": 6454500000
+    "duration_ns": 1403500000
   },
   {
     "name": "google.golang.org/grpc/stats/opentelemetry/csm",
-    "duration_ns": 5916000000
+    "duration_ns": 54000000
   },
   {
     "name": "google.golang.org/grpc/stats/opentelemetry/internal/tracing",
-    "duration_ns": 1207000000
+    "duration_ns": 5500000
   },
   {
     "name": "google.golang.org/grpc/status",
-    "duration_ns": 3333500000
+    "duration_ns": 51000000
+  },
+  {
+    "name": "google.golang.org/grpc/test",
+    "duration_ns": 34381000000
   },
   {
     "name": "google.golang.org/grpc/test/bufconn",
-    "duration_ns": 1401500000
+    "duration_ns": 213000000
+  },
+  {
+    "name": "google.golang.org/grpc/test/xds",
+    "duration_ns": 7453000000
   },
   {
     "name": "google.golang.org/grpc/xds",
-    "duration_ns": 10797000000
+    "duration_ns": 5634000000
   },
   {
     "name": "google.golang.org/grpc/xds/bootstrap",
-    "duration_ns": 3521500000
+    "duration_ns": 7000000
   },
   {
     "name": "google.golang.org/grpc/xds/csds",
-    "duration_ns": 5377500000
+    "duration_ns": 338500000
   },
   {
     "name": "google.golang.org/grpc/xds/googledirectpath",
-    "duration_ns": 6996500000
+    "duration_ns": 26000000
   },
   {
     "name": "google.golang.org/grpc/xds/test",
-    "duration_ns": 5441500000
+    "duration_ns": 529000000
   }
 ]

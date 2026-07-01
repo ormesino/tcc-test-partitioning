@@ -1,934 +1,946 @@
 [
   {
     "name": "github.com/cli/cli/v2/api",
-    "duration_ns": 2521500000
+    "duration_ns": 31000000
   },
   {
     "name": "github.com/cli/cli/v2/cmd/gen-docs",
-    "duration_ns": 5395000000
+    "duration_ns": 142000000
   },
   {
     "name": "github.com/cli/cli/v2/context",
-    "duration_ns": 1136500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/git",
-    "duration_ns": 5399000000
+    "duration_ns": 621500000
   },
   {
     "name": "github.com/cli/cli/v2/internal/agents",
-    "duration_ns": 1066500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/authflow",
-    "duration_ns": 2146999999
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/ci",
-    "duration_ns": 1073000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/codespaces",
-    "duration_ns": 3342000000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/codespaces/api",
-    "duration_ns": 3576500000
+    "duration_ns": 1030999999
   },
   {
     "name": "github.com/cli/cli/v2/internal/codespaces/connection",
-    "duration_ns": 2578500000
+    "duration_ns": 61000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/codespaces/portforwarder",
-    "duration_ns": 2692000000
+    "duration_ns": 196000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/codespaces/rpc",
-    "duration_ns": 2782000000
+    "duration_ns": 19000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/config",
-    "duration_ns": 2181500000
+    "duration_ns": 43500000
   },
   {
     "name": "github.com/cli/cli/v2/internal/config/migration",
-    "duration_ns": 2164000000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/docs",
-    "duration_ns": 4182500000
+    "duration_ns": 33500000
   },
   {
     "name": "github.com/cli/cli/v2/internal/featuredetection",
-    "duration_ns": 2182500000
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/flock",
-    "duration_ns": 1103000000
+    "duration_ns": 5000000
+  },
+  {
+    "name": "github.com/cli/cli/v2/internal/ghcmd",
+    "duration_ns": 36500000
   },
   {
     "name": "github.com/cli/cli/v2/internal/ghinstance",
-    "duration_ns": 1072000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/ghrepo",
-    "duration_ns": 881000000
+    "duration_ns": 3000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/licenses",
-    "duration_ns": 1093000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/prompter",
-    "duration_ns": 3335500000
+    "duration_ns": 1950000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/safepaths",
-    "duration_ns": 1078000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/skills/discovery",
-    "duration_ns": 2108499999
+    "duration_ns": 17000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/skills/frontmatter",
-    "duration_ns": 1146500000
+    "duration_ns": 4000000
+  },
+  {
+    "name": "github.com/cli/cli/v2/internal/skills/installer",
+    "duration_ns": 20000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/skills/lockfile",
-    "duration_ns": 1330000000
+    "duration_ns": 11500000
   },
   {
     "name": "github.com/cli/cli/v2/internal/skills/registry",
-    "duration_ns": 1102500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/skills/source",
-    "duration_ns": 1152500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/tableprinter",
-    "duration_ns": 1169000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/telemetry",
-    "duration_ns": 1404000000
+    "duration_ns": 59000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/text",
-    "duration_ns": 1142500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/update",
-    "duration_ns": 2710500000
+    "duration_ns": 28000000
   },
   {
     "name": "github.com/cli/cli/v2/internal/zip",
-    "duration_ns": 1072000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/agent-task",
-    "duration_ns": 3814000000
+    "duration_ns": 24500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/agent-task/capi",
-    "duration_ns": 2086499999
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/agent-task/create",
-    "duration_ns": 3714000000
+    "duration_ns": 24000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/agent-task/list",
-    "duration_ns": 3553000000
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/agent-task/shared",
-    "duration_ns": 3557499999
+    "duration_ns": 44000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/agent-task/view",
-    "duration_ns": 3804500000
+    "duration_ns": 24500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/alias/delete",
-    "duration_ns": 1659500000
+    "duration_ns": 5500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/alias/imports",
-    "duration_ns": 1708499999
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/alias/list",
-    "duration_ns": 1632500000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/alias/set",
-    "duration_ns": 1664000000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/alias/shared",
-    "duration_ns": 1080000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/api",
-    "duration_ns": 4037500000
+    "duration_ns": 38500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/api",
-    "duration_ns": 6022000000
+    "duration_ns": 2081999999
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/artifact",
-    "duration_ns": 3935500000
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/artifact/digest",
-    "duration_ns": 1073500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/artifact/oci",
-    "duration_ns": 3933000000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/auth",
-    "duration_ns": 1109500000
+    "duration_ns": 3500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/download",
-    "duration_ns": 4622000000
+    "duration_ns": 20500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/inspect",
-    "duration_ns": 4251500000
+    "duration_ns": 15000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/trustedroot",
-    "duration_ns": 4436500000
+    "duration_ns": 12000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/verification",
-    "duration_ns": 3957500000
+    "duration_ns": 15000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/attestation/verify",
-    "duration_ns": 4882000000
+    "duration_ns": 62500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/gitcredential",
-    "duration_ns": 1634000000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/login",
-    "duration_ns": 2969500000
+    "duration_ns": 17000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/logout",
-    "duration_ns": 1764000000
+    "duration_ns": 26500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/refresh",
-    "duration_ns": 2870000000
+    "duration_ns": 25000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/setupgit",
-    "duration_ns": 1667000000
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/shared",
-    "duration_ns": 2640500000
+    "duration_ns": 7500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/shared/gitcredentials",
-    "duration_ns": 2619500000
+    "duration_ns": 82500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/status",
-    "duration_ns": 3129500000
+    "duration_ns": 30000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/switch",
-    "duration_ns": 1746000000
+    "duration_ns": 25000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/auth/token",
-    "duration_ns": 1702500000
+    "duration_ns": 12500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/browse",
-    "duration_ns": 2588500000
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/cache/delete",
-    "duration_ns": 2446500000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/cache/list",
-    "duration_ns": 2979500000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/cache/shared",
-    "duration_ns": 2296000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/codespace",
-    "duration_ns": 4614000000
+    "duration_ns": 253500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/completion",
-    "duration_ns": 1731500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/config/clear-cache",
-    "duration_ns": 1661000000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/config/get",
-    "duration_ns": 1654000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/config/list",
-    "duration_ns": 1635500000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/config/set",
-    "duration_ns": 1675000000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/copilot",
-    "duration_ns": 2395000000
+    "duration_ns": 16000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/extension",
-    "duration_ns": 6673000000
+    "duration_ns": 175500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/extension/browse",
-    "duration_ns": 3596000000
+    "duration_ns": 24500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/factory",
-    "duration_ns": 3054500000
+    "duration_ns": 27000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gist/clone",
-    "duration_ns": 1691500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gist/create",
-    "duration_ns": 2418500000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gist/delete",
-    "duration_ns": 2482500000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gist/edit",
-    "duration_ns": 2519000000
+    "duration_ns": 13000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gist/list",
-    "duration_ns": 2505500000
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gist/rename",
-    "duration_ns": 2447000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gist/shared",
-    "duration_ns": 2134999999
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gist/view",
-    "duration_ns": 3674000000
+    "duration_ns": 28000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gpg-key/add",
-    "duration_ns": 2247500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gpg-key/delete",
-    "duration_ns": 2357499999
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/gpg-key/list",
-    "duration_ns": 2269500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/close",
-    "duration_ns": 2840499999
+    "duration_ns": 25500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/comment",
-    "duration_ns": 2934500000
+    "duration_ns": 27000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/create",
-    "duration_ns": 3133500000
+    "duration_ns": 45000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/delete",
-    "duration_ns": 2849500000
+    "duration_ns": 24000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/develop",
-    "duration_ns": 2900000000
+    "duration_ns": 29000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/edit",
-    "duration_ns": 3074500000
+    "duration_ns": 42000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/list",
-    "duration_ns": 3563000000
+    "duration_ns": 27500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/lock",
-    "duration_ns": 2868500000
+    "duration_ns": 26000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/pin",
-    "duration_ns": 2811500000
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/reopen",
-    "duration_ns": 2837499999
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/shared",
-    "duration_ns": 2691500000
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/status",
-    "duration_ns": 3491500000
+    "duration_ns": 24000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/transfer",
-    "duration_ns": 2826000000
+    "duration_ns": 22500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/unpin",
-    "duration_ns": 2823000000
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/issue/view",
-    "duration_ns": 3865500000
+    "duration_ns": 37000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/label",
-    "duration_ns": 3183500000
+    "duration_ns": 14000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/org/list",
-    "duration_ns": 2396000000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/checkout",
-    "duration_ns": 2934500000
+    "duration_ns": 29000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/checks",
-    "duration_ns": 3565500000
+    "duration_ns": 30000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/close",
-    "duration_ns": 2847000000
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/comment",
-    "duration_ns": 2976999999
+    "duration_ns": 27500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/create",
-    "duration_ns": 3939499999
+    "duration_ns": 53500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/diff",
-    "duration_ns": 2876500000
+    "duration_ns": 26000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/edit",
-    "duration_ns": 2996500000
+    "duration_ns": 38000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/list",
-    "duration_ns": 3615000000
+    "duration_ns": 30000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/merge",
-    "duration_ns": 3152500000
+    "duration_ns": 34000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/ready",
-    "duration_ns": 2844499999
+    "duration_ns": 22000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/reopen",
-    "duration_ns": 2825500000
+    "duration_ns": 22000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/revert",
-    "duration_ns": 2868500000
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/review",
-    "duration_ns": 3786000000
+    "duration_ns": 25500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/shared",
-    "duration_ns": 2848000000
+    "duration_ns": 35000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/status",
-    "duration_ns": 3617500000
+    "duration_ns": 29000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/update-branch",
-    "duration_ns": 2825500000
+    "duration_ns": 24000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/pr/view",
-    "duration_ns": 3898000000
+    "duration_ns": 37000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/close",
-    "duration_ns": 3353499999
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/copy",
-    "duration_ns": 3362500000
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/create",
-    "duration_ns": 3356500000
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/delete",
-    "duration_ns": 3368000000
+    "duration_ns": 13500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/edit",
-    "duration_ns": 3415000000
+    "duration_ns": 15000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/field-create",
-    "duration_ns": 3394000000
+    "duration_ns": 18000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/field-delete",
-    "duration_ns": 3336500000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/field-list",
-    "duration_ns": 3347499999
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/item-add",
-    "duration_ns": 3393000000
+    "duration_ns": 15000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/item-archive",
-    "duration_ns": 3397000000
+    "duration_ns": 20000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/item-create",
-    "duration_ns": 3363000000
+    "duration_ns": 15000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/item-delete",
-    "duration_ns": 3362000000
+    "duration_ns": 13000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/item-edit",
-    "duration_ns": 3430500000
+    "duration_ns": 12000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/item-list",
-    "duration_ns": 3367500000
+    "duration_ns": 10500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/link",
-    "duration_ns": 3424500000
+    "duration_ns": 12000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/list",
-    "duration_ns": 3383000000
+    "duration_ns": 16500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/mark-template",
-    "duration_ns": 3374000000
+    "duration_ns": 12000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/shared/format",
-    "duration_ns": 1218500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/shared/queries",
-    "duration_ns": 2943500000
+    "duration_ns": 16000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/unlink",
-    "duration_ns": 3415000000
+    "duration_ns": 12000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/project/view",
-    "duration_ns": 3978000000
+    "duration_ns": 36500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/create",
-    "duration_ns": 4587500000
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/delete",
-    "duration_ns": 4367000000
+    "duration_ns": 13000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/delete-asset",
-    "duration_ns": 4367000000
+    "duration_ns": 13000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/download",
-    "duration_ns": 4461000000
+    "duration_ns": 25000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/edit",
-    "duration_ns": 4441000000
+    "duration_ns": 15000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/list",
-    "duration_ns": 2983500000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/shared",
-    "duration_ns": 4184000000
+    "duration_ns": 14000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/upload",
-    "duration_ns": 4137000000
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/verify",
-    "duration_ns": 4609500000
+    "duration_ns": 14000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/verify-asset",
-    "duration_ns": 4642000000
+    "duration_ns": 16000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/release/view",
-    "duration_ns": 4358000000
+    "duration_ns": 32000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/archive",
-    "duration_ns": 2387000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/autolink/create",
-    "duration_ns": 2284500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/autolink/delete",
-    "duration_ns": 2293000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/autolink/list",
-    "duration_ns": 2909000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/autolink/view",
-    "duration_ns": 2904000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/clone",
-    "duration_ns": 2539500000
+    "duration_ns": 11000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/create",
-    "duration_ns": 5534500000
+    "duration_ns": 3019000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/delete",
-    "duration_ns": 2409000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/deploy-key/add",
-    "duration_ns": 2176500000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/deploy-key/delete",
-    "duration_ns": 2179000000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/deploy-key/list",
-    "duration_ns": 2182500000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/edit",
-    "duration_ns": 2477500000
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/fork",
-    "duration_ns": 2501500000
+    "duration_ns": 16000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/gitignore/list",
-    "duration_ns": 2391500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/gitignore/view",
-    "duration_ns": 2391500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/license/list",
-    "duration_ns": 2388500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/license/view",
-    "duration_ns": 2396000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/list",
-    "duration_ns": 3127000000
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/rename",
-    "duration_ns": 2413500000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/setdefault",
-    "duration_ns": 2428500000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/shared",
-    "duration_ns": 784500000
+    "duration_ns": 3000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/sync",
-    "duration_ns": 2428000000
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/unarchive",
-    "duration_ns": 2380000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/repo/view",
-    "duration_ns": 3727000000
+    "duration_ns": 28000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/root",
-    "duration_ns": 5952000000
+    "duration_ns": 781000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/ruleset/check",
-    "duration_ns": 2399000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/ruleset/list",
-    "duration_ns": 2424000000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/ruleset/view",
-    "duration_ns": 2432000000
+    "duration_ns": 7500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/run/cancel",
-    "duration_ns": 2404000000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/run/delete",
-    "duration_ns": 2390000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/run/download",
-    "duration_ns": 2348500000
+    "duration_ns": 11000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/run/list",
-    "duration_ns": 3003000000
+    "duration_ns": 12000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/run/rerun",
-    "duration_ns": 2460500000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/run/shared",
-    "duration_ns": 2296500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/run/view",
-    "duration_ns": 3350500000
+    "duration_ns": 63500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/run/watch",
-    "duration_ns": 2420000000
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/search/code",
-    "duration_ns": 3015000000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/search/commits",
-    "duration_ns": 2996500000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/search/issues",
-    "duration_ns": 3006500000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/search/prs",
-    "duration_ns": 3030000000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/search/repos",
-    "duration_ns": 2991000000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/search/shared",
-    "duration_ns": 2340000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/secret/delete",
-    "duration_ns": 2491000000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/secret/list",
-    "duration_ns": 3062500000
+    "duration_ns": 12000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/secret/set",
-    "duration_ns": 2598000000
+    "duration_ns": 14000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/secret/shared",
-    "duration_ns": 1324500000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/send-telemetry",
-    "duration_ns": 3453500000
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/skills",
-    "duration_ns": 3576000000
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/skills/install",
-    "duration_ns": 2943500000
+    "duration_ns": 94500000
+  },
+  {
+    "name": "github.com/cli/cli/v2/pkg/cmd/skills/list",
+    "duration_ns": 15000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/skills/preview",
-    "duration_ns": 3678000000
+    "duration_ns": 47000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/skills/publish",
-    "duration_ns": 2646500000
+    "duration_ns": 42500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/skills/search",
-    "duration_ns": 3060500000
+    "duration_ns": 15000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/skills/update",
-    "duration_ns": 2616500000
+    "duration_ns": 23000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/ssh-key/add",
-    "duration_ns": 2247000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/ssh-key/delete",
-    "duration_ns": 2359500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/ssh-key/list",
-    "duration_ns": 2254500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/status",
-    "duration_ns": 2867500000
+    "duration_ns": 32000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/variable/delete",
-    "duration_ns": 2394000000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/variable/get",
-    "duration_ns": 2992500000
+    "duration_ns": 9000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/variable/list",
-    "duration_ns": 2968000000
+    "duration_ns": 8000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/variable/set",
-    "duration_ns": 2488500000
+    "duration_ns": 8500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/variable/shared",
-    "duration_ns": 1650000000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/version",
-    "duration_ns": 1636000000
+    "duration_ns": 5000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/workflow/disable",
-    "duration_ns": 2392500000
+    "duration_ns": 6000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/workflow/enable",
-    "duration_ns": 2392000000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/workflow/list",
-    "duration_ns": 2937500000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/workflow/run",
-    "duration_ns": 2445000000
+    "duration_ns": 10000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/workflow/shared",
-    "duration_ns": 2300500000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmd/workflow/view",
-    "duration_ns": 3685500000
+    "duration_ns": 26500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/cmdutil",
-    "duration_ns": 2224500000
+    "duration_ns": 11500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/extensions",
-    "duration_ns": 1081000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/githubtemplate",
-    "duration_ns": 914500000
+    "duration_ns": 14000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/iostreams",
-    "duration_ns": 1155500000
+    "duration_ns": 7000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/jsoncolor",
-    "duration_ns": 1153000000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/option",
-    "duration_ns": 1070500000
+    "duration_ns": 4500000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/search",
-    "duration_ns": 2221000000
+    "duration_ns": 15000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/set",
-    "duration_ns": 1072500000
+    "duration_ns": 4000000
   },
   {
     "name": "github.com/cli/cli/v2/pkg/surveyext",
-    "duration_ns": 1459500000
+    "duration_ns": 17000000
   }
 ]
