@@ -1,0 +1,6 @@
+go version go1.26.2 windows/amd64
+b29f0186b576a9e77c0802aa854a21a735c68a18
+cli da68cb8f6f597cfc3838cf40f89ecc01f4e53233
+grpc-go faa34bf170ceef07b9ada9bcd44dc6e16a55d1f4
+goreleaser ce96e79b4883bdea39cf2cf5fe33fa63f5df4dd0
+hugo 72495f9fba69edadd50a7ecb9ae9fb3d9c46156b
