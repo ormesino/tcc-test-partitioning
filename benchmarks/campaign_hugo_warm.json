@@ -9,6 +9,7 @@
     "all"
   ],
   "repetitions": 3,
+  "max_attempts": 3,
   "timeout_minutes": 60,
   "warm_cache": true,
   "output_dir": "benchmarks/results/hugo",

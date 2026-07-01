@@ -39,6 +39,11 @@ type Config struct {
 	// (project, algorithm, workers) combination. >=1.
 	Repetitions int `json:"repetitions"`
 
+	// MaxAttempts is the maximum number of attempts for one logical
+	// repetition. Failed attempts are logged but never aggregated. A zero value
+	// resolves to 3 so existing campaign configurations gain retry protection.
+	MaxAttempts int `json:"max_attempts,omitempty"`
+
 	// TimeoutMinutes is the timeout for one experimental repetition
 	// (one project, algorithm and worker-count combination). The same
 	// deadline is applied to the concurrently launched worker commands.
@@ -120,6 +125,12 @@ func (c *Config) validate() error {
 	}
 	if c.Repetitions < 1 {
 		return fmt.Errorf("config.repetitions must be >= 1 (got %d)", c.Repetitions)
+	}
+	if c.MaxAttempts == 0 {
+		c.MaxAttempts = 3
+	}
+	if c.MaxAttempts < 1 {
+		return fmt.Errorf("config.max_attempts must be >= 1 (got %d)", c.MaxAttempts)
 	}
 	if c.OutputDir == "" {
 		return fmt.Errorf("config.output_dir is required")

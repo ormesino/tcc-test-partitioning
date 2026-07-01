@@ -123,3 +123,57 @@ func TestFinalConfigsReferenceValidNativeBaselines(t *testing.T) {
 		})
 	}
 }
+
+func TestConfigValidateDefaultsMaxAttemptsToThree(t *testing.T) {
+	cfg := Config{
+		Mode: "simulate", Workers: []int{2}, Algorithms: []string{"lpt"},
+		Repetitions: 1, OutputDir: "out", Projects: []ProjectSpec{{Name: "p", DataFile: "data.json"}},
+	}
+	if err := cfg.validate(); err != nil {
+		t.Fatalf("validate: %v", err)
+	}
+	if cfg.MaxAttempts != 3 {
+		t.Fatalf("MaxAttempts = %d, want 3", cfg.MaxAttempts)
+	}
+}
+
+func TestRunWithRetriesSucceedsOnThirdAttempt(t *testing.T) {
+	runs := 0
+	var failedAttempts []int
+	rec := runWithRetries(3, func() rawRecord {
+		runs++
+		if runs < 3 {
+			return rawRecord{ExecError: "transient failure"}
+		}
+		return rawRecord{}
+	}, func(attempt int, _ string, willRetry bool) {
+		failedAttempts = append(failedAttempts, attempt)
+		if !willRetry {
+			t.Errorf("attempt %d should be retried", attempt)
+		}
+	})
+
+	if runs != 3 || rec.Attempts != 3 || rec.ExecError != "" {
+		t.Fatalf("runs=%d rec=%+v, want success on third attempt", runs, rec)
+	}
+	if len(failedAttempts) != 2 || failedAttempts[0] != 1 || failedAttempts[1] != 2 {
+		t.Fatalf("failed attempts = %v, want [1 2]", failedAttempts)
+	}
+}
+
+func TestRunWithRetriesReturnsFinalFailure(t *testing.T) {
+	runs := 0
+	finalCallbackMarked := false
+	rec := runWithRetries(3, func() rawRecord {
+		runs++
+		return rawRecord{ExecError: "persistent failure"}
+	}, func(attempt int, _ string, willRetry bool) {
+		if attempt == 3 && !willRetry {
+			finalCallbackMarked = true
+		}
+	})
+
+	if runs != 3 || rec.Attempts != 3 || rec.ExecError == "" || !finalCallbackMarked {
+		t.Fatalf("runs=%d rec=%+v finalCallback=%v", runs, rec, finalCallbackMarked)
+	}
+}

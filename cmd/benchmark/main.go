@@ -109,6 +109,7 @@ func main() {
 	fmt.Printf("Workers:    %v\n", cfg.Workers)
 	fmt.Printf("Algorithms: %v\n", cfg.Algorithms)
 	fmt.Printf("Reps:       %d\n", cfg.Repetitions)
+	fmt.Printf("Attempts:   up to %d per logical repetition\n", cfg.MaxAttempts)
 	fmt.Printf("Output dir: %s\n\n", runDir)
 
 	var raw []rawRecord
@@ -157,12 +158,26 @@ func main() {
 					fmt.Printf("[%s] START combination %d/%d | project=%s regime=%s rep=%d/%d workers=%d algorithm=%s timeout=%dm\n",
 						combinationStarted.Format(time.RFC3339), combinationIndex, totalCombinations,
 						proj.Name, cacheRegime, rep, cfg.Repetitions, w, alg.Name(), cfg.TimeoutMinutes)
-					rec := runOne(cfg, proj, packages, theoreticalT1, t1, alg, w, rep)
+					rec := runWithRetries(
+						cfg.MaxAttempts,
+						func() rawRecord {
+							return runOne(cfg, proj, packages, theoreticalT1, t1, alg, w, rep)
+						},
+						func(attempt int, executionError string, willRetry bool) {
+							action := "IGNORED after final attempt"
+							if willRetry {
+								action = "RETRYING"
+							}
+							fmt.Printf("[%s] ATTEMPT FAILED | combination=%d/%d attempt=%d/%d action=%s error=%s\n",
+								time.Now().Format(time.RFC3339), combinationIndex, totalCombinations,
+								attempt, cfg.MaxAttempts, action, executionError)
+						},
+					)
 					raw = append(raw, rec)
-					status := "success"
+					status := fmt.Sprintf("success after %d attempt(s)", rec.Attempts)
 					if rec.ExecError != "" {
 						hadExecutionErrors = true
-						status = "error: " + rec.ExecError
+						status = fmt.Sprintf("ignored after %d failed attempts: %s", rec.Attempts, rec.ExecError)
 					}
 					fmt.Printf("[%s] END   combination %d/%d | status=%s elapsed=%v planned_makespan=%v overhead=%v\n\n",
 						time.Now().Format(time.RFC3339), combinationIndex, totalCombinations,
@@ -205,8 +220,29 @@ func main() {
 		finishedAt.Format(time.RFC3339), finishedAt.Sub(startedAt))
 	fmt.Printf("Reports written under %s\n", runDir)
 	if hadExecutionErrors {
-		fatal("one or more benchmark executions failed; reports were preserved for diagnosis")
+		fatal("one or more logical repetitions failed after all retry attempts; reports were preserved and failed repetitions were excluded from aggregates")
 	}
+}
+
+// runWithRetries executes one logical repetition up to maxAttempts times.
+// Only the final successful result (or the final failed result) is returned;
+// failed attempts are reported through onFailure and never become samples.
+func runWithRetries(maxAttempts int, run func() rawRecord, onFailure func(int, string, bool)) rawRecord {
+	if maxAttempts < 1 {
+		maxAttempts = 1
+	}
+	var rec rawRecord
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		rec = run()
+		rec.Attempts = attempt
+		if rec.ExecError == "" {
+			return rec
+		}
+		if onFailure != nil {
+			onFailure(attempt, rec.ExecError, attempt < maxAttempts)
+		}
+	}
+	return rec
 }
 
 // runOne executes one (project, algorithm, workers, rep) tuple and
@@ -272,12 +308,13 @@ func runOne(cfg Config, proj ProjectSpec, packages []model.PackageInfo, theoreti
 	rec.ExecEfficiency = &efficiency
 	rec.ExecLoadStdDevS = &stddev
 
+	var workerErrors []string
 	for _, wr := range execResult.WorkerResults {
 		if wr.Error != nil {
-			rec.ExecError = wr.Error.Error()
-			break
+			workerErrors = append(workerErrors, fmt.Sprintf("worker %d: %v", wr.WorkerID, wr.Error))
 		}
 	}
+	rec.ExecError = strings.Join(workerErrors, "; ")
 	return rec
 }
 

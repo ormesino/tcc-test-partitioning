@@ -22,6 +22,7 @@ type rawRecord struct {
 	Algorithm string `json:"algorithm"`
 	Workers   int    `json:"workers"`
 	Rep       int    `json:"rep"`
+	Attempts  int    `json:"attempts"`
 
 	PlannedMakespanNS      int64   `json:"planned_makespan_ns"`
 	PlannedSpeedup         float64 `json:"planned_speedup"`
@@ -63,6 +64,7 @@ type aggregateRecord struct {
 	ExecMakespanMeanNS   *int64   `json:"exec_makespan_mean_ns,omitempty"`
 	ExecMakespanStdDevNS *int64   `json:"exec_makespan_stddev_ns,omitempty"`
 	ExecSpeedupMedian    *float64 `json:"exec_speedup_median,omitempty"`
+	ExecSuccessCount     int      `json:"exec_success_count,omitempty"`
 	ExecErrorCount       int      `json:"exec_error_count,omitempty"`
 }
 
@@ -171,6 +173,7 @@ func summarize(mode, project, algorithm string, workers int, reps []rawRecord) a
 		PartitioningOverheadMedianNS: medianInt64(overheads),
 		PartitioningOverheadMinNS:    minInt64(overheads),
 		PartitioningOverheadMaxNS:    maxInt64(overheads),
+		ExecSuccessCount:             len(execMakespans),
 		ExecErrorCount:               errCount,
 	}
 
@@ -215,7 +218,7 @@ func writeRawCSV(path string, raw []rawRecord) error {
 	defer w.Flush()
 
 	header := []string{
-		"project", "mode", "algorithm", "workers", "rep",
+		"project", "mode", "algorithm", "workers", "rep", "attempts",
 		"planned_makespan_ns", "planned_speedup", "planned_efficiency",
 		"planned_load_stddev_s", "partitioning_overhead_ns",
 		"exec_makespan_ns", "exec_speedup", "exec_efficiency",
@@ -227,7 +230,7 @@ func writeRawCSV(path string, raw []rawRecord) error {
 	for _, r := range raw {
 		row := []string{
 			r.Project, r.Mode, r.Algorithm,
-			strconv.Itoa(r.Workers), strconv.Itoa(r.Rep),
+			strconv.Itoa(r.Workers), strconv.Itoa(r.Rep), strconv.Itoa(r.Attempts),
 			strconv.FormatInt(r.PlannedMakespanNS, 10),
 			formatFloat(r.PlannedSpeedup),
 			formatFloat(r.PlannedEfficiency),
@@ -266,7 +269,7 @@ func writeAggregateCSV(path string, agg []aggregateRecord) error {
 		"exec_makespan_median_ns", "exec_makespan_min_ns",
 		"exec_makespan_max_ns", "exec_makespan_mean_ns",
 		"exec_makespan_stddev_ns", "exec_speedup_median",
-		"exec_error_count",
+		"exec_success_count", "exec_error_count",
 	}
 	if err := w.Write(header); err != nil {
 		return err
@@ -285,6 +288,7 @@ func writeAggregateCSV(path string, agg []aggregateRecord) error {
 			optInt64(r.ExecMakespanMeanNS),
 			optInt64(r.ExecMakespanStdDevNS),
 			optFloat(r.ExecSpeedupMedian),
+			strconv.Itoa(r.ExecSuccessCount),
 			strconv.Itoa(r.ExecErrorCount),
 		}
 		if err := w.Write(row); err != nil {

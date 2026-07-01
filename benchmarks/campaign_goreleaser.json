@@ -9,6 +9,7 @@
     "all"
   ],
   "repetitions": 3,
+  "max_attempts": 3,
   "timeout_minutes": 60,
   "output_dir": "benchmarks/results/goreleaser",
   "projects": [
