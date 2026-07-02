@@ -1,12 +1,12 @@
 {
   "mode": "baseline-par",
   "parallelism": 4,
-  "duration_ns": 348219093800,
-  "measured_at": "2026-06-27T22:26:16.8140153-03:00",
+  "duration_ns": 58997450414,
+  "measured_at": "2026-07-02T02:27:44.365134087Z",
   "project_path": "repos/hugo",
   "package_count": 142,
   "package_source": "data/characterization/hugo.json",
   "success": true,
-  "data_file_sha256": "23e515bf1ed7f2585059c7321a14c9681851f1f4ecd1b415095f21a278920988",
+  "data_file_sha256": "295bca97dfa5ba973c913b76d0051caccecc55e6cf0ff6e0f40e4678b6400f95",
   "cache_regime": "warm"
 }

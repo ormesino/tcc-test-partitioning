@@ -1,12 +1,12 @@
 {
   "mode": "baseline-par",
   "parallelism": 2,
-  "duration_ns": 676077935500,
-  "measured_at": "2026-06-27T15:27:43.879732-03:00",
+  "duration_ns": 137821359620,
+  "measured_at": "2026-07-02T00:42:30.621672431Z",
   "project_path": "repos/cli",
-  "package_count": 233,
+  "package_count": 236,
   "package_source": "data/characterization/cli.json",
   "success": true,
-  "data_file_sha256": "b4a976ea07c12b08ae4531b9aad8541de7884e6a1df941ecb32b6872acf7b181",
+  "data_file_sha256": "08989e35871f8488cc861c9a092a979938e0d3d9e39b462b55741ad7e4fa6753",
   "cache_regime": "cold"
 }
