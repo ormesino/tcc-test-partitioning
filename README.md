@@ -32,6 +32,8 @@ cmd/
   demo/         Demonstrates all algorithms on synthetic datasets.
   gendata/      Exports deterministic synthetic fixtures as JSON.
   partitioner/  Main CLI: simulate, run, baseline-seq, baseline-par.
+  validateprobes/ Retroactive PASS/WARN/FAIL integrity check for probes.
+  workerdiag/   Non-canonical GOMAXPROCS worker-semantics diagnostic.
 data/
   synthetic/         Deterministic synthetic fixtures.
   characterization/  Final pass-only package datasets for the selected projects.
@@ -108,8 +110,10 @@ go run ./cmd/partitioner --mode run --warm-cache `
 ```
 
 `run` partitions the package list and executes one `go test` process per worker.
-Each worker is restricted to `-p 1 -parallel 1` to preserve the scheduling model
-and avoid local over-parallelism.
+Each worker uses `-p 1 -parallel 1` to serialize packages and tests that call
+`t.Parallel`. These flags do not constrain ordinary goroutines; use
+`cmd/workerdiag` before deciding whether future canonical runs should additionally
+set `GOMAXPROCS=1`.
 
 ## Data Collection Workflow
 
@@ -124,20 +128,46 @@ under `repos/<name>`, for example `repos/cli` or `repos/grpc-go`.
 pwsh scripts/collect.ps1 -ProjectPath repos/cli -ProjectName cli -Runs 10
 ```
 
-This runs `go test -json -p 1 -parallel 1 -count=1` repeatedly, stores raw probe
-files under `data/probe/<project>/`, and writes the aggregated pass-only dataset
-to `data/characterization/<project>.json`.
+This runs `go test -json -p 1 -parallel 1 -count=1` repeatedly and stores
+`run_NN.json`, `run_NN.err`, and `run_NN.meta.json` under
+`data/probe/<project>/`. Before aggregation, `cmd/validateprobes` checks the
+expected package universe, terminal-event completeness, malformed NDJSON, exit
+metadata, and timeout indicators, producing `validation.json`. Only then is the
+pass-only dataset written to `data/characterization/<project>.json`.
 
 The build cache is intentionally retained across the ten characterization runs.
 `-count=1` disables test-result caching, while package-level `Elapsed` excludes
 the preceding test-binary build. Cold campaign isolation is a separate regime.
 
+To validate an existing set without recollecting it:
+
+```powershell
+$probes = Get-ChildItem data/probe/cli/run_*.json |
+  Sort-Object Name | Select-Object -ExpandProperty FullName
+go run ./cmd/validateprobes `
+  -project-path repos/cli `
+  -expected-runs 10 `
+  -output data/probe/cli/validation.json `
+  $probes
+```
+
+`PASS` means the expected runs and terminal package events are complete. `WARN`
+allows aggregation but requires reviewing the listed caveats, which is expected
+for historical probes without sidecars. `FAIL` blocks aggregation and identifies
+the runs that need correction or recollection.
+
 ### Current experimental state
 
-The four characterization files and 16 warm baselines are current. The 16 cold
-baselines predate the isolated-cache measurement boundary and must be collected
-again before final cold campaigns. Existing campaign outputs are diagnostic or
-historical and must not be presented as final results.
+The four characterization files were independently reconstructed from ten probes
+per project and adopted as canonical on 2026-07-02. All 32 pass-only baselines
+(16 cold and 16 warm) match those files by SHA-256, package count, cache regime,
+and parallelism. Existing campaign outputs are diagnostic or historical and
+must not be presented as final results.
+
+The dedicated GCP VM is the primary experimental environment. Measurements from
+the personal Windows notebook are retained for a separate historical/comparative
+analysis of the transition from a shared host to a dedicated VM; they must not be
+pooled with cloud timings as if both environments were one homogeneous sample.
 
 ### 3. Collect pass-only baselines
 
@@ -153,10 +183,11 @@ canonical report is backed up before replacement.
 ### 4. Run benchmark campaigns
 
 ```powershell
-go run ./cmd/benchmark --config benchmarks/campaign_cli_warm.json
+go run ./cmd/benchmark --config benchmarks/campaign_cli_warm.json --repetitions 5 --environment-label gcp-primary
 ```
 
-A real benchmark retries a failed logical repetition up to three total attempts
+Future final campaigns use five logical repetitions and a cyclic counterbalanced
+algorithm order. A real benchmark retries a failed logical repetition up to three total attempts
 by default (`max_attempts`). Every failure is logged. Failed attempts are not
 aggregated; if the third attempt also fails, the repetition remains marked as
 failed and the command returns an error after preserving all reports.
@@ -164,6 +195,8 @@ failed and the command returns an error after preserving all reports.
 A benchmark run writes:
 
 - `config.json`: resolved configuration copy;
+- `environment.json`: captured environment metadata;
+- `native_baselines.csv`: sequential and Go-native parallel references used by the run;
 - `results.json`: full structured report;
 - `raw.csv`: one row per repetition;
 - `aggregate.csv`: summary by project, algorithm, and worker count.
@@ -171,17 +204,36 @@ A benchmark run writes:
 For the complete set of final campaigns:
 
 ```powershell
-pwsh -ExecutionPolicy Bypass -File scripts/run_all_campaigns.ps1 -TimeoutMinutes 90
+pwsh -ExecutionPolicy Bypass -File scripts/run_all_campaigns.ps1 `
+  -TimeoutMinutes 90 -Repetitions 5 -EnvironmentLabel gcp-primary
 ```
+
+### Targeted worker-semantics diagnostic
+
+This diagnostic is intentionally separate from canonical campaigns:
+
+```powershell
+go run ./cmd/workerdiag `
+  --project-path repos/cli `
+  --data-file data/characterization/cli.json `
+  --workers 1,2,4,8 `
+  --repetitions 3 `
+  --top-packages 8
+```
+
+It alternates inherited `GOMAXPROCS` and `GOMAXPROCS=1`, validates the child
+setting with a self-check, and writes JSON, CSV, and a textual interpretation.
+Its purpose is to decide whether the canonical protocol must change; its values
+are not thesis campaign samples.
 
 ## Selected Subject Projects
 
 | Project | Pass-only packages | Suite CV | Max/median | Characterization file |
 | --- | ---: | ---: | ---: | --- |
-| cli/cli | 233 | 0.373819 | 2.398634 | `data/characterization/cli.json` |
-| goreleaser/goreleaser | 116 | 1.028068 | 7.901511 | `data/characterization/goreleaser.json` |
-| grpc/grpc-go | 137 | 0.997441 | 8.780870 | `data/characterization/grpc-go.json` |
-| gohugoio/hugo | 142 | 1.721672 | 26.518223 | `data/characterization/hugo.json` |
+| cli/cli | 236 | 4.797488 | 262.521739 | `data/characterization/cli.json` |
+| goreleaser/goreleaser | 121 | 5.467722 | 3346.285714 | `data/characterization/goreleaser.json` |
+| grpc/grpc-go | 144 | 2.949269 | 1041.848485 | `data/characterization/grpc-go.json` |
+| gohugoio/hugo | 142 | 6.078856 | 1362.039474 | `data/characterization/hugo.json` |
 
 Only packages that pass under the characterization regime are included in the
 final experiments.
