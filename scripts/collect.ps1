@@ -9,10 +9,8 @@
                  (filtragem feita por cmd/analyze).
       - ADR-007: executa N rodadas com `-count=1` (default N=10).
       - ADR-008: mediana entre as rodadas como duracao canonica.
-      - ADR-017: mede cada pacote sob `-p 1 -parallel 1`. Essas flags
-                 serializam pacotes e testes que usam t.Parallel, mas nao
-                 limitam goroutines internas; essa semantica esta sob
-                 diagnostico separado antes de eventual GOMAXPROCS=1.
+      - ADR-017/026: mede sob `-p 1 -parallel 1` e injeta GOMAXPROCS=1
+                     explicitamente em cada processo filho.
 
     Cada rodada gera tres arquivos em data/probe/<ProjectName>/:
         run_NN.json       ← stdout puro (NDJSON consumido por cmd/analyze)
@@ -91,6 +89,19 @@ Write-Host "    Probe:    $probeDir"
 Write-Host "    Output:   $outFile"
 Write-Host ''
 
+Push-Location $repoRoot
+try {
+    $gomaxprocsEvidence = (& go run ./cmd/preflight | ConvertFrom-Json)
+    if ($LASTEXITCODE -ne 0 -or $gomaxprocsEvidence.gomaxprocs_effective -ne 1) {
+        throw 'Preflight de GOMAXPROCS falhou.'
+    }
+}
+finally {
+    Pop-Location
+}
+Write-Host "    GOMAXPROCS: configured=1 effective=$($gomaxprocsEvidence.gomaxprocs_effective) policy=$($gomaxprocsEvidence.gomaxprocs_policy)"
+Write-Host ''
+
 $runFiles = New-Object System.Collections.Generic.List[string]
 for ($i = 1; $i -le $Runs; $i++) {
     $tag     = '{0:D2}' -f $i
@@ -98,7 +109,7 @@ for ($i = 1; $i -le $Runs; $i++) {
     $errFile  = Join-Path $probeDir "run_$tag.err"
     $metaFile = Join-Path $probeDir "run_$tag.meta.json"
 
-    Write-Host "  [$tag/$Runs] go test -json -p 1 -parallel 1 -count=1 -timeout ${TimeoutMinutes}m $Pattern"
+    Write-Host "  [$tag/$Runs] GOMAXPROCS=1 go test -json -p 1 -parallel 1 -count=1 -timeout ${TimeoutMinutes}m $Pattern"
 
     Push-Location $ProjectPath
     try {
@@ -106,10 +117,17 @@ for ($i = 1; $i -le $Runs; $i++) {
         # arquivos distintos. O sidecar preserva o exit code, que nao pode ser
         # reconstruido com seguranca apenas a partir do NDJSON.
         $utf8 = New-Object System.Text.UTF8Encoding($false)
-        $startedAt = Get-Date
-        $outLines = @(& go test -json "-p" "1" "-parallel" "1" "-count=1" "-timeout" "${TimeoutMinutes}m" $Pattern 2> $errFile)
-        $exitCode = $LASTEXITCODE
-        $finishedAt = Get-Date
+        $previousGOMAXPROCS = [Environment]::GetEnvironmentVariable('GOMAXPROCS', 'Process')
+        try {
+            [Environment]::SetEnvironmentVariable('GOMAXPROCS', '1', 'Process')
+            $startedAt = Get-Date
+            $outLines = @(& go test -json "-p" "1" "-parallel" "1" "-count=1" "-timeout" "${TimeoutMinutes}m" $Pattern 2> $errFile)
+            $exitCode = $LASTEXITCODE
+            $finishedAt = Get-Date
+        }
+        finally {
+            [Environment]::SetEnvironmentVariable('GOMAXPROCS', $previousGOMAXPROCS, 'Process')
+        }
         [System.IO.File]::WriteAllLines($file, $outLines, $utf8)
 
         $combinedDiagnostic = (($outLines -join "`n") + "`n")
@@ -117,11 +135,15 @@ for ($i = 1; $i -le $Runs; $i++) {
             $combinedDiagnostic += Get-Content -Raw -LiteralPath $errFile
         }
         $meta = [ordered]@{
-            command = "go test -json -p 1 -parallel 1 -count=1 -timeout ${TimeoutMinutes}m $Pattern"
+            command = "GOMAXPROCS=1 go test -json -p 1 -parallel 1 -count=1 -timeout ${TimeoutMinutes}m $Pattern"
             started_at = $startedAt.ToUniversalTime().ToString('o')
             finished_at = $finishedAt.ToUniversalTime().ToString('o')
             exit_code = $exitCode
             timed_out = ($combinedDiagnostic -match '(?i)test timed out after|timed out|deadline exceeded')
+            gomaxprocs_configured = 1
+            gomaxprocs_effective = $gomaxprocsEvidence.gomaxprocs_effective
+            gomaxprocs_policy = $gomaxprocsEvidence.gomaxprocs_policy
+            child_environment_applied = $true
         }
         [System.IO.File]::WriteAllText($metaFile, ($meta | ConvertTo-Json -Depth 4), $utf8)
     }
@@ -145,6 +167,7 @@ try {
         -project-path $ProjectPath `
         -pattern $Pattern `
         -expected-runs $Runs `
+        -require-gomaxprocs 1 `
         -output $validationFile `
         @runFiles
     if ($LASTEXITCODE -ne 0) {
@@ -163,6 +186,22 @@ try {
     & go run ./cmd/analyze -output $outFile @runFiles
     if ($LASTEXITCODE -ne 0) {
         throw "cmd/analyze falhou (exit=$LASTEXITCODE)"
+    }
+}
+finally {
+    Pop-Location
+}
+
+$durationAuditFile = Join-Path $probeDir 'duration-audit.json'
+Write-Host "==> Auditando duracoes -> $durationAuditFile"
+Push-Location $repoRoot
+try {
+    & go run ./cmd/auditdurations `
+        -characterization $outFile `
+        -output $durationAuditFile `
+        @runFiles
+    if ($LASTEXITCODE -ne 0) {
+        throw "Auditoria de duracoes falhou. Consulte $durationAuditFile"
     }
 }
 finally {
