@@ -53,7 +53,10 @@ func (f *FFD) partition(packages []model.PackageInfo, workers, searchIterations 
 	sortedPkgs := make([]model.PackageInfo, len(packages))
 	copy(sortedPkgs, packages)
 	sort.Slice(sortedPkgs, func(i, j int) bool {
-		return sortedPkgs[i].Duration > sortedPkgs[j].Duration
+		if sortedPkgs[i].Duration != sortedPkgs[j].Duration {
+			return sortedPkgs[i].Duration > sortedPkgs[j].Duration
+		}
+		return sortedPkgs[i].Name < sortedPkgs[j].Name
 	})
 
 	// 2. Determine bounds for binary search

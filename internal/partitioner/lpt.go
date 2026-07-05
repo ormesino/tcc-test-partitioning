@@ -63,7 +63,10 @@ func (l *LPT) Partition(packages []model.PackageInfo, workers int) model.Partiti
 	sorted := make([]model.PackageInfo, len(packages))
 	copy(sorted, packages)
 	sort.Slice(sorted, func(i, j int) bool {
-		return sorted[i].Duration > sorted[j].Duration
+		if sorted[i].Duration != sorted[j].Duration {
+			return sorted[i].Duration > sorted[j].Duration
+		}
+		return sorted[i].Name < sorted[j].Name
 	})
 
 	// Greedy assignment: for each package (heaviest first),

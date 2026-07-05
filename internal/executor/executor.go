@@ -170,6 +170,12 @@ type Config struct {
 
 	// WarmCache, when false, forces runWorker to use an isolated GOCACHE.
 	WarmCache bool
+
+	// GOMAXPROCS, when greater than zero, is exported to each child go test
+	// process. Zero preserves the inherited runtime default. This is primarily
+	// used by the worker-semantics diagnostic; production campaigns currently
+	// leave it unset while the methodological choice is evaluated.
+	GOMAXPROCS int
 }
 
 // RunPartitioned executes go test for each partition in parallel,
@@ -327,9 +333,10 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 	}
 
 	// Build command: go test -p 1 -parallel 1 -count=1 [-v] pkg1 pkg2 ...
-	// Restricting to -p 1 -parallel 1 ensures this worker acts as a single
-	// sequential processor, matching the theoretical P||Cmax scheduling model
-	// and avoiding combinatorial explosion of parallelism that causes OOM.
+	// These flags serialize packages within this command and tests that call
+	// t.Parallel. They do not constrain ordinary goroutines or guarantee a
+	// single CPU for the whole test binary; that materiality is evaluated by
+	// cmd/workerdiag before any canonical GOMAXPROCS policy is changed.
 	args := []string{"test", "-p", "1", "-parallel", "1", "-count", fmt.Sprintf("%d", cfg.Count)}
 	if cfg.Timeout > 0 {
 		args = append(args, "-timeout", fmt.Sprintf("%dm", int(cfg.Timeout.Minutes())))
@@ -353,6 +360,9 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 // fresh isolated GOCACHE; warm runs inherit the cache populated by the caller.
 func runTimedGoTest(cfg Config, args []string, workerID, packageCount int, tempPattern string) WorkerResult {
 	var env []string
+	if cfg.GOMAXPROCS > 0 {
+		env = withEnvValue(os.Environ(), "GOMAXPROCS", fmt.Sprintf("%d", cfg.GOMAXPROCS))
+	}
 	var coldCacheDir string
 	if !cfg.WarmCache {
 		tempDir, err := mkdirTemp("", tempPattern)
@@ -364,7 +374,10 @@ func runTimedGoTest(cfg Config, args []string, workerID, packageCount int, tempP
 			}
 		}
 		coldCacheDir = tempDir
-		env = withEnvValue(os.Environ(), "GOCACHE", tempDir)
+		if len(env) == 0 {
+			env = os.Environ()
+		}
+		env = withEnvValue(env, "GOCACHE", tempDir)
 	}
 
 	started := time.Now()
@@ -427,36 +440,24 @@ func runGoTest(cfg Config, args []string, env []string) (string, error) {
 		cmd.Env = env
 	}
 
-	type result struct {
-		out []byte
-		err error
+	out, err := cmd.CombinedOutput()
+	// CommandContext waits for the child process to terminate. Checking the
+	// context only after CombinedOutput returns avoids starting cleanup or a
+	// retry while the previous go test process is still shutting down.
+	if ctx.Err() != nil {
+		return string(out), fmt.Errorf("timeout or context canceled: %w", ctx.Err())
 	}
-	resCh := make(chan result, 1)
-
-	go func() {
-		out, err := cmd.CombinedOutput()
-		resCh <- result{out, err}
-	}()
-
-	select {
-	case res := <-resCh:
-		return string(res.out), res.err
-	case <-ctx.Done():
-		return "", fmt.Errorf("timeout or context canceled: %w", ctx.Err())
-	}
+	return string(out), err
 }
 
-// WarmBuildCache pre-compiles all test binaries in the project
-// without running any tests. It uses `-run=^$` (matches no test
-// names) to trigger compilation only. The default `-p` (all CPUs)
-// is used for maximum compilation speed.
+// WarmBuildCache requests compilation of the selected test packages without
+// intentionally running named tests. It uses `-run=^$` and leaves Go free to
+// reuse the resulting build-cache artifacts in later measurements.
 //
-// After this function returns, Go's build cache (GOCACHE) contains
-// the compiled test binaries. Subsequent `go test` invocations
-// (even with `-p 1`) will skip compilation and only run tests.
-//
-// This simulates a CI environment where the build cache is warm
-// from a previous pipeline stage or a cached Docker layer.
+// This warm-up reduces reusable compilation work, but it does not claim that
+// every later `go test` invocation performs zero build, link, initialization,
+// or package setup work. It approximates a CI environment with a pre-populated
+// build cache.
 func WarmBuildCache(cfg Config) error {
 	return WarmBuildCachePackages(cfg, nil)
 }
@@ -474,9 +475,10 @@ func WarmBuildCachePackages(cfg Config, packages []string) error {
 		defer cancel()
 	}
 
-	// -run=^$ matches no test, so nothing executes.
-	// -count=1 ensures the test cache is not used, but the build cache IS used.
-	// Default -p (GOMAXPROCS) gives maximum compilation parallelism.
+	// -run=^$ matches no named test. Package initialization or framework-level
+	// setup may still occur. -count=1 avoids relying on cached test results while
+	// allowing reusable build artifacts to populate GOCACHE. The default -p is
+	// retained so the warm-up itself is not part of the measured region.
 	args := appendPackageArgs([]string{"test", "-run=^$", "-count=1"}, packages)
 	cmd := exec.CommandContext(ctx, "go", args...)
 	cmd.Dir = cfg.ProjectPath

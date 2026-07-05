@@ -162,7 +162,18 @@ func loadPackages(path string) ([]model.PackageInfo, error) {
 	if err := json.Unmarshal(data, &packages); err != nil {
 		return nil, fmt.Errorf("parsing data file: %w", err)
 	}
-	for _, pkg := range packages {
+	if len(packages) == 0 {
+		return nil, fmt.Errorf("data file contains an empty package population")
+	}
+	seen := make(map[string]struct{}, len(packages))
+	for i, pkg := range packages {
+		if strings.TrimSpace(pkg.Name) == "" {
+			return nil, fmt.Errorf("package at index %d has an empty name", i)
+		}
+		if _, exists := seen[pkg.Name]; exists {
+			return nil, fmt.Errorf("duplicate package name %q", pkg.Name)
+		}
+		seen[pkg.Name] = struct{}{}
 		if pkg.Duration < 0 {
 			return nil, fmt.Errorf("package %q has negative duration: %v", pkg.Name, pkg.Duration)
 		}

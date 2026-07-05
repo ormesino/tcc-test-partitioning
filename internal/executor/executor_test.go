@@ -302,3 +302,26 @@ func TestWithEnvValue_ReplacesCaseInsensitiveDuplicates(t *testing.T) {
 		t.Fatalf("GOCACHE entries = %d, want exactly 1: %v", count, got)
 	}
 }
+
+func TestRunTimedGoTestSetsGOMAXPROCS(t *testing.T) {
+	originalRunGoTest := runGoTestCommand
+	defer func() { runGoTestCommand = originalRunGoTest }()
+
+	seen := ""
+	runGoTestCommand = func(_ Config, _ []string, env []string) (string, error) {
+		for _, entry := range env {
+			if strings.HasPrefix(entry, "GOMAXPROCS=") {
+				seen = strings.TrimPrefix(entry, "GOMAXPROCS=")
+			}
+		}
+		return "", nil
+	}
+
+	wr := runTimedGoTest(Config{WarmCache: true, GOMAXPROCS: 1}, []string{"test", "./..."}, 0, 1, "unused")
+	if wr.Error != nil {
+		t.Fatalf("runTimedGoTest: %v", wr.Error)
+	}
+	if seen != "1" {
+		t.Fatalf("GOMAXPROCS child env = %q, want 1", seen)
+	}
+}
