@@ -130,16 +130,22 @@ for ($i = 1; $i -le $Runs; $i++) {
         }
         [System.IO.File]::WriteAllLines($file, $outLines, $utf8)
 
+        # O timeout real de `go test -timeout` termina com exit code nao zero e
+        # emite o panic especifico abaixo. Mensagens como "deadline exceeded"
+        # fazem parte de testes normais (especialmente grpc-go) e nao indicam
+        # timeout do processo.
         $combinedDiagnostic = (($outLines -join "`n") + "`n")
         if (Test-Path $errFile) {
             $combinedDiagnostic += Get-Content -Raw -LiteralPath $errFile
         }
+        $timedOut = ($exitCode -ne 0) -and
+            ($combinedDiagnostic -match '(?i)panic:\s+test timed out after\s+')
         $meta = [ordered]@{
             command = "GOMAXPROCS=1 go test -json -p 1 -parallel 1 -count=1 -timeout ${TimeoutMinutes}m $Pattern"
             started_at = $startedAt.ToUniversalTime().ToString('o')
             finished_at = $finishedAt.ToUniversalTime().ToString('o')
             exit_code = $exitCode
-            timed_out = ($combinedDiagnostic -match '(?i)test timed out after|timed out|deadline exceeded')
+            timed_out = $timedOut
             gomaxprocs_configured = 1
             gomaxprocs_effective = $gomaxprocsEvidence.gomaxprocs_effective
             gomaxprocs_policy = $gomaxprocsEvidence.gomaxprocs_policy

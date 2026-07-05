@@ -23,6 +23,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# Falhas de processos nativos devem ser tratadas pelo exit code e pelos
+# relatórios estruturados, não convertidas prematuramente em RuntimeException.
+if (Get-Variable PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyContinue) {
+    $PSNativeCommandUseErrorActionPreference = $false
+}
 
 if ($ColdOnly -and $WarmOnly) {
     throw "Use apenas um entre -ColdOnly e -WarmOnly."
@@ -40,6 +45,46 @@ $projectPaths = @{
     'grpc-go'    = 'repos/grpc-go'
     'goreleaser' = 'repos/goreleaser'
     'hugo'       = 'repos/hugo'
+}
+
+$expectedCommits = @{
+    'cli'        = 'da68cb8f6f597cfc3838cf40f89ecc01f4e53233'
+    'goreleaser' = 'ce96e79b4883bdea39cf2cf5fe33fa63f5df4dd0'
+    'grpc-go'    = 'faa34bf170ceef07b9ada9bcd44dc6e16a55d1f4'
+    'hugo'       = '72495f9fba69edadd50a7ecb9ae9fb3d9c46156b'
+}
+
+# Bloqueia antes da primeira medição se runtime, população ou fonte estiverem
+# incompatíveis. Assim uma matriz de 32 baselines não falha somente no meio.
+Push-Location $repoRoot
+try {
+    & go run ./cmd/preflight | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Preflight de GOMAXPROCS falhou.'
+    }
+    foreach ($project in $Projects) {
+        if (-not $projectPaths.ContainsKey($project)) {
+            throw "Projeto desconhecido: $project"
+        }
+        $dataFile = Join-Path $repoRoot "data/characterization/$project.json"
+        if (-not (Test-Path -LiteralPath $dataFile)) {
+            throw "Caracterizacao ausente para ${project}: $dataFile"
+        }
+        $packages = @(Get-Content -Raw -LiteralPath $dataFile | ConvertFrom-Json)
+        if ($packages.Count -eq 0) {
+            throw "Caracterizacao vazia para ${project}: $dataFile"
+        }
+        $actualCommit = (& git -C $projectPaths[$project] rev-parse HEAD).Trim()
+        if ($LASTEXITCODE -ne 0 -or $actualCommit -ne $expectedCommits[$project]) {
+            throw "Commit incorreto para ${project}: atual=$actualCommit esperado=$($expectedCommits[$project])"
+        }
+        if (& git -C $projectPaths[$project] status --porcelain) {
+            throw "Arvore modificada no projeto ${project}."
+        }
+    }
+}
+finally {
+    Pop-Location
 }
 
 $runCold = -not $WarmOnly

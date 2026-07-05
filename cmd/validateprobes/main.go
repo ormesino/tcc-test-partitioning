@@ -61,6 +61,7 @@ type runReport struct {
 	GOMAXPROCSEffective     int               `json:"gomaxprocs_effective,omitempty"`
 	GOMAXPROCSPolicy        string            `json:"gomaxprocs_policy,omitempty"`
 	ChildEnvironmentApplied bool              `json:"child_environment_applied,omitempty"`
+	TimeoutMetadataIgnored  bool              `json:"timeout_metadata_ignored,omitempty"`
 	TerminalStatusByPkg     map[string]string `json:"-"`
 }
 
@@ -166,6 +167,11 @@ func validate(projectPath, pattern string, expectedRuns, requiredGOMAXPROCS int,
 	}
 
 	for _, path := range paths {
+		if strings.HasSuffix(strings.ToLower(filepath.Base(path)), ".meta.json") {
+			report.FatalFindings = append(report.FatalFindings,
+				fmt.Sprintf("%s is a metadata sidecar, not probe NDJSON; select only run_NN.json", path))
+			continue
+		}
 		run, err := inspectRun(path, expectedSet)
 		if err != nil {
 			report.FatalFindings = append(report.FatalFindings, fmt.Sprintf("%s: %v", path, err))
@@ -193,6 +199,10 @@ func validate(projectPath, pattern string, expectedRuns, requiredGOMAXPROCS int,
 		}
 		if run.TimedOut {
 			report.FatalFindings = append(report.FatalFindings, fmt.Sprintf("%s records or indicates a timeout", path))
+		}
+		if run.TimeoutMetadataIgnored {
+			report.Warnings = append(report.Warnings,
+				fmt.Sprintf("%s records timed_out=true with exit_code=0 and a complete terminal set; ignoring inconsistent legacy metadata", path))
 		}
 		if run.ExitCode != nil && *run.ExitCode != 0 && run.FailPackages == 0 && run.SkipPackages == 0 {
 			report.FatalFindings = append(report.FatalFindings,
@@ -325,6 +335,11 @@ func inspectRun(path string, expected map[string]struct{}) (runReport, error) {
 		r.MetadataPresent = true
 		r.ExitCode = meta.ExitCode
 		r.TimedOut = meta.TimedOut
+		if meta.TimedOut && meta.ExitCode != nil && *meta.ExitCode == 0 &&
+			len(r.MissingExpected) == 0 && r.MalformedLines == 0 {
+			r.TimedOut = false
+			r.TimeoutMetadataIgnored = true
+		}
 		r.GOMAXPROCSConfigured = meta.GOMAXPROCSConfigured
 		r.GOMAXPROCSEffective = meta.GOMAXPROCSEffective
 		r.GOMAXPROCSPolicy = meta.GOMAXPROCSPolicy
@@ -333,7 +348,8 @@ func inspectRun(path string, expected map[string]struct{}) (runReport, error) {
 	r.StderrFile = base + ".err"
 	if info, err := os.Stat(r.StderrFile); err == nil && info.Size() > 0 {
 		r.StderrNonEmpty = true
-		if data, err := os.ReadFile(r.StderrFile); err == nil && bytes.Contains(bytes.ToLower(data), []byte("timed out")) {
+		if data, err := os.ReadFile(r.StderrFile); err == nil &&
+			bytes.Contains(bytes.ToLower(data), []byte("panic: test timed out after ")) {
 			r.TimedOut = true
 		}
 	}

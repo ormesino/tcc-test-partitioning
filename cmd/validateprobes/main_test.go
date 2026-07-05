@@ -73,3 +73,46 @@ func TestValidateRejectsDuplicatePackageTerminal(t *testing.T) {
 		t.Fatalf("report=%+v", report)
 	}
 }
+
+func TestValidateIgnoresKnownFalsePositiveTimeoutMetadata(t *testing.T) {
+	dir := t.TempDir()
+	path := writeProbeFixture(t, dir, "run_01",
+		"{\"Action\":\"output\",\"Package\":\"example/a\",\"Output\":\"rpc error: deadline exceeded\\n\"}\n"+
+			"{\"Action\":\"pass\",\"Package\":\"example/a\",\"Elapsed\":0.01}\n",
+		"{\"exit_code\":0,\"timed_out\":true}")
+
+	report := validate(dir, "./...", 1, 0, []string{"example/a"}, []string{path})
+	if report.Status != "WARN" {
+		t.Fatalf("status=%s findings=%v", report.Status, report.FatalFindings)
+	}
+	if report.Runs[0].TimedOut || !report.Runs[0].TimeoutMetadataIgnored {
+		t.Fatalf("run=%+v", report.Runs[0])
+	}
+	if !strings.Contains(strings.Join(report.Warnings, " "), "inconsistent legacy metadata") {
+		t.Fatalf("warnings=%v", report.Warnings)
+	}
+}
+
+func TestInspectRunRecognizesActualGoTestTimeout(t *testing.T) {
+	dir := t.TempDir()
+	path := writeProbeFixture(t, dir, "run_01",
+		"{\"Action\":\"fail\",\"Package\":\"example/a\",\"Elapsed\":60}\n",
+		"{\"exit_code\":1,\"timed_out\":true}")
+
+	report := validate(dir, "./...", 1, 0, []string{"example/a"}, []string{path})
+	if report.Status != "FAIL" || !report.Runs[0].TimedOut {
+		t.Fatalf("report=%+v", report)
+	}
+}
+
+func TestValidateRejectsMetadataSidecarAsProbeInput(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "run_01.meta.json")
+	if err := os.WriteFile(path, []byte("{\"exit_code\":0}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	report := validate(dir, "./...", 1, 0, []string{"example/a"}, []string{path})
+	if report.Status != "FAIL" || !strings.Contains(strings.Join(report.FatalFindings, " "), "sidecar") {
+		t.Fatalf("report=%+v", report)
+	}
+}

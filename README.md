@@ -145,7 +145,8 @@ the preceding test-binary build. Cold campaign isolation is a separate regime.
 To validate an existing set without recollecting it:
 
 ```powershell
-$probes = Get-ChildItem data/probe/cli/run_*.json |
+$probes = Get-ChildItem data/probe/cli -Filter run_*.json |
+  Where-Object Name -Match '^run_\d{2}\.json$' |
   Sort-Object Name | Select-Object -ExpandProperty FullName
 go run ./cmd/validateprobes `
   -project-path repos/cli `
