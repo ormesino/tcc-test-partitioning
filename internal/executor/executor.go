@@ -18,11 +18,17 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"tcc-test-partitioning/internal/model"
+)
+
+const (
+	CanonicalGOMAXPROCS = 1
+	GOMAXPROCSPolicy    = "explicit-child-environment"
 )
 
 // Hook for testing cold cache fallback
@@ -35,17 +41,20 @@ var runGoTestCommand = runGoTest
 // modes and consumed by partitioning runs to obtain a methodologically
 // sound T1 for speedup computation (ADR-011).
 type BaselineReport struct {
-	Mode           string        `json:"mode"`        // "baseline-seq" or "baseline-par"
-	Parallelism    int           `json:"parallelism"` // p for baseline-par; 1 for baseline-seq
-	Duration       time.Duration `json:"duration_ns"` // wall-clock, in nanoseconds
-	MeasuredAt     time.Time     `json:"measured_at"`
-	ProjectPath    string        `json:"project_path"`
-	PackageCount   int           `json:"package_count,omitempty"`
-	PackageSource  string        `json:"package_source,omitempty"` // "./..." or a PackageInfo JSON path
-	Success        bool          `json:"success"`
-	Error          string        `json:"error,omitempty"`
-	DataFileSHA256 string        `json:"data_file_sha256,omitempty"`
-	CacheRegime    string        `json:"cache_regime,omitempty"`
+	Mode                 string        `json:"mode"`        // "baseline-seq" or "baseline-par"
+	Parallelism          int           `json:"parallelism"` // p for baseline-par; 1 for baseline-seq
+	Duration             time.Duration `json:"duration_ns"` // wall-clock, in nanoseconds
+	MeasuredAt           time.Time     `json:"measured_at"`
+	ProjectPath          string        `json:"project_path"`
+	PackageCount         int           `json:"package_count,omitempty"`
+	PackageSource        string        `json:"package_source,omitempty"` // "./..." or a PackageInfo JSON path
+	Success              bool          `json:"success"`
+	Error                string        `json:"error,omitempty"`
+	DataFileSHA256       string        `json:"data_file_sha256,omitempty"`
+	CacheRegime          string        `json:"cache_regime,omitempty"`
+	GOMAXPROCSConfigured int           `json:"gomaxprocs_configured,omitempty"`
+	GOMAXPROCSEffective  int           `json:"gomaxprocs_effective,omitempty"`
+	GOMAXPROCSPolicy     string        `json:"gomaxprocs_policy,omitempty"`
 }
 
 // WriteBaselineReport serializes the report to path as indented JSON.
@@ -171,11 +180,13 @@ type Config struct {
 	// WarmCache, when false, forces runWorker to use an isolated GOCACHE.
 	WarmCache bool
 
-	// GOMAXPROCS, when greater than zero, is exported to each child go test
-	// process. Zero preserves the inherited runtime default. This is primarily
-	// used by the worker-semantics diagnostic; production campaigns currently
-	// leave it unset while the methodological choice is evaluated.
+	// GOMAXPROCS is exported to each child go test process. Zero selects the
+	// canonical value (1). Non-canonical values exist only for workerdiag.
 	GOMAXPROCS int
+
+	// InheritGOMAXPROCSForDiagnostic bypasses the canonical policy exclusively
+	// for the completed, non-canonical worker-semantics diagnostic.
+	InheritGOMAXPROCSForDiagnostic bool
 }
 
 // RunPartitioned executes go test for each partition in parallel,
@@ -359,10 +370,7 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 // and performs cleanup after the measured region. Cold runs always receive a
 // fresh isolated GOCACHE; warm runs inherit the cache populated by the caller.
 func runTimedGoTest(cfg Config, args []string, workerID, packageCount int, tempPattern string) WorkerResult {
-	var env []string
-	if cfg.GOMAXPROCS > 0 {
-		env = withEnvValue(os.Environ(), "GOMAXPROCS", fmt.Sprintf("%d", cfg.GOMAXPROCS))
-	}
+	env := childEnvironment(cfg, os.Environ())
 	var coldCacheDir string
 	if !cfg.WarmCache {
 		tempDir, err := mkdirTemp("", tempPattern)
@@ -374,9 +382,6 @@ func runTimedGoTest(cfg Config, args []string, workerID, packageCount int, tempP
 			}
 		}
 		coldCacheDir = tempDir
-		if len(env) == 0 {
-			env = os.Environ()
-		}
 		env = withEnvValue(env, "GOCACHE", tempDir)
 	}
 
@@ -403,6 +408,23 @@ func runTimedGoTest(cfg Config, args []string, workerID, packageCount int, tempP
 		executionStarted:  started,
 		executionFinished: finished,
 	}
+}
+
+func childEnvironment(cfg Config, environ []string) []string {
+	if cfg.InheritGOMAXPROCSForDiagnostic {
+		return append([]string(nil), environ...)
+	}
+	value := cfg.GOMAXPROCS
+	if value == 0 {
+		value = CanonicalGOMAXPROCS
+	}
+	return withEnvValue(environ, "GOMAXPROCS", strconv.Itoa(value))
+}
+
+// CanonicalEnvironment preserves the inherited environment, removes every
+// GOMAXPROCS definition, and appends exactly the canonical value.
+func CanonicalEnvironment(environ []string) []string {
+	return childEnvironment(Config{}, environ)
 }
 
 // withEnvValue replaces all inherited definitions of key and appends exactly
@@ -482,6 +504,7 @@ func WarmBuildCachePackages(cfg Config, packages []string) error {
 	args := appendPackageArgs([]string{"test", "-run=^$", "-count=1"}, packages)
 	cmd := exec.CommandContext(ctx, "go", args...)
 	cmd.Dir = cfg.ProjectPath
+	cmd.Env = childEnvironment(cfg, os.Environ())
 	cmd.Stdout = os.Stderr // Show compilation progress on stderr.
 	cmd.Stderr = os.Stderr
 
@@ -491,6 +514,36 @@ func WarmBuildCachePackages(cfg Config, packages []string) error {
 
 	fmt.Fprintf(os.Stderr, "  [warm-cache] Done in %v\n", time.Since(start))
 	return nil
+}
+
+// VerifyCanonicalGOMAXPROCS compiles and runs a minimal Go child under the
+// canonical child environment and returns the runtime value it observed.
+func VerifyCanonicalGOMAXPROCS(ctx context.Context) (int, error) {
+	dir, err := os.MkdirTemp("", "tcc-gomaxprocs-preflight-*")
+	if err != nil {
+		return 0, fmt.Errorf("create GOMAXPROCS preflight directory: %w", err)
+	}
+	defer os.RemoveAll(dir)
+
+	source := filepath.Join(dir, "main.go")
+	program := []byte("package main\nimport (\"fmt\"; \"runtime\")\nfunc main(){fmt.Print(runtime.GOMAXPROCS(0))}\n")
+	if err := os.WriteFile(source, program, 0o644); err != nil {
+		return 0, fmt.Errorf("write GOMAXPROCS preflight: %w", err)
+	}
+	cmd := exec.CommandContext(ctx, "go", "run", source)
+	cmd.Env = CanonicalEnvironment(os.Environ())
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return 0, fmt.Errorf("run GOMAXPROCS preflight: %w: %s", err, strings.TrimSpace(string(out)))
+	}
+	effective, err := strconv.Atoi(strings.TrimSpace(string(out)))
+	if err != nil {
+		return 0, fmt.Errorf("parse GOMAXPROCS preflight output %q: %w", out, err)
+	}
+	if effective != CanonicalGOMAXPROCS {
+		return effective, fmt.Errorf("GOMAXPROCS preflight observed %d, expected %d", effective, CanonicalGOMAXPROCS)
+	}
+	return effective, nil
 }
 
 // FormatExecutionResult returns a human-readable summary of an

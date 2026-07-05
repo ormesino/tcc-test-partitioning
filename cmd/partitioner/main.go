@@ -26,6 +26,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -289,6 +290,7 @@ func runSimulate(dataFile, algName string, workers int, baselineSeqFile, outputJ
 // Each algorithm's Partition() is called once and the result is
 // reused for both the human-readable text and the JSON report.
 func runExecution(dataFile, projectPath, algName string, workers, timeoutMin int, verbose, warmCache bool, baselineSeqFile, outputJSON string, listPackages bool) {
+	requireCanonicalGOMAXPROCS()
 	packages, err := loadPackages(dataFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -397,6 +399,7 @@ func packageDurationSum(packages []model.PackageInfo) time.Duration {
 // When output is non-empty, the wall-clock T1 is persisted as a BaselineReport
 // JSON for later reuse by --mode run.
 func runBaselineSeq(projectPath, dataFile string, timeoutMin int, verbose, warmCache bool, output string) {
+	effective := requireCanonicalGOMAXPROCS()
 	cfg := executor.Config{
 		ProjectPath: projectPath,
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
@@ -432,17 +435,20 @@ func runBaselineSeq(projectPath, dataFile string, timeoutMin int, verbose, warmC
 			regime = "warm"
 		}
 		writeBaselineReport(output, executor.BaselineReport{
-			Mode:           "baseline-seq",
-			Parallelism:    1,
-			Duration:       result.Makespan,
-			MeasuredAt:     time.Now(),
-			ProjectPath:    projectPath,
-			PackageCount:   wr.PackageCount,
-			PackageSource:  packageSource,
-			Success:        wr.Error == nil,
-			Error:          errorString(wr.Error),
-			DataFileSHA256: hashFile(dataFile),
-			CacheRegime:    regime,
+			Mode:                 "baseline-seq",
+			Parallelism:          1,
+			Duration:             result.Makespan,
+			MeasuredAt:           time.Now(),
+			ProjectPath:          projectPath,
+			PackageCount:         wr.PackageCount,
+			PackageSource:        packageSource,
+			Success:              wr.Error == nil,
+			Error:                errorString(wr.Error),
+			DataFileSHA256:       hashFile(dataFile),
+			CacheRegime:          regime,
+			GOMAXPROCSConfigured: executor.CanonicalGOMAXPROCS,
+			GOMAXPROCSEffective:  effective,
+			GOMAXPROCSPolicy:     executor.GOMAXPROCSPolicy,
 		})
 	}
 }
@@ -452,6 +458,7 @@ func runBaselineSeq(projectPath, dataFile string, timeoutMin int, verbose, warmC
 // instead of ./..., producing a pass-only native baseline.
 // When output is non-empty, the wall-clock is persisted as a BaselineReport JSON.
 func runBaselinePar(projectPath, dataFile string, workers, timeoutMin int, verbose, warmCache bool, output string) {
+	effective := requireCanonicalGOMAXPROCS()
 	cfg := executor.Config{
 		ProjectPath: projectPath,
 		Timeout:     time.Duration(timeoutMin) * time.Minute,
@@ -487,19 +494,33 @@ func runBaselinePar(projectPath, dataFile string, workers, timeoutMin int, verbo
 			regime = "warm"
 		}
 		writeBaselineReport(output, executor.BaselineReport{
-			Mode:           "baseline-par",
-			Parallelism:    workers,
-			Duration:       result.Makespan,
-			MeasuredAt:     time.Now(),
-			ProjectPath:    projectPath,
-			PackageCount:   wr.PackageCount,
-			PackageSource:  packageSource,
-			Success:        wr.Error == nil,
-			Error:          errorString(wr.Error),
-			DataFileSHA256: hashFile(dataFile),
-			CacheRegime:    regime,
+			Mode:                 "baseline-par",
+			Parallelism:          workers,
+			Duration:             result.Makespan,
+			MeasuredAt:           time.Now(),
+			ProjectPath:          projectPath,
+			PackageCount:         wr.PackageCount,
+			PackageSource:        packageSource,
+			Success:              wr.Error == nil,
+			Error:                errorString(wr.Error),
+			DataFileSHA256:       hashFile(dataFile),
+			CacheRegime:          regime,
+			GOMAXPROCSConfigured: executor.CanonicalGOMAXPROCS,
+			GOMAXPROCSEffective:  effective,
+			GOMAXPROCSPolicy:     executor.GOMAXPROCSPolicy,
 		})
 	}
+}
+
+func requireCanonicalGOMAXPROCS() int {
+	effective, err := executor.VerifyCanonicalGOMAXPROCS(context.Background())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: GOMAXPROCS preflight: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("GOMAXPROCS: configured=%d effective=%d policy=%s\n",
+		executor.CanonicalGOMAXPROCS, effective, executor.GOMAXPROCSPolicy)
+	return effective
 }
 
 func loadBaselinePackageScope(dataFile string) ([]string, string) {
@@ -583,6 +604,12 @@ func resolveT1(packages []model.PackageInfo, baselineSeqFile string, dataFile st
 }
 
 func validateBaselineReport(path string, r executor.BaselineReport, expectedPackageCount int, dataFile string, warmCache bool) error {
+	if r.GOMAXPROCSConfigured != executor.CanonicalGOMAXPROCS ||
+		r.GOMAXPROCSEffective != executor.CanonicalGOMAXPROCS ||
+		r.GOMAXPROCSPolicy != executor.GOMAXPROCSPolicy {
+		return fmt.Errorf("baseline file %s lacks canonical GOMAXPROCS evidence (configured=%d effective=%d policy=%q)",
+			path, r.GOMAXPROCSConfigured, r.GOMAXPROCSEffective, r.GOMAXPROCSPolicy)
+	}
 	if r.Duration <= 0 {
 		return fmt.Errorf("baseline file %s has non-positive duration", path)
 	}

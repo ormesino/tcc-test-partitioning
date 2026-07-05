@@ -1,10 +1,12 @@
 package executor
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -20,16 +22,19 @@ func TestBaselineReport_RoundTrip(t *testing.T) {
 	path := filepath.Join(dir, "baseline.json")
 
 	want := BaselineReport{
-		Mode:           "baseline-seq",
-		Parallelism:    1,
-		Duration:       1234567890 * time.Nanosecond,
-		MeasuredAt:     time.Date(2026, 6, 3, 12, 0, 0, 0, time.UTC),
-		ProjectPath:    "C:/src/cli",
-		PackageCount:   233,
-		PackageSource:  "data/characterization/cli.json",
-		Success:        true,
-		DataFileSHA256: "deadbeef",
-		CacheRegime:    "cold",
+		Mode:                 "baseline-seq",
+		Parallelism:          1,
+		Duration:             1234567890 * time.Nanosecond,
+		MeasuredAt:           time.Date(2026, 6, 3, 12, 0, 0, 0, time.UTC),
+		ProjectPath:          "C:/src/cli",
+		PackageCount:         233,
+		PackageSource:        "data/characterization/cli.json",
+		Success:              true,
+		DataFileSHA256:       "deadbeef",
+		CacheRegime:          "cold",
+		GOMAXPROCSConfigured: CanonicalGOMAXPROCS,
+		GOMAXPROCSEffective:  CanonicalGOMAXPROCS,
+		GOMAXPROCSPolicy:     GOMAXPROCSPolicy,
 	}
 
 	if err := WriteBaselineReport(path, want); err != nil {
@@ -51,7 +56,10 @@ func TestBaselineReport_RoundTrip(t *testing.T) {
 		got.Success != want.Success ||
 		got.Error != want.Error ||
 		got.DataFileSHA256 != want.DataFileSHA256 ||
-		got.CacheRegime != want.CacheRegime {
+		got.CacheRegime != want.CacheRegime ||
+		got.GOMAXPROCSConfigured != want.GOMAXPROCSConfigured ||
+		got.GOMAXPROCSEffective != want.GOMAXPROCSEffective ||
+		got.GOMAXPROCSPolicy != want.GOMAXPROCSPolicy {
 		t.Fatalf("round-trip mismatch:\nwant=%+v\n got=%+v", want, got)
 	}
 }
@@ -317,11 +325,53 @@ func TestRunTimedGoTestSetsGOMAXPROCS(t *testing.T) {
 		return "", nil
 	}
 
-	wr := runTimedGoTest(Config{WarmCache: true, GOMAXPROCS: 1}, []string{"test", "./..."}, 0, 1, "unused")
+	wr := runTimedGoTest(Config{WarmCache: true}, []string{"test", "./..."}, 0, 1, "unused")
 	if wr.Error != nil {
 		t.Fatalf("runTimedGoTest: %v", wr.Error)
 	}
 	if seen != "1" {
 		t.Fatalf("GOMAXPROCS child env = %q, want 1", seen)
+	}
+}
+
+func TestCanonicalEnvironmentReplacesDuplicatesAndPreservesOthers(t *testing.T) {
+	got := CanonicalEnvironment([]string{"PATH=C:/bin", "GOMAXPROCS=8", "gomaxprocs=4"})
+	count := 0
+	for _, entry := range got {
+		if strings.EqualFold(strings.SplitN(entry, "=", 2)[0], "GOMAXPROCS") {
+			count++
+			if entry != "GOMAXPROCS=1" {
+				t.Fatalf("canonical entry = %q", entry)
+			}
+		}
+	}
+	if count != 1 || got[0] != "PATH=C:/bin" {
+		t.Fatalf("canonical environment = %v", got)
+	}
+}
+
+func TestCanonicalEnvironmentConcurrent(t *testing.T) {
+	const workers = 32
+	var wg sync.WaitGroup
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			got := CanonicalEnvironment([]string{"GOMAXPROCS=99"})
+			if len(got) != 1 || got[0] != "GOMAXPROCS=1" {
+				t.Errorf("canonical environment = %v", got)
+			}
+		}()
+	}
+	wg.Wait()
+}
+
+func TestVerifyCanonicalGOMAXPROCS(t *testing.T) {
+	effective, err := VerifyCanonicalGOMAXPROCS(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if effective != CanonicalGOMAXPROCS {
+		t.Fatalf("effective=%d, want %d", effective, CanonicalGOMAXPROCS)
 	}
 }

@@ -26,34 +26,42 @@ type testEvent struct {
 }
 
 type runMetadata struct {
-	Command    string    `json:"command,omitempty"`
-	StartedAt  time.Time `json:"started_at,omitempty"`
-	FinishedAt time.Time `json:"finished_at,omitempty"`
-	ExitCode   *int      `json:"exit_code,omitempty"`
-	TimedOut   bool      `json:"timed_out,omitempty"`
+	Command                 string    `json:"command,omitempty"`
+	StartedAt               time.Time `json:"started_at,omitempty"`
+	FinishedAt              time.Time `json:"finished_at,omitempty"`
+	ExitCode                *int      `json:"exit_code,omitempty"`
+	TimedOut                bool      `json:"timed_out,omitempty"`
+	GOMAXPROCSConfigured    int       `json:"gomaxprocs_configured,omitempty"`
+	GOMAXPROCSEffective     int       `json:"gomaxprocs_effective,omitempty"`
+	GOMAXPROCSPolicy        string    `json:"gomaxprocs_policy,omitempty"`
+	ChildEnvironmentApplied bool      `json:"child_environment_applied,omitempty"`
 }
 
 type runReport struct {
-	File                string            `json:"file"`
-	MetadataFile        string            `json:"metadata_file,omitempty"`
-	MetadataPresent     bool              `json:"metadata_present"`
-	ExitCode            *int              `json:"exit_code,omitempty"`
-	TimedOut            bool              `json:"timed_out"`
-	TotalLines          int               `json:"total_lines"`
-	JSONLines           int               `json:"json_lines"`
-	MalformedLines      int               `json:"malformed_lines"`
-	MalformedExamples   []string          `json:"malformed_examples,omitempty"`
-	TerminalPackages    int               `json:"terminal_packages"`
-	PassPackages        int               `json:"pass_packages"`
-	FailPackages        int               `json:"fail_packages"`
-	SkipPackages        int               `json:"skip_packages"`
-	ZeroElapsedPasses   int               `json:"zero_elapsed_passes"`
-	DuplicateTerminal   int               `json:"duplicate_terminal_events"`
-	MissingExpected     []string          `json:"missing_expected,omitempty"`
-	UnexpectedPackages  []string          `json:"unexpected_packages,omitempty"`
-	StderrFile          string            `json:"stderr_file,omitempty"`
-	StderrNonEmpty      bool              `json:"stderr_non_empty"`
-	TerminalStatusByPkg map[string]string `json:"-"`
+	File                    string            `json:"file"`
+	MetadataFile            string            `json:"metadata_file,omitempty"`
+	MetadataPresent         bool              `json:"metadata_present"`
+	ExitCode                *int              `json:"exit_code,omitempty"`
+	TimedOut                bool              `json:"timed_out"`
+	TotalLines              int               `json:"total_lines"`
+	JSONLines               int               `json:"json_lines"`
+	MalformedLines          int               `json:"malformed_lines"`
+	MalformedExamples       []string          `json:"malformed_examples,omitempty"`
+	TerminalPackages        int               `json:"terminal_packages"`
+	PassPackages            int               `json:"pass_packages"`
+	FailPackages            int               `json:"fail_packages"`
+	SkipPackages            int               `json:"skip_packages"`
+	ZeroElapsedPasses       int               `json:"zero_elapsed_passes"`
+	DuplicateTerminal       int               `json:"duplicate_terminal_events"`
+	MissingExpected         []string          `json:"missing_expected,omitempty"`
+	UnexpectedPackages      []string          `json:"unexpected_packages,omitempty"`
+	StderrFile              string            `json:"stderr_file,omitempty"`
+	StderrNonEmpty          bool              `json:"stderr_non_empty"`
+	GOMAXPROCSConfigured    int               `json:"gomaxprocs_configured,omitempty"`
+	GOMAXPROCSEffective     int               `json:"gomaxprocs_effective,omitempty"`
+	GOMAXPROCSPolicy        string            `json:"gomaxprocs_policy,omitempty"`
+	ChildEnvironmentApplied bool              `json:"child_environment_applied,omitempty"`
+	TerminalStatusByPkg     map[string]string `json:"-"`
 }
 
 type validationReport struct {
@@ -80,6 +88,7 @@ func main() {
 	projectPath := flag.String("project-path", "", "Go project root used by the probes (required).")
 	pattern := flag.String("pattern", "./...", "Package pattern passed to go list.")
 	expectedRuns := flag.Int("expected-runs", 10, "Expected number of probe files.")
+	requireGOMAXPROCS := flag.Int("require-gomaxprocs", 0, "Require sidecar proof of this effective GOMAXPROCS value (0 disables the check).")
 	output := flag.String("output", "", "Optional path for the JSON validation report.")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s -project-path DIR [options] RUN_JSON...\n", os.Args[0])
@@ -98,7 +107,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	report := validate(*projectPath, *pattern, *expectedRuns, expected, flag.Args())
+	report := validate(*projectPath, *pattern, *expectedRuns, *requireGOMAXPROCS, expected, flag.Args())
 	printSummary(report)
 	if *output != "" {
 		if err := writeJSON(*output, report); err != nil {
@@ -137,7 +146,7 @@ func listExpectedPackages(projectPath, pattern string) ([]string, error) {
 	return packages, nil
 }
 
-func validate(projectPath, pattern string, expectedRuns int, expected []string, paths []string) validationReport {
+func validate(projectPath, pattern string, expectedRuns, requiredGOMAXPROCS int, expected []string, paths []string) validationReport {
 	report := validationReport{
 		GeneratedAt:      time.Now(),
 		ProjectPath:      projectPath,
@@ -190,13 +199,20 @@ func validate(projectPath, pattern string, expectedRuns int, expected []string, 
 				fmt.Sprintf("%s exited with code %d without a package fail/skip explaining it", path, *run.ExitCode))
 		}
 		if !run.MetadataPresent {
-			report.Warnings = append(report.Warnings, fmt.Sprintf("%s has no sidecar metadata; exit code cannot be verified retroactively", path))
+			if requiredGOMAXPROCS > 0 {
+				report.FatalFindings = append(report.FatalFindings, fmt.Sprintf("%s has no sidecar metadata proving GOMAXPROCS=%d", path, requiredGOMAXPROCS))
+			} else {
+				report.Warnings = append(report.Warnings, fmt.Sprintf("%s has no sidecar metadata; exit code cannot be verified retroactively", path))
+			}
+		} else if requiredGOMAXPROCS > 0 && (run.GOMAXPROCSConfigured != requiredGOMAXPROCS || run.GOMAXPROCSEffective != requiredGOMAXPROCS || !run.ChildEnvironmentApplied) {
+			report.FatalFindings = append(report.FatalFindings,
+				fmt.Sprintf("%s lacks valid GOMAXPROCS evidence: configured=%d effective=%d applied=%t expected=%d", path, run.GOMAXPROCSConfigured, run.GOMAXPROCSEffective, run.ChildEnvironmentApplied, requiredGOMAXPROCS))
 		}
 		if run.StderrNonEmpty {
 			report.Warnings = append(report.Warnings, fmt.Sprintf("%s has non-empty stderr (%s)", path, run.StderrFile))
 		}
 		if run.DuplicateTerminal > 0 {
-			report.Warnings = append(report.Warnings, fmt.Sprintf("%s has %d duplicate terminal event(s)", path, run.DuplicateTerminal))
+			report.FatalFindings = append(report.FatalFindings, fmt.Sprintf("%s has %d duplicate terminal event(s)", path, run.DuplicateTerminal))
 		}
 		if len(run.UnexpectedPackages) > 0 {
 			report.Warnings = append(report.Warnings, fmt.Sprintf("%s contains %d package(s) outside current go list", path, len(run.UnexpectedPackages)))
@@ -309,6 +325,10 @@ func inspectRun(path string, expected map[string]struct{}) (runReport, error) {
 		r.MetadataPresent = true
 		r.ExitCode = meta.ExitCode
 		r.TimedOut = meta.TimedOut
+		r.GOMAXPROCSConfigured = meta.GOMAXPROCSConfigured
+		r.GOMAXPROCSEffective = meta.GOMAXPROCSEffective
+		r.GOMAXPROCSPolicy = meta.GOMAXPROCSPolicy
+		r.ChildEnvironmentApplied = meta.ChildEnvironmentApplied
 	}
 	r.StderrFile = base + ".err"
 	if info, err := os.Stat(r.StderrFile); err == nil && info.Size() > 0 {

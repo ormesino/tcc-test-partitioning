@@ -170,11 +170,12 @@ func main() {
 			for _, sc := range order {
 				fmt.Printf("workers=%d rep=%d scenario=%s\n", workersCount, rep, sc.Name)
 				result := executor.RunPartitioned(executor.Config{
-					ProjectPath: *projectPath,
-					Timeout:     time.Duration(*timeoutMinutes) * time.Minute,
-					Count:       1,
-					WarmCache:   *warmCache,
-					GOMAXPROCS:  sc.GOMAXPROCS,
+					ProjectPath:                    *projectPath,
+					Timeout:                        time.Duration(*timeoutMinutes) * time.Minute,
+					Count:                          1,
+					WarmCache:                      *warmCache,
+					GOMAXPROCS:                     sc.GOMAXPROCS,
+					InheritGOMAXPROCSForDiagnostic: sc.GOMAXPROCS == 0,
 				}, partition)
 				obs := observation{Scenario: sc.Name, Workers: workersCount, Repetition: rep, MakespanNS: int64(result.Makespan)}
 				var errors []string

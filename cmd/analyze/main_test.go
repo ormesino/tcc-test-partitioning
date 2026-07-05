@@ -60,3 +60,14 @@ func TestMedian(t *testing.T) {
 		t.Errorf("median mutated input: first element = %v", in[0])
 	}
 }
+
+func TestSecondsToDurationPrecisionAndPolicy(t *testing.T) {
+	if got := secondsToDuration(0.0005); got != 500*time.Microsecond {
+		t.Fatalf("submillisecond duration=%v", got)
+	}
+	for _, invalid := range []float64{0, -1} {
+		if got := secondsToDuration(invalid); got != 0 {
+			t.Fatalf("secondsToDuration(%v)=%v, want zero", invalid, got)
+		}
+	}
+}

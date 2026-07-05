@@ -30,6 +30,7 @@ func TestValidateBaselineReport(t *testing.T) {
 		Mode: "baseline-seq", Duration: time.Second, PackageCount: 2,
 		PackageSource: "data/characterization/example.json", Success: true,
 		DataFileSHA256: hash, CacheRegime: "cold",
+		GOMAXPROCSConfigured: 1, GOMAXPROCSEffective: 1, GOMAXPROCSPolicy: executor.GOMAXPROCSPolicy,
 	}
 	if err := validateBaselineReport("baseline.json", valid, 2, tmpFile.Name(), false); err != nil {
 		t.Fatalf("valid report rejected: %v", err)
@@ -46,6 +47,7 @@ func TestValidateBaselineReport(t *testing.T) {
 		{"legacy scope", func(r *executor.BaselineReport) { r.PackageSource = "./..." }, "not pass-only"},
 		{"wrong hash", func(r *executor.BaselineReport) { r.DataFileSHA256 = "bad" }, "expected"},
 		{"wrong regime", func(r *executor.BaselineReport) { r.CacheRegime = "warm" }, "expected"},
+		{"missing GOMAXPROCS evidence", func(r *executor.BaselineReport) { r.GOMAXPROCSEffective = 0 }, "GOMAXPROCS evidence"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

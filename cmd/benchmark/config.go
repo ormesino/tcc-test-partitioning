@@ -64,8 +64,8 @@ type Config struct {
 	// imply that all later build, link, initialization, or setup work vanishes.
 	WarmCache bool `json:"warm_cache,omitempty"`
 
-	// EnvironmentLabel identifies the collection context (for example
-	// "gcp-primary" or "local-historical") in environment.json.
+	// EnvironmentLabel identifies the canonical collection context
+	// (`gcp-primary`) in environment.json.
 	EnvironmentLabel string `json:"environment_label,omitempty"`
 
 	// Projects is the list of subjects to benchmark.
@@ -77,6 +77,9 @@ type ProjectSpec struct {
 	// Name is a short identifier used in output filenames and
 	// aggregated records.
 	Name string `json:"name"`
+
+	// ExpectedCommit freezes the subject source identity for canonical runs.
+	ExpectedCommit string `json:"expected_commit,omitempty"`
 
 	// DataFile is the path to the PackageInfo JSON (produced by
 	// cmd/analyze or cmd/gendata).
@@ -153,6 +156,9 @@ func (c *Config) validate() error {
 		}
 		if c.Mode == "run" && p.ProjectPath == "" {
 			return fmt.Errorf("config.projects[%d].project_path is required in run mode", i)
+		}
+		if c.Mode == "run" && p.ExpectedCommit == "" {
+			return fmt.Errorf("config.projects[%d].expected_commit is required in run mode", i)
 		}
 		if c.Mode == "run" && p.BaselineSeqFile == "" {
 			return fmt.Errorf("config.projects[%d].baseline_seq_file is required in run mode", i)

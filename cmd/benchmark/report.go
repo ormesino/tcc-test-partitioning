@@ -81,24 +81,28 @@ type fullReport struct {
 }
 
 type environmentReport struct {
-	CollectedAt        time.Time         `json:"collected_at"`
-	GoVersion          string            `json:"go_version"`
-	GOOS               string            `json:"goos"`
-	GOARCH             string            `json:"goarch"`
-	NumCPU             int               `json:"num_cpu"`
-	GOMAXPROCS         int               `json:"gomaxprocs"`
-	CPUModel           string            `json:"cpu_model,omitempty"`
-	OSVersion          string            `json:"os_version,omitempty"`
-	KernelVersion      string            `json:"kernel_version,omitempty"`
-	EnvironmentLabel   string            `json:"environment_label"`
-	GoCache            string            `json:"go_cache,omitempty"`
-	GoModCache         string            `json:"go_mod_cache,omitempty"`
-	TotalMemoryBytes   uint64            `json:"total_memory_bytes,omitempty"`
-	Hostname           string            `json:"hostname,omitempty"`
-	ApplicationVersion string            `json:"application_version,omitempty"`
-	ApplicationCommit  string            `json:"application_commit,omitempty"`
-	ApplicationDirty   bool              `json:"application_dirty"`
-	ProjectCommits     map[string]string `json:"project_commits"`
+	CollectedAt          time.Time         `json:"collected_at"`
+	GoVersion            string            `json:"go_version"`
+	GOOS                 string            `json:"goos"`
+	GOARCH               string            `json:"goarch"`
+	NumCPU               int               `json:"num_cpu"`
+	GOMAXPROCS           int               `json:"gomaxprocs"`
+	GOMAXPROCSConfigured int               `json:"gomaxprocs_configured"`
+	GOMAXPROCSEffective  int               `json:"gomaxprocs_effective"`
+	GOMAXPROCSPolicy     string            `json:"gomaxprocs_policy"`
+	CPUModel             string            `json:"cpu_model,omitempty"`
+	OSVersion            string            `json:"os_version,omitempty"`
+	KernelVersion        string            `json:"kernel_version,omitempty"`
+	EnvironmentLabel     string            `json:"environment_label"`
+	GoCache              string            `json:"go_cache,omitempty"`
+	GoModCache           string            `json:"go_mod_cache,omitempty"`
+	TotalMemoryBytes     uint64            `json:"total_memory_bytes,omitempty"`
+	Hostname             string            `json:"hostname,omitempty"`
+	ApplicationVersion   string            `json:"application_version,omitempty"`
+	ApplicationCommit    string            `json:"application_commit,omitempty"`
+	ApplicationDirty     bool              `json:"application_dirty"`
+	ProjectCommits       map[string]string `json:"project_commits"`
+	ProjectDirty         map[string]bool   `json:"project_dirty"`
 }
 
 type nativeBaselineRecord struct {

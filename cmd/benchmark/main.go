@@ -27,6 +27,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -111,7 +112,13 @@ func main() {
 	if err := writeJSON(filepath.Join(runDir, "config.json"), cfg); err != nil {
 		fatal("writing config copy: %v", err)
 	}
-	environment := collectEnvironment(cfg)
+	environment, err := collectEnvironment(cfg)
+	if err != nil {
+		fatal("environment preflight: %v", err)
+	}
+	if err := validateCanonicalEnvironment(cfg, environment); err != nil {
+		fatal("canonical environment: %v", err)
+	}
 	if err := writeJSON(filepath.Join(runDir, "environment.json"), environment); err != nil {
 		fatal("writing environment manifest: %v", err)
 	}
@@ -410,6 +417,9 @@ func loadNativeBaselines(cfg Config, proj ProjectSpec, packages []model.PackageI
 }
 
 func validateParallelBaselineReport(path string, r executor.BaselineReport, expectedPackageCount int, dataFile string, warmCache bool, workers int) error {
+	if err := validateBaselineGOMAXPROCS(path, r); err != nil {
+		return err
+	}
 	if r.Mode != "baseline-par" {
 		return fmt.Errorf("baseline file %s has mode %q, expected 'baseline-par'", path, r.Mode)
 	}
@@ -462,6 +472,9 @@ func resolveT1(packages []model.PackageInfo, baselineSeqFile string, dataFile st
 }
 
 func validateBaselineReport(path string, r executor.BaselineReport, expectedPackageCount int, dataFile string, warmCache bool) error {
+	if err := validateBaselineGOMAXPROCS(path, r); err != nil {
+		return err
+	}
 	if r.Duration <= 0 {
 		return fmt.Errorf("baseline file %s has non-positive duration", path)
 	}
@@ -495,6 +508,16 @@ func validateBaselineReport(path string, r executor.BaselineReport, expectedPack
 		return fmt.Errorf("baseline file %s has cache_regime=%q, expected %q", path, r.CacheRegime, expectedRegime)
 	}
 
+	return nil
+}
+
+func validateBaselineGOMAXPROCS(path string, r executor.BaselineReport) error {
+	if r.GOMAXPROCSConfigured != executor.CanonicalGOMAXPROCS ||
+		r.GOMAXPROCSEffective != executor.CanonicalGOMAXPROCS ||
+		r.GOMAXPROCSPolicy != executor.GOMAXPROCSPolicy {
+		return fmt.Errorf("baseline file %s lacks canonical GOMAXPROCS evidence (configured=%d effective=%d policy=%q)",
+			path, r.GOMAXPROCSConfigured, r.GOMAXPROCSEffective, r.GOMAXPROCSPolicy)
+	}
 	return nil
 }
 
@@ -567,22 +590,30 @@ func makeRunDir(base string, t time.Time) (string, error) {
 	return dir, nil
 }
 
-func collectEnvironment(cfg Config) environmentReport {
+func collectEnvironment(cfg Config) (environmentReport, error) {
+	effective, err := executor.VerifyCanonicalGOMAXPROCS(context.Background())
+	if err != nil {
+		return environmentReport{}, err
+	}
 	report := environmentReport{
-		GoVersion:        runtime.Version(),
-		GOOS:             runtime.GOOS,
-		GOARCH:           runtime.GOARCH,
-		NumCPU:           runtime.NumCPU(),
-		GOMAXPROCS:       runtime.GOMAXPROCS(0),
-		CPUModel:         cpuModel(),
-		OSVersion:        osVersion(),
-		KernelVersion:    kernelVersion(),
-		EnvironmentLabel: environmentLabel(cfg),
-		GoCache:          goEnvValue("GOCACHE"),
-		GoModCache:       goEnvValue("GOMODCACHE"),
-		TotalMemoryBytes: totalMemoryBytes(),
-		ProjectCommits:   make(map[string]string),
-		CollectedAt:      time.Now(),
+		GoVersion:            runtime.Version(),
+		GOOS:                 runtime.GOOS,
+		GOARCH:               runtime.GOARCH,
+		NumCPU:               runtime.NumCPU(),
+		GOMAXPROCS:           effective,
+		GOMAXPROCSConfigured: executor.CanonicalGOMAXPROCS,
+		GOMAXPROCSEffective:  effective,
+		GOMAXPROCSPolicy:     executor.GOMAXPROCSPolicy,
+		CPUModel:             cpuModel(),
+		OSVersion:            osVersion(),
+		KernelVersion:        kernelVersion(),
+		EnvironmentLabel:     environmentLabel(cfg),
+		GoCache:              goEnvValue("GOCACHE"),
+		GoModCache:           goEnvValue("GOMODCACHE"),
+		TotalMemoryBytes:     totalMemoryBytes(),
+		ProjectCommits:       make(map[string]string),
+		ProjectDirty:         make(map[string]bool),
+		CollectedAt:          time.Now(),
 	}
 	report.Hostname, _ = os.Hostname()
 	if info, ok := debug.ReadBuildInfo(); ok {
@@ -602,8 +633,9 @@ func collectEnvironment(cfg Config) environmentReport {
 	}
 	for _, project := range cfg.Projects {
 		report.ProjectCommits[project.Name] = gitValue(project.ProjectPath, "rev-parse", "HEAD")
+		report.ProjectDirty[project.Name] = gitValue(project.ProjectPath, "status", "--porcelain") != ""
 	}
-	return report
+	return report, nil
 }
 
 func environmentLabel(cfg Config) string {
@@ -614,6 +646,24 @@ func environmentLabel(cfg Config) string {
 		return label
 	}
 	return "unspecified"
+}
+
+func validateCanonicalEnvironment(cfg Config, report environmentReport) error {
+	if cfg.Mode != "run" {
+		return nil
+	}
+	for _, project := range cfg.Projects {
+		if got := report.ProjectCommits[project.Name]; got != project.ExpectedCommit {
+			return fmt.Errorf("project %s commit=%q, expected %q", project.Name, got, project.ExpectedCommit)
+		}
+		if report.ProjectDirty[project.Name] {
+			return fmt.Errorf("project %s has a modified worktree", project.Name)
+		}
+	}
+	if report.EnvironmentLabel == "gcp-primary" && report.ApplicationDirty {
+		return fmt.Errorf("tool worktree is modified; commit the validated implementation before canonical collection")
+	}
+	return nil
 }
 
 func cpuModel() string {

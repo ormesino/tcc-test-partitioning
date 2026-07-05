@@ -33,6 +33,7 @@ func TestValidateBaselineReport(t *testing.T) {
 		Mode: "baseline-seq", Duration: time.Second, PackageCount: 2,
 		PackageSource: "data/characterization/example.json", Success: true,
 		DataFileSHA256: hash, CacheRegime: "warm",
+		GOMAXPROCSConfigured: 1, GOMAXPROCSEffective: 1, GOMAXPROCSPolicy: executor.GOMAXPROCSPolicy,
 	}
 	if err := validateBaselineReport("baseline.json", valid, 2, tmpFile.Name(), true); err != nil {
 		t.Fatalf("valid report rejected: %v", err)
@@ -51,7 +52,7 @@ func TestValidateBaselineReport(t *testing.T) {
 }
 
 func TestConfigValidateRunRequiresBaseline(t *testing.T) {
-	cfg := Config{Mode: "run", Workers: []int{2}, Algorithms: []string{"lpt"}, Repetitions: 1, OutputDir: "out", Projects: []ProjectSpec{{Name: "p", DataFile: "data.json", ProjectPath: "project"}}}
+	cfg := Config{Mode: "run", Workers: []int{2}, Algorithms: []string{"lpt"}, Repetitions: 1, OutputDir: "out", Projects: []ProjectSpec{{Name: "p", ExpectedCommit: "abc", DataFile: "data.json", ProjectPath: "project"}}}
 	if err := cfg.validate(); err == nil || !strings.Contains(err.Error(), "baseline_seq_file") {
 		t.Fatalf("validate error = %v, want missing baseline_seq_file", err)
 	}
@@ -61,10 +62,53 @@ func TestConfigValidateRunRequiresParallelBaselines(t *testing.T) {
 	cfg := Config{
 		Mode: "run", Workers: []int{2, 4}, Algorithms: []string{"lpt"},
 		Repetitions: 1, OutputDir: "out",
-		Projects: []ProjectSpec{{Name: "p", DataFile: "data.json", ProjectPath: "project", BaselineSeqFile: "seq.json", BaselineParFiles: map[string]string{"2": "p2.json"}}},
+		Projects: []ProjectSpec{{Name: "p", ExpectedCommit: "abc", DataFile: "data.json", ProjectPath: "project", BaselineSeqFile: "seq.json", BaselineParFiles: map[string]string{"2": "p2.json"}}},
 	}
 	if err := cfg.validate(); err == nil || !strings.Contains(err.Error(), `baseline_par_files["4"]`) {
 		t.Fatalf("validate error = %v, want missing p=4 native baseline", err)
+	}
+}
+
+func TestFinalCampaignConfigs(t *testing.T) {
+	wantCommits := map[string]string{
+		"cli":        "da68cb8f6f597cfc3838cf40f89ecc01f4e53233",
+		"goreleaser": "ce96e79b4883bdea39cf2cf5fe33fa63f5df4dd0",
+		"grpc-go":    "faa34bf170ceef07b9ada9bcd44dc6e16a55d1f4",
+		"hugo":       "72495f9fba69edadd50a7ecb9ae9fb3d9c46156b",
+	}
+	paths, err := filepath.Glob(filepath.Join("..", "..", "benchmarks", "campaign*.json"))
+	if err != nil || len(paths) != 8 {
+		t.Fatalf("campaign configs=%v err=%v", paths, err)
+	}
+	for _, path := range paths {
+		cfg, err := loadConfig(path)
+		if err != nil {
+			t.Fatalf("%s: %v", path, err)
+		}
+		if cfg.Repetitions != 5 || cfg.MaxAttempts != 3 || len(cfg.Projects) != 1 {
+			t.Fatalf("%s: repetitions=%d attempts=%d projects=%d", path, cfg.Repetitions, cfg.MaxAttempts, len(cfg.Projects))
+		}
+		p := cfg.Projects[0]
+		if p.ExpectedCommit != wantCommits[p.Name] {
+			t.Fatalf("%s: commit=%q", path, p.ExpectedCommit)
+		}
+	}
+}
+
+func TestValidateCanonicalEnvironment(t *testing.T) {
+	cfg := Config{Mode: "run", EnvironmentLabel: "gcp-primary", Projects: []ProjectSpec{{Name: "p", ExpectedCommit: "abc"}}}
+	report := environmentReport{EnvironmentLabel: "gcp-primary", ApplicationDirty: false, ProjectCommits: map[string]string{"p": "abc"}, ProjectDirty: map[string]bool{"p": false}}
+	if err := validateCanonicalEnvironment(cfg, report); err != nil {
+		t.Fatalf("valid environment rejected: %v", err)
+	}
+	report.ProjectCommits["p"] = "wrong"
+	if err := validateCanonicalEnvironment(cfg, report); err == nil || !strings.Contains(err.Error(), "expected") {
+		t.Fatalf("commit mismatch error=%v", err)
+	}
+	report.ProjectCommits["p"] = "abc"
+	report.ApplicationDirty = true
+	if err := validateCanonicalEnvironment(cfg, report); err == nil || !strings.Contains(err.Error(), "tool worktree") {
+		t.Fatalf("dirty tool error=%v", err)
 	}
 }
 
