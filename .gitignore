@@ -23,7 +23,7 @@ go.work.sum
 
 # env file
 .env
-/environment/
+/env/
 
 # Editor/IDE
 .vscode/
@@ -46,6 +46,8 @@ go.work.sum
 
 # Benchmark results are generated; configs are versioned.
 /benchmarks/results/
+/data/baseline/local/
+/data/characterization/local/
 
 # Internal documentation, not part of the public project artifact.
 /docs
