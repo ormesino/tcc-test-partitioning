@@ -22,7 +22,7 @@ Gráficos gerados:
 
 Decisões metodológicas incorporadas:
     - Decisão 1: Speedup calculado com dois T1 (medido e teórico).
-    - Decisão 2: Boxplots com 3 repetições, mediana como tendência central.
+    - Decisão 2: Boxplots com todas as repetições válidas (3 nas campanhas históricas e 5 nas futuras), usando a mediana como tendência central.
     - Decisão 4: p=8 mantido para mostrar saturação.
 """
 
@@ -112,6 +112,20 @@ def get_project_name(config):
     return config["projects"][0]["name"]
 
 
+def parallel_native_baselines(native):
+    """Seleciona somente os baselines nativos paralelos.
+
+    Arquivos históricos não possuem a coluna ``mode`` e já contêm apenas os
+    pontos paralelos. Arquivos novos incluem também ``baseline-seq`` (p=1),
+    usado como T1, mas que não deve ser alinhado às barras p=2/4/8.
+    """
+    if native is None or native.empty:
+        return native
+    if "mode" not in native.columns:
+        return native
+    return native[native["mode"] == "baseline-par"]
+
+
 # ---------- Gráfico 1: Boxplot de Makespan ----------------------------------
 
 def plot_makespan_boxplot(raw, charts_dir, project_name):
@@ -182,10 +196,11 @@ def plot_makespan_bars(agg, native, charts_dir, project_name):
             ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1,
                     format_seconds(val), ha="center", va="bottom", fontsize=8)
 
-    if native is not None and not native.empty:
-        native = native.sort_values("workers")
+    native_parallel = parallel_native_baselines(native)
+    if native_parallel is not None and not native_parallel.empty:
+        native_parallel = native_parallel.sort_values("workers")
         ax.plot([xi + width * (n_algos - 1) / 2 for xi in x],
-                ns_to_seconds(native["duration_ns"]), "kD--",
+                ns_to_seconds(native_parallel["duration_ns"]), "kD--",
                 label="Go Native", linewidth=1.5, markersize=6)
 
     ax.set_xlabel("Número de Workers (p)")
@@ -225,9 +240,10 @@ def plot_speedup(raw, agg, native, t1_measured, charts_dir, project_name):
 
         ax.plot(workers_list, workers_list, "k--", alpha=0.4,
                 label="Ideal (linear)")
-        if native is not None and not native.empty:
-            native = native.sort_values("workers")
-            ax.plot(native["workers"], native["speedup"], "kD-.",
+        native_parallel = parallel_native_baselines(native)
+        if native_parallel is not None and not native_parallel.empty:
+            native_parallel = native_parallel.sort_values("workers")
+            ax.plot(native_parallel["workers"], native_parallel["speedup"], "kD-.",
                     label="Go Native", linewidth=1.5, markersize=6)
         ax.set_title("Speedup com T1 Medido\n(baseline-seq, inclui overhead)")
     else:
@@ -384,8 +400,9 @@ def plot_summary_panel(raw, agg, native, t1_measured, t1_theoretical,
         positions = [xi + i * width for xi in x]
         ax.bar(positions, vals, width, label=algo,
                color=ALGO_COLORS[algo], alpha=0.85, edgecolor="white")
-    if native is not None and not native.empty:
-        native_sorted = native.sort_values("workers")
+    native_parallel = parallel_native_baselines(native)
+    if native_parallel is not None and not native_parallel.empty:
+        native_sorted = native_parallel.sort_values("workers")
         ax.plot([xi + width * (n_algos - 1) / 2 for xi in x],
                 ns_to_seconds(native_sorted["duration_ns"]), "kD--",
                 label="Go Native", linewidth=1.5, markersize=5)
@@ -409,8 +426,9 @@ def plot_summary_panel(raw, agg, native, t1_measured, t1_theoretical,
             ax.plot(workers_list, speedups, "o-", label=algo,
                     color=ALGO_COLORS[algo], linewidth=2, markersize=5)
         ax.plot(workers_list, workers_list, "k--", alpha=0.4, label="Ideal")
-        if native is not None and not native.empty:
-            native_sorted = native.sort_values("workers")
+        native_parallel = parallel_native_baselines(native)
+        if native_parallel is not None and not native_parallel.empty:
+            native_sorted = native_parallel.sort_values("workers")
             ax.plot(native_sorted["workers"], native_sorted["speedup"], "kD-.",
                     label="Go Native", linewidth=1.5, markersize=5)
     ax.set_xlabel("Workers (p)")

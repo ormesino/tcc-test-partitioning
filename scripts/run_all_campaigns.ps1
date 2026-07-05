@@ -11,6 +11,13 @@
     Timeout por repeticao em minutos. Cada repeticao corresponde a uma
     combinacao de projeto, algoritmo e numero de workers. Default: 90.
 
+.PARAMETER Repetitions
+    Numero de repeticoes logicas por algoritmo e quantidade de workers.
+    Default: 5 para as campanhas futuras.
+
+.PARAMETER EnvironmentLabel
+    Rotulo persistido em environment.json. Default: gcp-primary.
+
 .PARAMETER Projects
     Projetos a executar. Valores aceitos: cli, goreleaser, grpc-go e hugo.
 
@@ -31,6 +38,8 @@
 [CmdletBinding()]
 param(
     [int]$TimeoutMinutes = 90,
+    [int]$Repetitions = 5,
+    [string]$EnvironmentLabel = 'gcp-primary',
     [ValidateSet('cli', 'goreleaser', 'grpc-go', 'hugo')]
     [string[]]$Projects = @('cli', 'goreleaser', 'grpc-go', 'hugo'),
     [ValidateSet('cold', 'warm')]
@@ -104,6 +113,8 @@ try {
     Write-Log "Inicio geral: $startTime"
     Write-Log "Log principal: $logFile"
     Write-Log "Timeout por repeticao: $TimeoutMinutes min"
+    Write-Log "Repeticoes logicas por combinacao: $Repetitions"
+    Write-Log "Rotulo de ambiente: $EnvironmentLabel"
     Write-Log "Projetos: $($Projects -join ', ')"
     Write-Log "Regimes: $($Regimes -join ', ')"
     Write-Log ""
@@ -128,7 +139,7 @@ try {
             $campaignIndex++
             $exitCode = Run-Step -Name $c.Name `
                 -Command "go" `
-                -Arguments @("run", "./cmd/benchmark", "--config", $c.Config, "--timeout-minutes", "$TimeoutMinutes") `
+                -Arguments @("run", "./cmd/benchmark", "--config", $c.Config, "--timeout-minutes", "$TimeoutMinutes", "--repetitions", "$Repetitions", "--environment-label", $EnvironmentLabel) `
                 -CampaignIndex $campaignIndex `
                 -CampaignTotal $campaignTotal
             if ($exitCode -ne 0) {
@@ -152,7 +163,7 @@ try {
             $campaignIndex++
             $exitCode = Run-Step -Name $c.Name `
                 -Command "go" `
-                -Arguments @("run", "./cmd/benchmark", "--config", $c.Config, "--timeout-minutes", "$TimeoutMinutes") `
+                -Arguments @("run", "./cmd/benchmark", "--config", $c.Config, "--timeout-minutes", "$TimeoutMinutes", "--repetitions", "$Repetitions", "--environment-label", $EnvironmentLabel) `
                 -CampaignIndex $campaignIndex `
                 -CampaignTotal $campaignTotal
             if ($exitCode -ne 0) {
