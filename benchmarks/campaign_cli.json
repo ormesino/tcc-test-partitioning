@@ -8,13 +8,14 @@
   "algorithms": [
     "all"
   ],
-  "repetitions": 3,
+  "repetitions": 5,
   "max_attempts": 3,
   "timeout_minutes": 60,
   "output_dir": "benchmarks/results/cli",
   "projects": [
     {
       "name": "cli",
+      "expected_commit": "da68cb8f6f597cfc3838cf40f89ecc01f4e53233",
       "data_file": "data/characterization/cli.json",
       "baseline_seq_file": "data/baseline/cli-seq-passonly.json",
       "baseline_par_files": {

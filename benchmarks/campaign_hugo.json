@@ -8,13 +8,14 @@
   "algorithms": [
     "all"
   ],
-  "repetitions": 3,
+  "repetitions": 5,
   "max_attempts": 3,
   "timeout_minutes": 60,
   "output_dir": "benchmarks/results/hugo",
   "projects": [
     {
       "name": "hugo",
+      "expected_commit": "72495f9fba69edadd50a7ecb9ae9fb3d9c46156b",
       "data_file": "data/characterization/hugo.json",
       "baseline_seq_file": "data/baseline/hugo-seq-passonly.json",
       "baseline_par_files": {

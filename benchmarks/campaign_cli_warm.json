@@ -8,7 +8,7 @@
   "algorithms": [
     "all"
   ],
-  "repetitions": 3,
+  "repetitions": 5,
   "max_attempts": 3,
   "timeout_minutes": 60,
   "warm_cache": true,
@@ -16,6 +16,7 @@
   "projects": [
     {
       "name": "cli",
+      "expected_commit": "da68cb8f6f597cfc3838cf40f89ecc01f4e53233",
       "data_file": "data/characterization/cli.json",
       "baseline_seq_file": "data/baseline/cli-seq-warm-passonly.json",
       "baseline_par_files": {

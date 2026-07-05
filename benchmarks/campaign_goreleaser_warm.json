@@ -8,7 +8,7 @@
   "algorithms": [
     "all"
   ],
-  "repetitions": 3,
+  "repetitions": 5,
   "max_attempts": 3,
   "timeout_minutes": 60,
   "warm_cache": true,
@@ -16,6 +16,7 @@
   "projects": [
     {
       "name": "goreleaser",
+      "expected_commit": "ce96e79b4883bdea39cf2cf5fe33fa63f5df4dd0",
       "data_file": "data/characterization/goreleaser.json",
       "baseline_seq_file": "data/baseline/goreleaser-seq-warm-passonly.json",
       "baseline_par_files": {
