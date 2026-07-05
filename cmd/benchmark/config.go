@@ -17,9 +17,9 @@ import (
 //
 //	projects × workers × algorithms × repetitions
 //
-// All combinations are independent; no state is shared across
-// (project, alg, workers, rep) tuples beyond the loaded package and
-// baseline data (which are immutable inputs).
+// Partitioning inputs are immutable and Partition is invoked afresh for every
+// tuple. Runtime state such as OS caches and a project-level warm build cache may
+// persist by design; algorithm order is counterbalanced to reduce position bias.
 type Config struct {
 	// Mode selects what is measured.
 	//   "simulate": partition only (no go test invoked). Deterministic;
@@ -35,8 +35,10 @@ type Config struct {
 	// expands to every implemented algorithm.
 	Algorithms []string `json:"algorithms"`
 
-	// Repetitions is the number of independent reps per
-	// (project, algorithm, workers) combination. >=1.
+	// Repetitions is the number of logical reps per
+	// (project, algorithm, workers) combination. >=1. Future final campaigns
+	// use five repetitions; older three-repetition configs remain readable for
+	// historical analysis.
 	Repetitions int `json:"repetitions"`
 
 	// MaxAttempts is the maximum number of attempts for one logical
@@ -57,10 +59,14 @@ type Config struct {
 	// Verbose enables `go test -v` in "run" mode.
 	Verbose bool `json:"verbose,omitempty"`
 
-	// WarmCache, when true, pre-compiles the selected package set before
-	// each project run. This populates Go's build cache so workers measure
-	// mostly test execution time rather than compilation.
+	// WarmCache, when true, pre-warms reusable build-cache artifacts for the
+	// selected package set. It reduces reusable compilation work but does not
+	// imply that all later build, link, initialization, or setup work vanishes.
 	WarmCache bool `json:"warm_cache,omitempty"`
+
+	// EnvironmentLabel identifies the collection context (for example
+	// "gcp-primary" or "local-historical") in environment.json.
+	EnvironmentLabel string `json:"environment_label,omitempty"`
 
 	// Projects is the list of subjects to benchmark.
 	Projects []ProjectSpec `json:"projects"`

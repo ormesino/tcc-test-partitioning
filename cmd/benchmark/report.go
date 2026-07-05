@@ -17,12 +17,13 @@ import (
 // Pointer fields for the "exec_*" group are nil in simulate mode and
 // populated only when mode == "run".
 type rawRecord struct {
-	Project   string `json:"project"`
-	Mode      string `json:"mode"`
-	Algorithm string `json:"algorithm"`
-	Workers   int    `json:"workers"`
-	Rep       int    `json:"rep"`
-	Attempts  int    `json:"attempts"`
+	Project          string `json:"project"`
+	Mode             string `json:"mode"`
+	Algorithm        string `json:"algorithm"`
+	Workers          int    `json:"workers"`
+	Rep              int    `json:"rep"`
+	SequencePosition int    `json:"sequence_position"`
+	Attempts         int    `json:"attempts"`
 
 	PlannedMakespanNS      int64   `json:"planned_makespan_ns"`
 	PlannedSpeedup         float64 `json:"planned_speedup"`
@@ -85,7 +86,13 @@ type environmentReport struct {
 	GOOS               string            `json:"goos"`
 	GOARCH             string            `json:"goarch"`
 	NumCPU             int               `json:"num_cpu"`
+	GOMAXPROCS         int               `json:"gomaxprocs"`
 	CPUModel           string            `json:"cpu_model,omitempty"`
+	OSVersion          string            `json:"os_version,omitempty"`
+	KernelVersion      string            `json:"kernel_version,omitempty"`
+	EnvironmentLabel   string            `json:"environment_label"`
+	GoCache            string            `json:"go_cache,omitempty"`
+	GoModCache         string            `json:"go_mod_cache,omitempty"`
 	TotalMemoryBytes   uint64            `json:"total_memory_bytes,omitempty"`
 	Hostname           string            `json:"hostname,omitempty"`
 	ApplicationVersion string            `json:"application_version,omitempty"`
@@ -96,6 +103,7 @@ type environmentReport struct {
 
 type nativeBaselineRecord struct {
 	Project        string    `json:"project"`
+	Mode           string    `json:"mode"`
 	Workers        int       `json:"workers"`
 	DurationNS     int64     `json:"duration_ns"`
 	Speedup        float64   `json:"speedup"`
@@ -218,7 +226,7 @@ func writeRawCSV(path string, raw []rawRecord) error {
 	defer w.Flush()
 
 	header := []string{
-		"project", "mode", "algorithm", "workers", "rep", "attempts",
+		"project", "mode", "algorithm", "workers", "rep", "sequence_position", "attempts",
 		"planned_makespan_ns", "planned_speedup", "planned_efficiency",
 		"planned_load_stddev_s", "partitioning_overhead_ns",
 		"exec_makespan_ns", "exec_speedup", "exec_efficiency",
@@ -230,7 +238,7 @@ func writeRawCSV(path string, raw []rawRecord) error {
 	for _, r := range raw {
 		row := []string{
 			r.Project, r.Mode, r.Algorithm,
-			strconv.Itoa(r.Workers), strconv.Itoa(r.Rep), strconv.Itoa(r.Attempts),
+			strconv.Itoa(r.Workers), strconv.Itoa(r.Rep), strconv.Itoa(r.SequencePosition), strconv.Itoa(r.Attempts),
 			strconv.FormatInt(r.PlannedMakespanNS, 10),
 			formatFloat(r.PlannedSpeedup),
 			formatFloat(r.PlannedEfficiency),
@@ -306,12 +314,13 @@ func writeNativeBaselineCSV(path string, records []nativeBaselineRecord) error {
 	defer f.Close()
 	w := csv.NewWriter(f)
 	defer w.Flush()
-	if err := w.Write([]string{"project", "workers", "duration_ns", "speedup", "efficiency", "cache_regime", "package_count", "data_file_sha256", "measured_at", "baseline_file"}); err != nil {
+	if err := w.Write([]string{"project", "mode", "workers", "duration_ns", "speedup", "efficiency", "cache_regime", "package_count", "data_file_sha256", "measured_at", "baseline_file"}); err != nil {
 		return err
 	}
 	for _, r := range records {
 		if err := w.Write([]string{
 			r.Project,
+			r.Mode,
 			strconv.Itoa(r.Workers),
 			strconv.FormatInt(r.DurationNS, 10),
 			formatFloat(r.Speedup),

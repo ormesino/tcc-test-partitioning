@@ -70,7 +70,7 @@ func TestConfigValidateRunRequiresParallelBaselines(t *testing.T) {
 
 func TestRunOneSeparatesPlannedAndMeasuredT1(t *testing.T) {
 	packages := []model.PackageInfo{{Name: "a", Duration: 4 * time.Second}, {Name: "b", Duration: 6 * time.Second}}
-	rec := runOne(Config{Mode: "simulate"}, ProjectSpec{Name: "p"}, packages, 10*time.Second, 100*time.Second, &partitioner.LPT{}, 2, 1)
+	rec := runOne(Config{Mode: "simulate"}, ProjectSpec{Name: "p"}, packages, 10*time.Second, 100*time.Second, &partitioner.LPT{}, 2, 1, 3)
 	if rec.PlannedMakespanNS != int64(6*time.Second) {
 		t.Fatalf("planned makespan = %d, want %d", rec.PlannedMakespanNS, 6*time.Second)
 	}
@@ -95,6 +95,9 @@ func TestMakeRunDirRejectsCollision(t *testing.T) {
 }
 
 func TestFinalConfigsReferenceValidNativeBaselines(t *testing.T) {
+	if os.Getenv("TCC_VALIDATE_CAMPAIGN_ARTIFACTS") != "1" {
+		t.Skip("set TCC_VALIDATE_CAMPAIGN_ARTIFACTS=1 to validate campaign artifacts")
+	}
 	root := filepath.Join("..", "..")
 	configs, err := filepath.Glob(filepath.Join(root, "benchmarks", "campaign_*.json"))
 	if err != nil || len(configs) != 8 {
@@ -105,12 +108,6 @@ func TestFinalConfigsReferenceValidNativeBaselines(t *testing.T) {
 			cfg, err := loadConfig(path)
 			if err != nil {
 				t.Fatalf("loadConfig: %v", err)
-			}
-			// Baseline compatibility is an experimental-readiness check. It is
-			// expected to fail while baselines await recollection after a
-			// characterization change, so keep it out of the normal unit suite.
-			if os.Getenv("TCC_VALIDATE_CAMPAIGN_ARTIFACTS") != "1" {
-				t.Skip("set TCC_VALIDATE_CAMPAIGN_ARTIFACTS=1 to validate campaign artifacts")
 			}
 			project := cfg.Projects[0]
 			project.DataFile = filepath.Join(root, filepath.FromSlash(project.DataFile))
@@ -123,8 +120,8 @@ func TestFinalConfigsReferenceValidNativeBaselines(t *testing.T) {
 				t.Fatalf("loadPackages: %v", err)
 			}
 			seq, _ := resolveT1(packages, project.BaselineSeqFile, project.DataFile, cfg.WarmCache)
-			if records, err := loadNativeBaselines(cfg, project, packages, seq); err != nil || len(records) != 3 {
-				t.Fatalf("native baselines = %d, err=%v; want 3", len(records), err)
+			if records, err := loadNativeBaselines(cfg, project, packages, seq); err != nil || len(records) != 4 {
+				t.Fatalf("native baselines = %d, err=%v; want 4", len(records), err)
 			}
 		})
 	}
@@ -181,5 +178,51 @@ func TestRunWithRetriesReturnsFinalFailure(t *testing.T) {
 
 	if runs != 3 || rec.Attempts != 3 || rec.ExecError == "" || !finalCallbackMarked {
 		t.Fatalf("runs=%d rec=%+v finalCallback=%v", runs, rec, finalCallbackMarked)
+	}
+}
+
+func TestAlgorithmOrderForRepCounterbalancesCompleteBlock(t *testing.T) {
+	algorithms, err := resolveAlgorithms([]string{"all"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	positions := make(map[string]map[int]int)
+	for rep := 1; rep <= len(algorithms); rep++ {
+		for pos, alg := range algorithmOrderForRep(algorithms, rep) {
+			if positions[alg.Name()] == nil {
+				positions[alg.Name()] = make(map[int]int)
+			}
+			positions[alg.Name()][pos]++
+		}
+	}
+	for name, counts := range positions {
+		for pos := range algorithms {
+			if counts[pos] != 1 {
+				t.Fatalf("algorithm %s appeared %d times at position %d; want 1", name, counts[pos], pos)
+			}
+		}
+	}
+}
+
+func TestLoadPackagesRejectsEmptyNamesAndDuplicates(t *testing.T) {
+	tests := []struct {
+		name string
+		data string
+		want string
+	}{
+		{"empty-population", `[]`, "empty package population"},
+		{"empty-name", `[{"name":"","duration_ns":1}]`, "empty name"},
+		{"duplicate", `[{"name":"a","duration_ns":1},{"name":"a","duration_ns":2}]`, "duplicate"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "packages.json")
+			if err := os.WriteFile(path, []byte(tc.data), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := loadPackages(path); err == nil || !strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("error=%v, want substring %q", err, tc.want)
+			}
+		})
 	}
 }

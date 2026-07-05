@@ -6,10 +6,10 @@
 // for either the simulate mode (deterministic, partitioning-only) or
 // the run mode (real `go test` execution via the executor package).
 //
-// Each (project, algorithm, workers, rep) tuple is processed
-// independently; no state is shared across tuples beyond the
-// immutable inputs (loaded PackageInfo and BaselineReport). Each
-// invocation of Partition() and the executor is fresh.
+// Each tuple receives a fresh Partition invocation and go test execution.
+// Immutable package/baseline inputs are shared, while OS state and the optional
+// project-level warm build cache may persist by design. Algorithm sequence is
+// counterbalanced across repetitions to reduce fixed-order bias.
 //
 // Outputs (under <output_dir>/<timestamp>/):
 //
@@ -18,7 +18,7 @@
 //	results.json    full structured report (config + raw + aggregate)
 //	raw.csv         one row per rep
 //	aggregate.csv   one row per (project, algorithm, workers)
-//	native_baselines.csv validated Go-native baselines by worker count
+//	native_baselines.csv validated sequential and Go-native parallel baselines
 //
 // Usage:
 //
@@ -57,6 +57,10 @@ func main() {
 		"Override config.output_dir. Empty keeps config value.")
 	timeoutMinutesOverride := flag.Int("timeout-minutes", 0,
 		"Override the per-repetition config.timeout_minutes. Zero keeps the config value.")
+	repetitionsOverride := flag.Int("repetitions", 0,
+		"Override config.repetitions. Zero keeps the config value.")
+	environmentLabelOverride := flag.String("environment-label", "",
+		"Override config.environment_label (for example gcp-primary).")
 	flag.Parse()
 
 	if *configPath == "" {
@@ -80,6 +84,15 @@ func main() {
 	}
 	if *timeoutMinutesOverride > 0 {
 		cfg.TimeoutMinutes = *timeoutMinutesOverride
+	}
+	if *repetitionsOverride > 0 {
+		cfg.Repetitions = *repetitionsOverride
+	}
+	if *environmentLabelOverride != "" {
+		cfg.EnvironmentLabel = *environmentLabelOverride
+	}
+	if err := cfg.validate(); err != nil {
+		fatal("config (after CLI overrides): %v", err)
 	}
 
 	algorithms, err := resolveAlgorithms(cfg.Algorithms)
@@ -151,8 +164,9 @@ func main() {
 		}
 
 		for rep := 1; rep <= cfg.Repetitions; rep++ {
+			orderedAlgorithms := algorithmOrderForRep(algorithms, rep)
 			for _, w := range cfg.Workers {
-				for _, alg := range algorithms {
+				for sequencePosition, alg := range orderedAlgorithms {
 					combinationIndex++
 					combinationStarted := time.Now()
 					fmt.Printf("[%s] START combination %d/%d | project=%s regime=%s rep=%d/%d workers=%d algorithm=%s timeout=%dm\n",
@@ -161,7 +175,7 @@ func main() {
 					rec := runWithRetries(
 						cfg.MaxAttempts,
 						func() rawRecord {
-							return runOne(cfg, proj, packages, theoreticalT1, t1, alg, w, rep)
+							return runOne(cfg, proj, packages, theoreticalT1, t1, alg, w, rep, sequencePosition+1)
 						},
 						func(attempt int, executionError string, willRetry bool) {
 							action := "IGNORED after final attempt"
@@ -224,6 +238,25 @@ func main() {
 	}
 }
 
+// algorithmOrderForRep applies a deterministic cyclic counterbalancing. Over
+// each complete block of len(algorithms) repetitions, every algorithm occupies
+// every sequence position exactly once. A fifth repetition begins the next
+// block, which is the least imbalanced deterministic design for four algorithms
+// and five repetitions.
+func algorithmOrderForRep(algorithms []partitioner.Partitioner, rep int) []partitioner.Partitioner {
+	if len(algorithms) == 0 {
+		return nil
+	}
+	offset := (rep - 1) % len(algorithms)
+	if offset < 0 {
+		offset += len(algorithms)
+	}
+	ordered := make([]partitioner.Partitioner, 0, len(algorithms))
+	ordered = append(ordered, algorithms[offset:]...)
+	ordered = append(ordered, algorithms[:offset]...)
+	return ordered
+}
+
 // runWithRetries executes one logical repetition up to maxAttempts times.
 // Only the final successful result (or the final failed result) is returned;
 // failed attempts are reported through onFailure and never become samples.
@@ -249,7 +282,7 @@ func runWithRetries(maxAttempts int, run func() rawRecord, onFailure func(int, s
 // returns the corresponding raw record. Independent of every other
 // tuple: it always calls Partition() fresh, and (in run mode) starts
 // a new executor.RunPartitioned.
-func runOne(cfg Config, proj ProjectSpec, packages []model.PackageInfo, theoreticalT1, measuredT1 time.Duration, alg partitioner.Partitioner, workers, rep int) rawRecord {
+func runOne(cfg Config, proj ProjectSpec, packages []model.PackageInfo, theoreticalT1, measuredT1 time.Duration, alg partitioner.Partitioner, workers, rep, sequencePosition int) rawRecord {
 	partResult := alg.Partition(packages, workers)
 	plannedReport := metrics.Compute(partResult, theoreticalT1)
 
@@ -259,6 +292,7 @@ func runOne(cfg Config, proj ProjectSpec, packages []model.PackageInfo, theoreti
 		Algorithm:              alg.Name(),
 		Workers:                workers,
 		Rep:                    rep,
+		SequencePosition:       sequencePosition,
 		PlannedMakespanNS:      int64(plannedReport.Makespan),
 		PlannedSpeedup:         plannedReport.Speedup,
 		PlannedEfficiency:      plannedReport.Efficiency,
@@ -327,7 +361,27 @@ func sumPackageDurations(packages []model.PackageInfo) time.Duration {
 }
 
 func loadNativeBaselines(cfg Config, proj ProjectSpec, packages []model.PackageInfo, sequential time.Duration) ([]nativeBaselineRecord, error) {
-	records := make([]nativeBaselineRecord, 0, len(cfg.Workers))
+	records := make([]nativeBaselineRecord, 0, len(cfg.Workers)+1)
+	seqReport, err := executor.LoadBaselineReport(proj.BaselineSeqFile)
+	if err != nil {
+		return nil, fmt.Errorf("loading sequential baseline %q: %w", proj.BaselineSeqFile, err)
+	}
+	if err := validateBaselineReport(proj.BaselineSeqFile, seqReport, len(packages), proj.DataFile, cfg.WarmCache); err != nil {
+		return nil, err
+	}
+	records = append(records, nativeBaselineRecord{
+		Project:        proj.Name,
+		Mode:           "baseline-seq",
+		Workers:        1,
+		DurationNS:     int64(seqReport.Duration),
+		Speedup:        1,
+		Efficiency:     1,
+		BaselineFile:   proj.BaselineSeqFile,
+		CacheRegime:    seqReport.CacheRegime,
+		PackageCount:   seqReport.PackageCount,
+		DataFileSHA256: seqReport.DataFileSHA256,
+		MeasuredAt:     seqReport.MeasuredAt,
+	})
 	for _, workers := range cfg.Workers {
 		path := proj.BaselineParFiles[strconv.Itoa(workers)]
 		report, err := executor.LoadBaselineReport(path)
@@ -340,6 +394,7 @@ func loadNativeBaselines(cfg Config, proj ProjectSpec, packages []model.PackageI
 		speedup := float64(sequential) / float64(report.Duration)
 		records = append(records, nativeBaselineRecord{
 			Project:        proj.Name,
+			Mode:           "baseline-par",
 			Workers:        workers,
 			DurationNS:     int64(report.Duration),
 			Speedup:        speedup,
@@ -470,7 +525,18 @@ func loadPackages(path string) ([]model.PackageInfo, error) {
 	if err := json.Unmarshal(data, &packages); err != nil {
 		return nil, fmt.Errorf("parsing data file %s: %w", path, err)
 	}
-	for _, pkg := range packages {
+	if len(packages) == 0 {
+		return nil, fmt.Errorf("data file %s contains an empty package population", path)
+	}
+	seen := make(map[string]struct{}, len(packages))
+	for i, pkg := range packages {
+		if strings.TrimSpace(pkg.Name) == "" {
+			return nil, fmt.Errorf("package at index %d in data file %s has an empty name", i, path)
+		}
+		if _, exists := seen[pkg.Name]; exists {
+			return nil, fmt.Errorf("data file %s contains duplicate package name %q", path, pkg.Name)
+		}
+		seen[pkg.Name] = struct{}{}
 		if pkg.Duration < 0 {
 			return nil, fmt.Errorf("package %q in data file %s has negative duration: %v", pkg.Name, path, pkg.Duration)
 		}
@@ -507,7 +573,13 @@ func collectEnvironment(cfg Config) environmentReport {
 		GOOS:             runtime.GOOS,
 		GOARCH:           runtime.GOARCH,
 		NumCPU:           runtime.NumCPU(),
-		CPUModel:         os.Getenv("PROCESSOR_IDENTIFIER"),
+		GOMAXPROCS:       runtime.GOMAXPROCS(0),
+		CPUModel:         cpuModel(),
+		OSVersion:        osVersion(),
+		KernelVersion:    kernelVersion(),
+		EnvironmentLabel: environmentLabel(cfg),
+		GoCache:          goEnvValue("GOCACHE"),
+		GoModCache:       goEnvValue("GOMODCACHE"),
 		TotalMemoryBytes: totalMemoryBytes(),
 		ProjectCommits:   make(map[string]string),
 		CollectedAt:      time.Now(),
@@ -532,6 +604,67 @@ func collectEnvironment(cfg Config) environmentReport {
 		report.ProjectCommits[project.Name] = gitValue(project.ProjectPath, "rev-parse", "HEAD")
 	}
 	return report
+}
+
+func environmentLabel(cfg Config) string {
+	if label := strings.TrimSpace(cfg.EnvironmentLabel); label != "" {
+		return label
+	}
+	if label := strings.TrimSpace(os.Getenv("TCC_ENVIRONMENT")); label != "" {
+		return label
+	}
+	return "unspecified"
+}
+
+func cpuModel() string {
+	if value := strings.TrimSpace(os.Getenv("PROCESSOR_IDENTIFIER")); value != "" {
+		return value
+	}
+	if data, err := os.ReadFile("/proc/cpuinfo"); err == nil {
+		for _, line := range strings.Split(string(data), "\n") {
+			if key, value, ok := strings.Cut(line, ":"); ok && strings.TrimSpace(key) == "model name" {
+				return strings.TrimSpace(value)
+			}
+		}
+	}
+	return ""
+}
+
+func osVersion() string {
+	if runtime.GOOS == "windows" {
+		out, err := exec.Command("powershell", "-NoProfile", "-Command", "[Environment]::OSVersion.VersionString").Output()
+		if err == nil {
+			return strings.TrimSpace(string(out))
+		}
+		return ""
+	}
+	if data, err := os.ReadFile("/etc/os-release"); err == nil {
+		for _, line := range strings.Split(string(data), "\n") {
+			if strings.HasPrefix(line, "PRETTY_NAME=") {
+				return strings.Trim(strings.TrimPrefix(line, "PRETTY_NAME="), "\"")
+			}
+		}
+	}
+	return ""
+}
+
+func kernelVersion() string {
+	if runtime.GOOS == "windows" {
+		return osVersion()
+	}
+	out, err := exec.Command("uname", "-sr").Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}
+
+func goEnvValue(key string) string {
+	out, err := exec.Command("go", "env", key).Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
 }
 
 func totalMemoryBytes() uint64 {
