@@ -14,53 +14,58 @@ rationale without reading the full thesis or the private working notes.
 
 The project evaluates static partitioning strategies for Go test suites. The
 central question is which package-level partitioning strategy offers the best
-trade-off between makespan and coordination overhead across Go projects with
-different test-duration distributions.
+trade-off between empirical makespan and coordination overhead under a controlled
+Go execution model.
 
 The tool is not intended to be a full CI orchestrator. It does not implement a
-distributed runner, a multi-language test framework, machine-learning prediction,
-or production-grade scheduling infrastructure. The implementation stays focused
-on collecting data, applying scheduling heuristics, running controlled host
-experiments, and exporting results for analysis.
+distributed runner, a multi-language framework, machine-learning prediction, or
+production-grade scheduling infrastructure.
 
-### Experimental environment hierarchy
+### Canonical experimental environment
 
-The dedicated Google Cloud Platform VM is the primary and current experimental
-environment. Results collected on the personal Windows notebook are retained as
-a historical and comparative dataset. They are useful for studying the effect
-of moving from a shared, day-to-day machine to a dedicated VM, including effects
-visible in probes, characterization, baselines, and campaigns.
+Only the dedicated Google Cloud Platform VM is part of the final empirical
+analysis. Measurements from the former personal Windows notebook are excluded
+from final tables, plots, hypotheses, conclusions, and sample counts. They may
+remain archived solely as historical traceability.
 
-On the notebook, the experiment was launched from a single PowerShell window and
-the computer was left untouched until completion, but background services and
-installed programs were not disabled. Therefore, local and cloud results must be
-analyzed separately. Absolute times must not be pooled as a homogeneous sample;
-comparisons should use within-environment baselines, normalized metrics, ranking
-consistency, and differences in variability.
+The subject repositories are frozen at the commits already selected:
 
-The current application reference is commit `5829f07d`. The older hash recorded
-in `env/environment-local.txt` predates documentation-only changes and does not,
-by itself, invalidate measurements from either environment.
+| Project | Frozen commit |
+| --- | --- |
+| cli | `da68cb8f6f597cfc3838cf40f89ecc01f4e53233` |
+| goreleaser | `ce96e79b4883bdea39cf2cf5fe33fa63f5df4dd0` |
+| grpc-go | `faa34bf170ceef07b9ada9bcd44dc6e16a55d1f4` |
+| hugo | `72495f9fba69edadd50a7ecb9ae9fb3d9c46156b` |
+
+The projects will not be updated to newer upstream revisions before the final
+collection. Doing so would change tests, dependencies, package populations, and
+runtime behavior at the same time as the worker-semantics change, requiring a new
+triage and creating an avoidable confounder.
 
 ## 2. Scheduling Model and Objective
 
-The primary objective is makespan minimization. In scheduling notation, the
-problem is treated as P||Cmax: a set of independent jobs must be assigned to a
-fixed number of identical processors, and the objective is to minimize the load
-of the most loaded processor.
+The primary objective is empirical makespan minimization. In scheduling notation,
+the partitioning problem is modeled as P||Cmax: independent jobs are assigned to
+a fixed number of identical processors, minimizing the completion time of the
+most loaded processor.
 
-In this project:
+In the canonical experiment:
 
 - a Go test package is a job;
-- a worker is an external `go test` executor; its equivalence to one logical processor is an approximation under active diagnostic;
-- package duration is the processing time;
-- the makespan is the maximum partition load.
+- a worker is one external `go test` process;
+- every relevant Go process receives `GOMAXPROCS=1`;
+- package median duration is the historical processing-time estimate;
+- empirical makespan is the wall-clock interval from the first worker start to
+  the last worker completion.
 
-Makespan is the primary metric because it corresponds directly to CI feedback
-time: the suite is only complete when the slowest partition finishes.
+`GOMAXPROCS=1` limits simultaneous execution of Go-managed code inside each
+process and removes the unrestricted internal goroutine parallelism found by the
+worker diagnostic. It does not provide CPU affinity or a physically exclusive
+core, so P||Cmax remains a controlled abstraction rather than a claim of hardware
+pinning.
 
-Secondary metrics include speedup, efficiency, load standard deviation, and
-partitioning overhead.
+Secondary metrics include speedup, efficiency, planned-load dispersion,
+partitioning overhead, and the difference between planned and observed behavior.
 
 ## 3. Package-Level Granularity
 
@@ -128,26 +133,23 @@ based on the median durations collected during characterization.
 
 ## 6. Subject Project Selection
 
-The empirical study uses four open source Go projects:
-
-| Project | Pass-only packages | Suite CV | Max/median | Characterization file |
-| --- | ---: | ---: | ---: | --- |
-| cli/cli | 236 | 4.797488 | 262.521739 | `data/characterization/cli.json` |
-| goreleaser/goreleaser | 121 | 5.467722 | 3346.285714 | `data/characterization/goreleaser.json` |
-| grpc/grpc-go | 144 | 2.949269 | 1041.848485 | `data/characterization/grpc-go.json` |
-| gohugoio/hugo | 142 | 6.078856 | 1362.039474 | `data/characterization/hugo.json` |
-
-The projects were selected from a broader candidate set using build viability,
+The empirical study uses four open source Go projects: cli, GoReleaser, gRPC-Go,
+and Hugo. They were selected from a broader candidate set using build viability,
 number of testable packages, pass rate, and duration-distribution diversity.
-The final set provides medium-to-large Go suites with non-trivial duration
-variance, including markedly dispersed profiles.
 
-The current characterization contains four highly dispersed suites, with
-different degrees of concentration in their largest packages. This supports
-comparisons under imbalance but does not provide a low-dispersion control
-subject. The observed package-count range is 121 to 236. Suite CV and
-max/median are descriptive and do not, by themselves, establish a heavy-tailed
-distribution.
+No new project triage will be performed before the final run. The commits listed
+in Section 1 are fixed experimental subjects. This preserves reproducibility and
+ensures that `GOMAXPROCS=1` is the only substantive change between the pilot
+protocol and the final protocol.
+
+Package counts, CV, max/median, top-k concentration, and pass-only populations
+from the inherited-`GOMAXPROCS` collection are pilot descriptors. They must not
+be treated as final values. The final table will be regenerated from ten new
+validated probes per project under `GOMAXPROCS=1`.
+
+The previous pilot suggested highly dispersed suites but did not contain a
+low-dispersion control. Whether this remains true must be reassessed after the
+new characterization.
 
 ## 7. Pass-Only Experimental Scope
 
@@ -165,62 +167,75 @@ files and pass-only baseline reports.
 
 ## 8. Characterization Regime
 
-Package durations are collected with repeated executions of:
+Package durations are collected through ten repeated executions of:
 
 ```text
-go test -json -p 1 -parallel 1 -count=1
+GOMAXPROCS=1 go test -json -p 1 -parallel 1 -count=1 ./...
 ```
 
-The final duration for each package is the median across 10 runs. Suite-level
-dispersion is descriptive and is not stored in `PackageInfo`.
+The final duration for each package is the median of its ten valid package-level
+`Elapsed` values. A package enters the pass-only population only if it is present
+and passes in every accepted run.
 
 The choices are deliberate:
 
-- `-count=1` disables Go test result caching;
-- `-p 1` serializes package test processes inside the command;
-- `-parallel 1` limits tests that explicitly use `t.Parallel`, but does not cap ordinary goroutines or all CPU use inside the tested code;
-- the median is robust to occasional noisy runs;
-- 10 runs provide a practical balance between stability and collection cost.
+- `GOMAXPROCS=1` bounds Go-managed CPU parallelism in every test process;
+- `-count=1` disables Go test-result caching;
+- `-p 1` serializes package test processes inside the characterization command;
+- `-parallel 1` limits tests that explicitly use `t.Parallel`;
+- the median reduces sensitivity to occasional noisy observations.
 
-`GOCACHE` is intentionally retained between characterization runs. The
-aggregator uses package-level `Elapsed` events, whose interval starts after the
-test binary has been built. Clearing the build cache would add collection cost
-without improving the package-duration estimate. This differs from a cold
-campaign, which measures the complete `go test` command with an isolated cache.
+`GOCACHE` remains available between the ten probes because the scheduling weight
+uses package-level `Elapsed`, which excludes the preceding build of the test
+binary. Cold campaign isolation is a separate wall-clock regime.
 
-Every new probe run also records a `.meta.json` sidecar with command, timestamps,
-exit code, and timeout indication. `cmd/validateprobes` compares each NDJSON file
-with the package universe returned by `go list`, detects malformed lines and
-missing terminal events, and emits a clear PASS/WARN/FAIL report before aggregation.
-Historical probes without sidecars receive a warning rather than automatic rejection.
+Each probe records NDJSON, stderr, and a metadata sidecar. `cmd/validateprobes`
+compares terminal events with a package universe obtained on the same GCP
+checkout, reports malformed lines, missing terminals, timeouts, and exit-code
+inconsistencies, and blocks aggregation on objective incompleteness.
+
+The previous cloud probes passed structural validation but were collected with
+inherited `GOMAXPROCS`; they are pilot evidence and cannot supply the final
+characterization.
+
+An independent reconciliation with `cmd/auditdurations` classified duration
+handling as **A — no error**. Go's `test2json` rounds package terminal `Elapsed`
+to one millisecond before JSON serialization. Across 643 pass-only packages,
+six stored values had a one-nanosecond floating-point residue and none exceeded
+the explicit 1 ns tolerance. Calculation semantics are unchanged; recollection
+is required by the `GOMAXPROCS` policy, not by a duration defect.
 
 ## 9. Worker Execution Regime
 
-Partitioned runs execute one `go test` process per worker. Each worker uses:
+Partitioned runs execute one `go test` process per worker. Every worker uses:
 
 ```text
-go test -p 1 -parallel 1 -count=1 <assigned packages>
+GOMAXPROCS=1 go test -p 1 -parallel 1 -count=1 <assigned packages>
 ```
 
-This avoids package-level and `t.Parallel`-level over-parallelism. It does not,
-however, force the complete test binary to one CPU: ordinary goroutines and
-concurrent code inside the subject project may still use the inherited
-`GOMAXPROCS`. Therefore, the worker is currently interpreted as a sequential
-package executor rather than a guaranteed single-core processor.
+The worker diagnostic showed a material difference between inherited
+`GOMAXPROCS` and `GOMAXPROCS=1`, particularly for gRPC-Go. The final protocol
+therefore fixes the value at one rather than redefining a worker as a potentially
+multi-CPU executor.
 
-A targeted, non-canonical diagnostic (`cmd/workerdiag`) compares inherited
-`GOMAXPROCS` with `GOMAXPROCS=1` on selected dominant packages. No canonical
-characterization, baseline, or campaign is changed until that diagnostic is
-interpreted.
+The setting must be injected by the tool for every child process, not left as an
+undocumented shell convention. The child value is self-checked and recorded in
+`environment.json`. Warm-up commands, retries, baselines, and probes follow the
+same rule.
+
+This decision requires a complete timing-dependent reset: new probes,
+characterizations, baselines, and campaigns. Earlier cloud results remain valid
+only as pilot data used to diagnose and refine the protocol.
 
 ## 10. Baselines
 
-The project uses two Go-native baselines.
+The project uses two Go-native baselines over the exact final pass-only
+population.
 
 ### Sequential baseline
 
 ```text
-go test -p 1 -parallel 1 -count=1 <pass-only packages>
+GOMAXPROCS=1 go test -p 1 -parallel 1 -count=1 <pass-only packages>
 ```
 
 This measures `T1`, the sequential reference used for empirical speedup.
@@ -228,22 +243,21 @@ This measures `T1`, the sequential reference used for empirical speedup.
 ### Native parallel baseline
 
 ```text
-go test -p P -parallel 1 -count=1 <pass-only packages>
+GOMAXPROCS=1 go test -p P -parallel 1 -count=1 <pass-only packages>
 ```
 
-This measures Go's package-level parallelism at the same worker counts used by
-the partitioning algorithms.
+This measures Go's package-level parallelism for P in {2, 4, 8}. Each generated
+test process inherits the same one-CPU Go-runtime limit, while `-p P` controls
+how many package test processes may run concurrently.
 
-Both baselines are pass-only: they use exactly the packages present in the
-characterization file. This prevents comparing a partitioned run over one package
-population against a baseline over another.
+Both baselines must be recollected after the new characterization. Baselines
+from the inherited-`GOMAXPROCS` pilot are not compatible with final speedup or
+efficiency calculations.
 
-Baseline reports include duration, package count, package source, success state,
-and error text when a run fails. The CLIs reject failed baseline reports when
-those reports are used as `T1` inputs. Cold baselines execute with a fresh,
-isolated `GOCACHE`; warm baselines inherit the cache populated by their
-successful warm-up. Reports are staged and published without directly
-truncating an existing valid artifact.
+Reports include duration, package count, source hash, success state, cache
+regime, and error text. Cold baselines use a fresh isolated `GOCACHE`; warm
+baselines use the successful warm-up state. Reports are staged and validated
+before replacing any canonical artifact.
 
 ## 11. Cold and Warm Cache Campaigns
 
@@ -347,17 +361,69 @@ This keeps the algorithms interchangeable and easy to test.
 The executor uses goroutines, channels, and `sync.WaitGroup`, following Go's CSP
 style. No external Go dependencies are required.
 
-## 16. Known Limitations
+## 16. Pilot Validation and Canonical Reset
+
+`cmd/validateprobes` found the prior GCP probes structurally complete: there was
+no evidence of malformed NDJSON, truncated runs, duplicate terminal events, or
+silent package loss. The prior characterization logic is therefore not rejected
+as an implementation error.
+
+`cmd/workerdiag`, however, found material runtime differences when internal Go
+parallelism was restricted. The project has consequently chosen technical-model
+fidelity over preserving the previous timing artifacts.
+
+The next collection is the only canonical dataset and consists of:
+
+- 40 probes: four projects times ten runs;
+- four validated pass-only characterizations;
+- 32 baselines: four projects times two cache regimes times one sequential and
+  three native-parallel references;
+- eight campaigns: four projects times cold/warm, each with 60 logical samples
+  (three worker counts times four algorithms times five repetitions).
+
+No new triage or upstream update is part of this reset. Previous GCP artifacts
+are retained under a `pilot/pre-gomaxprocs1` classification and must not be mixed
+with final results.
+
+## 17. Hypotheses and Exploratory Questions
+
+The final hypotheses are frozen before the new canonical collection. They are
+pilot-informed and this provenance must be stated explicitly; they must not be
+changed again after final results are observed.
+
+- **H1:** for the same project, cache regime, and worker count, LPT tends to
+  achieve lower empirical makespan than Round-Robin and Quantity.
+- **H2:** the relative improvement of LPT over Round-Robin and Quantity tends to
+  be greater in warm-cache than in cold-cache executions.
+- **H3:** partitioning overhead remains below 1% of empirical makespan for every
+  evaluated algorithm and configuration.
+
+FFD-Multifit remains a full algorithm under comparison, but the relation between
+its planned and empirical performance is treated as an exploratory research
+question rather than a post-hoc directional hypothesis. The relation between
+suite concentration metrics and algorithm gains is also exploratory because the
+study contains only four projects.
+
+Five repetitions support descriptive comparison of medians, dispersion, relative
+effects, sign consistency, and outliers. They do not justify strong claims of
+population-level statistical inference.
+
+## 18. Known Limitations
 
 The study is intentionally scoped. The most important limitations are:
 
-- results are based on four Go projects, not a broad benchmark corpus;
-- the current characterization has no low-dispersion control project (suite CV below 0.5);
+- results are based on four frozen Go projects, not a broad benchmark corpus;
+- all final measurements come from one dedicated GCP VM;
+- `GOMAXPROCS=1` bounds Go-runtime CPU parallelism but does not pin each process
+  to an exclusive physical or logical CPU;
 - package-level partitioning cannot split a single very slow package;
-- local goroutines simulate distributed workers but are not a real cluster;
-- primary results come from one dedicated GCP VM, while the notebook dataset is comparative and subject to uncontrolled background activity;
+- the final characterization may still lack a low-dispersion control project;
+- cold runs include compilation and other costs not represented by package
+  `Elapsed` weights;
 - warm-cache behavior approximates, but does not fully reproduce, CI caching;
-- the static algorithms rely on historical durations that may become stale.
+- static historical durations may become stale;
+- five repetitions prioritize practical descriptive evidence over strong
+  inferential claims.
 
-These limitations are acceptable for the thesis goal: comparing classical
-partitioning heuristics under a controlled and reproducible Go test workload.
+These limitations are acceptable for comparing classical partitioning heuristics
+under one controlled, reproducible Go workload protocol.

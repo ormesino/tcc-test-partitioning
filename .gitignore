@@ -46,8 +46,8 @@ go.work.sum
 
 # Benchmark results are generated; configs are versioned.
 /benchmarks/results/
-/data/baseline/local/
-/data/characterization/local/
+/data/baseline/old/
+/data/characterization/old/
 
 # Internal documentation, not part of the public project artifact.
 /docs

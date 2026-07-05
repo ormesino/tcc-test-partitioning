@@ -28,12 +28,14 @@ hierarchy are in [docs/README.md](docs/README.md).
 ```text
 cmd/
   analyze/      Aggregates N go test -json runs into PackageInfo data.
+  auditdurations/ Independently reconciles probes, medians and suite metrics.
   benchmark/    Experimental driver: projects x workers x algorithms x reps.
   demo/         Demonstrates all algorithms on synthetic datasets.
   gendata/      Exports deterministic synthetic fixtures as JSON.
   partitioner/  Main CLI: simulate, run, baseline-seq, baseline-par.
+  preflight/    Verifies effective child-process GOMAXPROCS.
   validateprobes/ Retroactive PASS/WARN/FAIL integrity check for probes.
-  workerdiag/   Non-canonical GOMAXPROCS worker-semantics diagnostic.
+  workerdiag/   Completed non-canonical diagnostic that motivated GOMAXPROCS=1.
 data/
   synthetic/         Deterministic synthetic fixtures.
   characterization/  Final pass-only package datasets for the selected projects.
@@ -51,7 +53,7 @@ scripts/
   recharacterize_all.ps1         Rebuilds characterization data for all subjects.
   run_all_campaigns.ps1          Runs the final cold and warm campaigns.
   generate_charts.py             Generates plots from benchmark results.
-  triage.ps1                     Performs candidate-project triage.
+  triage.ps1                     Historical project-selection utility; not part of final collection.
 benchmarks/
   example-config.json  Synthetic benchmark example.
   campaign_*.json      Final campaign configs for the selected projects.
@@ -110,10 +112,11 @@ go run ./cmd/partitioner --mode run --warm-cache `
 ```
 
 `run` partitions the package list and executes one `go test` process per worker.
-Each worker uses `-p 1 -parallel 1` to serialize packages and tests that call
-`t.Parallel`. These flags do not constrain ordinary goroutines; use
-`cmd/workerdiag` before deciding whether future canonical runs should additionally
-set `GOMAXPROCS=1`.
+The final protocol requires every worker to receive `GOMAXPROCS=1` together with
+`-p 1 -parallel 1`. This decision was made after `cmd/workerdiag` found a material
+effect from inherited internal Go parallelism. The current code must not be used
+for final collection unless `go run ./cmd/preflight` succeeds. The executor now
+injects and verifies the value for every measured child process.
 
 ## Data Collection Workflow
 
@@ -128,7 +131,7 @@ under `repos/<name>`, for example `repos/cli` or `repos/grpc-go`.
 pwsh scripts/collect.ps1 -ProjectPath repos/cli -ProjectName cli -Runs 10
 ```
 
-This runs `go test -json -p 1 -parallel 1 -count=1` repeatedly and stores
+This runs `GOMAXPROCS=1 go test -json -p 1 -parallel 1 -count=1` repeatedly and stores
 `run_NN.json`, `run_NN.err`, and `run_NN.meta.json` under
 `data/probe/<project>/`. Before aggregation, `cmd/validateprobes` checks the
 expected package universe, terminal-event completeness, malformed NDJSON, exit
@@ -156,18 +159,39 @@ allows aggregation but requires reviewing the listed caveats, which is expected
 for historical probes without sidecars. `FAIL` blocks aggregation and identifies
 the runs that need correction or recollection.
 
+To reconcile durations independently after validation:
+
+```powershell
+go run ./cmd/auditdurations `
+  -characterization data/characterization/cli.json `
+  $probes
+```
+
+The auditor reports source quantization, pass-only medians, suite dispersion,
+concentration and every characterization difference with a 1 ns tolerance.
+
 ### Current experimental state
 
-The four characterization files were independently reconstructed from ten probes
-per project and adopted as canonical on 2026-07-02. All 32 pass-only baselines
-(16 cold and 16 warm) match those files by SHA-256, package count, cache regime,
-and parallelism. Existing campaign outputs are diagnostic or historical and
-must not be presented as final results.
+The former GCP probes passed the retroactive structural validator, so no silent
+truncation or aggregation defect was found. `cmd/workerdiag`, however, showed a
+material timing effect when `GOMAXPROCS` was fixed at one. The final methodology
+therefore requires a complete timing-dependent recollection under
+`GOMAXPROCS=1`.
 
-The dedicated GCP VM is the primary experimental environment. Measurements from
-the personal Windows notebook are retained for a separate historical/comparative
-analysis of the transition from a shared host to a dedicated VM; they must not be
-pooled with cloud timings as if both environments were one homogeneous sample.
+All previous cloud characterizations, baselines, and campaigns are classified as
+`pilot/pre-gomaxprocs1`. The local Windows dataset is outside the final study.
+
+The selected repositories remain frozen at their existing commits. Do not pull
+new upstream revisions or run a new triage: that would change the subject systems
+at the same time as the worker semantics.
+
+Implementation preparation is complete. Before the final run:
+
+1. run the preflight and confirm clean, frozen source identities;
+2. recollect ten probes per project and regenerate the four characterizations;
+3. audit and freeze the characterizations;
+4. recollect all 32 baselines;
+5. run eight campaigns with five repetitions and counterbalanced order.
 
 ### 3. Collect pass-only baselines
 
@@ -210,7 +234,7 @@ pwsh -ExecutionPolicy Bypass -File scripts/run_all_campaigns.ps1 `
 
 ### Targeted worker-semantics diagnostic
 
-This diagnostic is intentionally separate from canonical campaigns:
+This diagnostic has been completed and is intentionally separate from canonical campaigns:
 
 ```powershell
 go run ./cmd/workerdiag `
@@ -223,17 +247,16 @@ go run ./cmd/workerdiag `
 
 It alternates inherited `GOMAXPROCS` and `GOMAXPROCS=1`, validates the child
 setting with a self-check, and writes JSON, CSV, and a textual interpretation.
-Its purpose is to decide whether the canonical protocol must change; its values
-are not thesis campaign samples.
+It demonstrated that inherited internal Go parallelism materially affected execution, especially for gRPC-Go. The canonical protocol now requires `GOMAXPROCS=1`; diagnostic values remain non-canonical.
 
 ## Selected Subject Projects
 
-| Project | Pass-only packages | Suite CV | Max/median | Characterization file |
-| --- | ---: | ---: | ---: | --- |
-| cli/cli | 236 | 4.797488 | 262.521739 | `data/characterization/cli.json` |
-| goreleaser/goreleaser | 121 | 5.467722 | 3346.285714 | `data/characterization/goreleaser.json` |
-| grpc/grpc-go | 144 | 2.949269 | 1041.848485 | `data/characterization/grpc-go.json` |
-| gohugoio/hugo | 142 | 6.078856 | 1362.039474 | `data/characterization/hugo.json` |
+| Project | Frozen commit | Final characterization |
+| --- | --- | --- |
+| cli/cli | `da68cb8f6f597cfc3838cf40f89ecc01f4e53233` | pending under `GOMAXPROCS=1` |
+| goreleaser/goreleaser | `ce96e79b4883bdea39cf2cf5fe33fa63f5df4dd0` | pending under `GOMAXPROCS=1` |
+| grpc/grpc-go | `faa34bf170ceef07b9ada9bcd44dc6e16a55d1f4` | pending under `GOMAXPROCS=1` |
+| gohugoio/hugo | `72495f9fba69edadd50a7ecb9ae9fb3d9c46156b` | pending under `GOMAXPROCS=1` |
 
 Only packages that pass under the characterization regime are included in the
 final experiments.
