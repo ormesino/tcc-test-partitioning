@@ -1,5 +1,7 @@
-// Command auditdurations independently reconciles probe NDJSON with a
-// characterization and reports the effective precision of package Elapsed.
+// Command auditdurations independently rebuilds a characterization from probe
+// NDJSON and compares it with the stored PackageInfo data. It preserves the raw
+// decimal Elapsed lexemes, normalizes test2json's millisecond precision and
+// reports population, duration and suite-level differences.
 package main
 
 import (
@@ -112,6 +114,8 @@ func main() {
 	}
 }
 
+// audit reconstructs the pass-only population and medians without calling the
+// production analyzer, keeping the verification path independent.
 func audit(paths []string, characterization string, tolerance int64) (report, error) {
 	r := report{Classification: "A — sem erro", PrecisionSource: "go test/test2json rounds package terminal Elapsed to 1 ms", ToleranceNS: tolerance, DecimalPlaces: map[string]int{}}
 	runs := make([]map[string]outcome, 0, len(paths))
@@ -248,6 +252,8 @@ func audit(paths []string, characterization string, tolerance int64) (report, er
 	return r, nil
 }
 
+// parseProbe reads one NDJSON probe and retains its package-level terminal
+// events. Test-level events contribute only to the audit counters.
 func parseProbe(rd io.Reader, r *report, all *[]float64, distinct map[string]struct{}) (map[string]outcome, error) {
 	out := map[string]outcome{}
 	s := bufio.NewScanner(rd)
@@ -304,6 +310,8 @@ func parseProbe(rd io.Reader, r *report, all *[]float64, distinct map[string]str
 	return out, s.Err()
 }
 
+// roundedMilliseconds parses the original decimal exactly and reproduces the
+// millisecond rounding applied by test2json before median aggregation.
 func roundedMilliseconds(text string) (int64, error) {
 	rat, ok := new(big.Rat).SetString(text)
 	if !ok {
@@ -358,6 +366,8 @@ func fillRawStats(r *report, values []float64, distinct map[string]struct{}) {
 	}
 }
 
+// fillSuiteStats computes the descriptive distribution measures reported in
+// the characterization audit; these values are not partitioner inputs.
 func fillSuiteStats(r *report, ns []int64) {
 	if len(ns) == 0 {
 		return

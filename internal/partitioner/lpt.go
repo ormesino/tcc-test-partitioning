@@ -28,9 +28,8 @@ import (
 // LPT sorts packages by duration (descending) and greedily assigns
 // each package to the worker with the smallest accumulated load.
 //
-// This is the first algorithm in our study that uses Duration as a
-// decision criterion. It is expected to outperform Round-Robin and
-// Quantity on datasets with high variance (hypothesis H1).
+// LPT is the principal duration-aware strategy compared with Round-Robin and
+// Quantity in the final experiment; empirical advantage is not guaranteed.
 type LPT struct{}
 
 // Name returns the algorithm identifier.
@@ -49,7 +48,6 @@ func (l *LPT) Partition(packages []model.PackageInfo, workers int) model.Partiti
 		return invalidWorkersResult(l.Name(), workers, time.Since(start))
 	}
 
-	// Initialize empty partitions for each worker.
 	partitions := make([]model.Partition, workers)
 	for i := range partitions {
 		partitions[i] = model.Partition{
@@ -69,15 +67,13 @@ func (l *LPT) Partition(packages []model.PackageInfo, workers int) model.Partiti
 		return sorted[i].Name < sorted[j].Name
 	})
 
-	// Greedy assignment: for each package (heaviest first),
-	// assign to the worker with the smallest current load.
+	// Assign each package, heaviest first, to the least-loaded worker.
 	for _, pkg := range sorted {
 		w := minLoadWorker(partitions)
 		partitions[w].Packages = append(partitions[w].Packages, pkg)
 		partitions[w].Load += pkg.Duration
 	}
 
-	// Compute makespan = max(Load) across all partitions.
 	var makespan time.Duration
 	for _, p := range partitions {
 		if p.Load > makespan {

@@ -9,9 +9,8 @@ import (
 	"tcc-test-partitioning/internal/partitioner"
 )
 
-// Config drives the benchmark runner. It is loaded from a JSON file
-// passed via --config and may be partially overridden by CLI flags
-// (see main.go).
+// Config defines one benchmark invocation. It is loaded from --config and may
+// be partially overridden by CLI flags.
 //
 // The runner executes a matrix of experiments:
 //
@@ -31,14 +30,13 @@ type Config struct {
 	Workers []int `json:"workers"`
 
 	// Algorithms is the list of algorithm identifiers to run. Each
-	// must resolve via resolveAlgorithm. A single entry of "all"
+	// must resolve via resolveAlgorithms. A single entry of "all"
 	// expands to every implemented algorithm.
 	Algorithms []string `json:"algorithms"`
 
-	// Repetitions is the number of logical reps per
-	// (project, algorithm, workers) combination. >=1. Future final campaigns
-	// use five repetitions; older three-repetition configs remain readable for
-	// historical analysis.
+	// Repetitions is the number of logical repetitions per
+	// (project, algorithm, workers) combination. The accepted final protocol uses
+	// five; older configurations remain readable for historical analysis.
 	Repetitions int `json:"repetitions"`
 
 	// MaxAttempts is the maximum number of attempts for one logical
@@ -46,10 +44,9 @@ type Config struct {
 	// resolves to 3 so existing campaign configurations gain retry protection.
 	MaxAttempts int `json:"max_attempts,omitempty"`
 
-	// TimeoutMinutes is the timeout for one experimental repetition
-	// (one project, algorithm and worker-count combination). The same
-	// deadline is applied to the concurrently launched worker commands.
-	// Used only in "run" mode.
+	// TimeoutMinutes is the limit applied to each child go test process. All
+	// concurrently launched workers receive the same duration. Used only in
+	// "run" mode.
 	TimeoutMinutes int `json:"timeout_minutes"`
 
 	// OutputDir is the base directory; the runner creates a
@@ -85,9 +82,9 @@ type ProjectSpec struct {
 	// cmd/analyze or cmd/gendata).
 	DataFile string `json:"data_file"`
 
-	// BaselineSeqFile is the path to a BaselineReport JSON (produced
-	// by `cmd/partitioner --mode baseline-seq --output FILE`). When
-	// empty, T1 falls back to sum(Duration) with a stderr warning.
+	// BaselineSeqFile is the path to a BaselineReport JSON produced by
+	// `cmd/partitioner --mode baseline-seq`. Run mode requires it; simulate mode
+	// may use the characterized duration sum as its planned T1.
 	BaselineSeqFile string `json:"baseline_seq_file,omitempty"`
 
 	// BaselineParFiles maps each configured worker count to the matching

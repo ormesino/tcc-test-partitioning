@@ -1,12 +1,11 @@
-// Package metrics provides functions to compute performance metrics
-// for test-suite partitioning results.
+// Package metrics computes planned or empirical performance measures from a
+// PartitionResult and a sequential reference with the same measurement origin.
 //
-// All metrics map to standard parallel computing and scheduling
-// theory concepts:
+// The reported measures are:
 //   - Makespan (Cmax): max completion time across workers.
 //   - Load variance: population variance of worker loads.
-//   - Speedup S(p) = T1 / Tp (cf. Amdahl, 1967).
-//   - Efficiency E(p) = S(p) / p (cf. Gustafson, 1988).
+//   - Speedup S(p) = T1 / Tp.
+//   - Efficiency E(p) = S(p) / p.
 //   - Overhead: wall-clock time of the partitioning algorithm.
 package metrics
 
@@ -32,8 +31,8 @@ type Report struct {
 	// (in seconds squared). A value of 0 means perfect balance.
 	LoadVariance float64
 
-	// Speedup is T1 / Tp, where T1 is the sequential baseline
-	// time and Tp is the makespan with p workers.
+	// Speedup is T1 / Tp. T1 and Tp must both be planned values or both be
+	// empirical values from the same cache regime.
 	// Only meaningful when T1 > 0.
 	Speedup float64
 
@@ -47,8 +46,9 @@ type Report struct {
 
 // Compute calculates all metrics for a PartitionResult.
 //
-// The seqDuration parameter is T1 — the total sequential execution
-// time (sum of all package durations, or measured baseline-seq time).
+// seqDuration is the planned T1 (sum of characterized durations) for a planned
+// result, or the measured sequential baseline for an empirical result. Callers
+// must not mix planned and empirical measurement origins.
 // If seqDuration <= 0, Speedup and Efficiency are set to 0.
 func Compute(result model.PartitionResult, seqDuration time.Duration) Report {
 	makespan := result.Makespan
@@ -124,9 +124,8 @@ func LoadVariance(result model.PartitionResult) float64 {
 	return variance
 }
 
-// TotalDuration computes the sum of all package durations across
-// all partitions. This equals T1 (sequential execution time)
-// assuming no overhead between packages.
+// TotalDuration returns the sum of characterized package durations across all
+// partitions. It is the planned T1, not a measured sequential baseline.
 func TotalDuration(result model.PartitionResult) time.Duration {
 	var total time.Duration
 	for _, p := range result.Partitions {

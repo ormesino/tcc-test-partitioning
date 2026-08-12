@@ -1,6 +1,7 @@
-// Command workerdiag runs a small, non-canonical diagnostic that compares the
-// current worker semantics with child processes constrained by GOMAXPROCS=1.
-// It does not replace characterization, baselines, or final campaigns.
+// Command workerdiag reproduces the non-canonical diagnostic used to compare an
+// inherited runtime environment with the final GOMAXPROCS=1 worker policy. It
+// samples only the longest characterized packages and does not replace the
+// accepted characterization, baselines or campaigns.
 package main
 
 import (
@@ -207,6 +208,7 @@ func main() {
 	fmt.Printf("Reports written under %s\n", out)
 }
 
+// parseWorkers preserves the requested order while removing duplicate counts.
 func parseWorkers(value string) ([]int, error) {
 	seen := make(map[int]struct{})
 	var out []int
@@ -259,6 +261,8 @@ func names(packages []model.PackageInfo) []string {
 	return out
 }
 
+// selfCheckGOMAXPROCS observes the effective runtime value in a child Go
+// process under either the inherited environment or an explicit override.
 func selfCheckGOMAXPROCS(override int) (int, error) {
 	dir, err := os.MkdirTemp("", "tcc-gomaxprocs-check-*")
 	if err != nil {
@@ -292,6 +296,8 @@ func replaceEnv(environ []string, key, value string) []string {
 	return append(out, key+"="+value)
 }
 
+// summarize compares scenario medians. Its 10% threshold is a diagnostic
+// signal used during protocol definition, not an inferential test.
 func summarize(observations []observation, workers []int) []summary {
 	var out []summary
 	for _, w := range workers {

@@ -1,14 +1,9 @@
-// Package executor runs go test commands on partitioned packages
-// and measures wall-clock execution time per worker.
+// Package executor runs go test processes for partitions and native baselines.
+// It enforces the cache and GOMAXPROCS policies used by the final protocol and
+// measures the process interval independently of cold-cache setup and cleanup.
 //
-// The executor bridges the gap between theoretical partitioning
-// (which operates on estimated durations) and empirical measurement
-// (which captures real execution times including I/O, compilation,
-// and system noise).
-//
-// Concurrency model: one goroutine per worker, following Go's CSP
-// model (Hoare, 1978). Results are collected via channels to avoid
-// race conditions.
+// Partitioned execution uses one goroutine and one child process per worker;
+// results are coordinated through a channel and a WaitGroup.
 package executor
 
 import (
@@ -36,10 +31,9 @@ var mkdirTemp = os.MkdirTemp
 var removeAll = os.RemoveAll
 var runGoTestCommand = runGoTest
 
-// BaselineReport is the persisted form of a baseline measurement
-// (sequential or native-parallel). It is written by the baseline
-// modes and consumed by partitioning runs to obtain a methodologically
-// sound T1 for speedup computation (ADR-011).
+// BaselineReport persists a sequential or Go-native parallel measurement with
+// the population, cache regime and runtime evidence required for compatibility
+// checks. A validated sequential report supplies empirical T1.
 type BaselineReport struct {
 	Mode                 string        `json:"mode"`        // "baseline-seq" or "baseline-par"
 	Parallelism          int           `json:"parallelism"` // p for baseline-par; 1 for baseline-seq
@@ -155,8 +149,8 @@ type ExecutionResult struct {
 	// go test process to the end of the last. Cache setup/cleanup is excluded.
 	Makespan time.Duration
 
-	// TotalElapsed is the sum of all workers' Elapsed times.
-	// This approximates T1 when workers=1.
+	// TotalElapsed is the sum of the measured worker process durations. It equals
+	// Makespan for a one-worker execution but is not a baseline by itself.
 	TotalElapsed time.Duration
 }
 
@@ -165,19 +159,18 @@ type Config struct {
 	// ProjectPath is the root directory of the Go project under test.
 	ProjectPath string
 
-	// Timeout is the maximum duration of each go test command. In a
-	// partitioned repetition, all worker commands receive the same limit and
-	// start concurrently, bounding that repetition rather than the campaign.
+	// Timeout is the maximum duration of each child go test process. In a
+	// partitioned repetition, every concurrent worker receives the same limit.
 	// Zero means no timeout.
 	Timeout time.Duration
 
-	// Count is the -count flag for go test (default: 1, per ADR-008).
+	// Count is passed to go test -count. The final protocol uses 1.
 	Count int
 
 	// Verbose enables -v flag on go test.
 	Verbose bool
 
-	// WarmCache, when false, forces runWorker to use an isolated GOCACHE.
+	// WarmCache, when false, makes each measured process use an isolated GOCACHE.
 	WarmCache bool
 
 	// GOMAXPROCS is exported to each child go test process. Zero selects the
@@ -246,8 +239,8 @@ func RunPartitioned(cfg Config, partResult model.PartitionResult) ExecutionResul
 	}
 }
 
-// RunBaselineSeq executes go test sequentially (-p 1 -parallel 1)
-// over ./... to measure T1 for speedup calculation.
+// RunBaselineSeq is the compatibility wrapper that measures ./... sequentially.
+// The final pass-only flow calls RunBaselineSeqPackages with an explicit scope.
 func RunBaselineSeq(cfg Config) ExecutionResult {
 	return RunBaselineSeqPackages(cfg, nil)
 }
@@ -256,7 +249,6 @@ func RunBaselineSeq(cfg Config) ExecutionResult {
 // over an explicit package list. When packages is empty, it falls back to ./...
 // for backward compatibility.
 func RunBaselineSeqPackages(cfg Config, packages []string) ExecutionResult {
-	// Build command: go test -p 1 -parallel 1 -count=1 <packages|./...>
 	args := []string{"test", "-p", "1", "-parallel", "1",
 		"-count", fmt.Sprintf("%d", cfg.Count)}
 	if cfg.Timeout > 0 {
@@ -278,9 +270,8 @@ func RunBaselineSeqPackages(cfg Config, packages []string) ExecutionResult {
 	}
 }
 
-// RunBaselinePar executes go test with native parallelism (-p P)
-// over ./... for direct comparison with partitioning algorithms at the same
-// level of parallelism.
+// RunBaselinePar is the compatibility wrapper that measures ./... with native
+// package parallelism. The final pass-only flow calls RunBaselineParPackages.
 func RunBaselinePar(cfg Config, parallelism int) ExecutionResult {
 	return RunBaselineParPackages(cfg, parallelism, nil)
 }
@@ -289,7 +280,6 @@ func RunBaselinePar(cfg Config, parallelism int) ExecutionResult {
 // over an explicit package list. When packages is empty, it falls back to ./...
 // for backward compatibility.
 func RunBaselineParPackages(cfg Config, parallelism int, packages []string) ExecutionResult {
-	// Build command: go test -p P -parallel 1 -count=1 <packages|./...>
 	args := []string{"test", "-p", fmt.Sprintf("%d", parallelism),
 		"-parallel", "1",
 		"-count", fmt.Sprintf("%d", cfg.Count)}
@@ -337,17 +327,14 @@ func runWorker(cfg Config, partition model.Partition) WorkerResult {
 		}
 	}
 
-	// Build the list of package paths.
 	pkgPaths := make([]string, len(partition.Packages))
 	for i, pkg := range partition.Packages {
 		pkgPaths[i] = pkg.Name
 	}
 
-	// Build command: go test -p 1 -parallel 1 -count=1 [-v] pkg1 pkg2 ...
-	// These flags serialize packages within this command and tests that call
-	// t.Parallel. They do not constrain ordinary goroutines or guarantee a
-	// single CPU for the whole test binary; that materiality is evaluated by
-	// cmd/workerdiag before any canonical GOMAXPROCS policy is changed.
+	// -p 1 serializes packages in this command and -parallel 1 limits tests that
+	// call t.Parallel. Ordinary goroutines remain outside those controls, so the
+	// executor also injects the final GOMAXPROCS=1 policy into each child.
 	args := []string{"test", "-p", "1", "-parallel", "1", "-count", fmt.Sprintf("%d", cfg.Count)}
 	if cfg.Timeout > 0 {
 		args = append(args, "-timeout", fmt.Sprintf("%dm", int(cfg.Timeout.Minutes())))
@@ -428,8 +415,7 @@ func CanonicalEnvironment(environ []string) []string {
 }
 
 // withEnvValue replaces all inherited definitions of key and appends exactly
-// one canonical value. EqualFold is required because environment keys are
-// case-insensitive on Windows.
+// one requested value. EqualFold also handles case-insensitive Windows keys.
 func withEnvValue(environ []string, key, value string) []string {
 	prefix := key + "="
 	out := make([]string, 0, len(environ)+1)
@@ -472,9 +458,8 @@ func runGoTest(cfg Config, args []string, env []string) (string, error) {
 	return string(out), err
 }
 
-// WarmBuildCache requests compilation of the selected test packages without
-// intentionally running named tests. It uses `-run=^$` and leaves Go free to
-// reuse the resulting build-cache artifacts in later measurements.
+// WarmBuildCache prepares reusable build-cache artifacts for ./... without
+// intentionally running named tests.
 //
 // This warm-up reduces reusable compilation work, but it does not claim that
 // every later `go test` invocation performs zero build, link, initialization,
@@ -484,10 +469,10 @@ func WarmBuildCache(cfg Config) error {
 	return WarmBuildCachePackages(cfg, nil)
 }
 
-// WarmBuildCachePackages pre-compiles test binaries for an explicit package
-// list. When packages is empty, it falls back to ./...
+// WarmBuildCachePackages prepares reusable build-cache artifacts for an
+// explicit package list. When packages is empty, it falls back to ./...
 func WarmBuildCachePackages(cfg Config, packages []string) error {
-	fmt.Fprintf(os.Stderr, "  [warm-cache] Pre-compiling test binaries for %s...\n", cfg.ProjectPath)
+	fmt.Fprintf(os.Stderr, "  [warm-cache] Preparing reusable build-cache artifacts for %s...\n", cfg.ProjectPath)
 	start := time.Now()
 
 	ctx := context.Background()
@@ -509,7 +494,7 @@ func WarmBuildCachePackages(cfg Config, packages []string) error {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("warm-cache pre-compilation failed: %w", err)
+		return fmt.Errorf("warm-cache preparation failed: %w", err)
 	}
 
 	fmt.Fprintf(os.Stderr, "  [warm-cache] Done in %v\n", time.Since(start))

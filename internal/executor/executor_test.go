@@ -13,10 +13,8 @@ import (
 	"tcc-test-partitioning/internal/model"
 )
 
-// TestBaselineReport_RoundTrip exercises ADR-011: a baseline report
-// persisted by WriteBaselineReport must be losslessly recoverable by
-// LoadBaselineReport, including the Duration field (which carries the
-// snake_case + _ns convention from ADR-014).
+// TestBaselineReport_RoundTrip verifies that persisted baseline evidence is
+// recovered without changing its nanosecond duration or compatibility fields.
 func TestBaselineReport_RoundTrip(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "baseline.json")

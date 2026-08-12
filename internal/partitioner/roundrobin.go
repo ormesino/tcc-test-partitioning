@@ -1,11 +1,6 @@
 package partitioner
 
-// Round-Robin partitioning algorithm.
-//
-// Reference: classical cyclic distribution, widely used in operating
-// systems and networking (e.g., Linux kernel task scheduling).
-// Not specific to a single paper — it is the simplest possible
-// load-distribution strategy.
+// Round-Robin is the duration-unaware cyclic distribution strategy.
 //
 // Complexity:
 //   - Time:  O(n)  where n = len(packages)
@@ -21,9 +16,8 @@ import (
 // considering package durations. Package j_i is assigned to worker
 // (i mod p), where p = workers.
 //
-// This algorithm serves as a naive baseline: it provides fair
-// distribution by count but offers no guarantees on makespan
-// because it ignores processing times entirely.
+// It is a simple comparison strategy: assignments are balanced by position,
+// but makespan can remain uneven because durations are ignored.
 type RoundRobin struct{}
 
 // Name returns the algorithm identifier.
@@ -42,7 +36,6 @@ func (r *RoundRobin) Partition(packages []model.PackageInfo, workers int) model.
 		return invalidWorkersResult(r.Name(), workers, time.Since(start))
 	}
 
-	// Initialize empty partitions for each worker.
 	partitions := make([]model.Partition, workers)
 	for i := range partitions {
 		partitions[i] = model.Partition{
@@ -51,14 +44,12 @@ func (r *RoundRobin) Partition(packages []model.PackageInfo, workers int) model.
 		}
 	}
 
-	// Assign each package to worker (i mod workers).
 	for i, pkg := range packages {
 		w := i % workers
 		partitions[w].Packages = append(partitions[w].Packages, pkg)
 		partitions[w].Load += pkg.Duration
 	}
 
-	// Compute makespan = max(Load) across all partitions.
 	var makespan time.Duration
 	for _, p := range partitions {
 		if p.Load > makespan {

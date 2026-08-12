@@ -80,8 +80,8 @@ type workerSummary struct {
 	Error        string `json:"error,omitempty"`
 }
 
-// buildPlannedEntry materializes the planned (theoretical) portion of
-// an algEntry from a cached PartitionResult plus the canonical T1.
+// buildPlannedEntry materializes the planned portion of an algEntry from a
+// cached PartitionResult and the planned T1 (sum of characterized durations).
 // includePackageNames controls whether each partition embeds the full
 // package list (useful for auditing partitions, noisy for big runs).
 func buildPlannedEntry(r model.PartitionResult, t1 time.Duration, includePackageNames bool) algEntry {

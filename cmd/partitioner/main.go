@@ -1,5 +1,7 @@
-// Command partitioner is the main CLI tool for partitioning Go test
-// suites across parallel workers and measuring execution performance.
+// Command partitioner operates on one project, algorithm selection and worker
+// count. It supports planned simulation, partitioned execution and collection
+// of sequential or Go-native parallel baselines; cmd/benchmark orchestrates the
+// complete experimental matrix.
 //
 // Usage:
 //
@@ -18,11 +20,15 @@
 //	# Simulate all algorithms on collected data
 //	go run cmd/partitioner/main.go --mode simulate --data-file data/characterization/cli.json --algorithm all --workers 4
 //
-//	# Run LPT on a real project
-//	go run cmd/partitioner/main.go --mode run --project-path /tmp/cli --algorithm lpt --workers 4
+//	# Run LPT with a measured sequential reference from the same cache regime
+//	go run ./cmd/partitioner --mode run --project-path /tmp/cli \
+//	    --data-file data/characterization/cli.json --algorithm lpt --workers 4 \
+//	    --baseline-seq-file /tmp/cli-seq-passonly.json
 //
-//	# Sequential baseline
-//	go run cmd/partitioner/main.go --mode baseline-seq --project-path /tmp/cli
+//	# Collect a pass-only sequential baseline
+//	go run ./cmd/partitioner --mode baseline-seq --project-path /tmp/cli \
+//	    --data-file data/characterization/cli.json \
+//	    --output /tmp/cli-seq-passonly.json
 package main
 
 import (
@@ -44,7 +50,6 @@ import (
 )
 
 func main() {
-	// Define CLI flags.
 	algorithm := flag.String("algorithm", "all",
 		"Partitioning algorithm: round-robin, quantity, lpt, ffd, all")
 	workers := flag.Int("workers", 4,
@@ -61,7 +66,7 @@ func main() {
 		"Enable verbose output from go test (-v flag)")
 	baselineSeqFile := flag.String("baseline-seq-file", "",
 		"Path to a BaselineReport JSON (written by --mode baseline-seq --output). "+
-			"Used as T1 for speedup in --mode run. Without it, T1 is approximated by sum(Duration).")
+			"Used as empirical T1 in --mode run; omission enables only the non-canonical duration-sum fallback.")
 	output := flag.String("output", "",
 		"Path to write the BaselineReport JSON in --mode baseline-seq / baseline-par.")
 	outputJSON := flag.String("output-json", "",
@@ -69,11 +74,10 @@ func main() {
 	listPackages := flag.Bool("list-packages", false,
 		"Include the full package list per partition in --output-json (default: omit).")
 	warmCache := flag.Bool("warm-cache", false,
-		"Pre-compile test binaries before running to separate compilation cost (run/baseline modes).")
+		"Pre-warm reusable build-cache artifacts before measurement (run/baseline modes).")
 
 	flag.Parse()
 
-	// Validate flags.
 	switch *mode {
 	case "simulate":
 		if *dataFile == "" {
@@ -104,7 +108,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Dispatch based on mode.
 	switch *mode {
 	case "simulate":
 		runSimulate(*dataFile, *algorithm, *workers, *baselineSeqFile, *outputJSON, *listPackages)
@@ -144,8 +147,7 @@ func resolveAlgorithms(name string) []partitioner.Partitioner {
 	}
 }
 
-// loadPackages reads a JSON file containing an array of PackageInfo
-// objects in the canonical convention (ADR-014):
+// loadPackages reads a characterization JSON containing PackageInfo objects:
 //
 //	[
 //	  {"name": "pkg/path", "duration_ns": 1500000000},
@@ -186,9 +188,9 @@ func loadPackages(path string) ([]model.PackageInfo, error) {
 	return packages, nil
 }
 
-// runSimulate loads pre-collected durations and computes theoretical
-// metrics without executing go test. This is the primary mode when
-// Go is not installed or for rapid iteration.
+// runSimulate computes planned partitions and metrics from characterized
+// durations without invoking go test. It is useful for inspecting schedules,
+// but it does not replace empirical execution.
 //
 // Each algorithm's Partition() is invoked exactly once per call;
 // the resulting PartitionResult is cached locally and reused for
@@ -282,10 +284,9 @@ func runSimulate(dataFile, algName string, workers int, baselineSeqFile, outputJ
 // runExecution loads durations, partitions, then executes go test
 // on each partition and reports real metrics.
 //
-// T1 (sequential baseline) is taken from baselineSeqFile when
-// provided; otherwise it falls back to sum(Duration), which
-// over-estimates Speedup because it ignores per-package go test
-// setup/build cost. A warning is emitted in that case.
+// Empirical T1 is loaded from baselineSeqFile. When it is absent, the command
+// permits a non-canonical fallback to sum(Duration) for ad hoc use and emits a
+// warning because the two measurements have different boundaries.
 //
 // Each algorithm's Partition() is called once and the result is
 // reused for both the human-readable text and the JSON report.
@@ -571,12 +572,12 @@ func hashFile(path string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// resolveT1 returns the canonical sequential baseline used in
-// speedup computations and a label describing where it came from.
+// resolveT1 selects the sequential reference used by the single-run CLI and
+// returns a label describing its origin.
 //
 // Preference order:
-//  1. BaselineReport JSON at baselineSeqFile (methodologically sound).
-//  2. sum(packages.Duration) (approximation; emits a stderr warning).
+//  1. A compatible measured BaselineReport.
+//  2. The non-canonical characterized duration sum, with a warning.
 func resolveT1(packages []model.PackageInfo, baselineSeqFile string, dataFile string, warmCache bool) (time.Duration, string) {
 	if baselineSeqFile != "" {
 		r, err := executor.LoadBaselineReport(baselineSeqFile)
@@ -597,8 +598,8 @@ func resolveT1(packages []model.PackageInfo, baselineSeqFile string, dataFile st
 	}
 	fmt.Fprintln(os.Stderr,
 		"WARN: --baseline-seq-file not provided. T1 = sum(Duration) is an\n"+
-			"      optimistic approximation (ignores go test setup, build, I/O).\n"+
-			"      Reported Speedup will be biased upward. Run --mode baseline-seq\n"+
+			"      non-canonical fallback with a different measurement boundary.\n"+
+			"      Resulting speedup mixes origins and is not empirical. Run --mode baseline-seq\n"+
 			"      --output FILE once per project and pass --baseline-seq-file FILE.")
 	return sum, "approx (sum of durations)"
 }

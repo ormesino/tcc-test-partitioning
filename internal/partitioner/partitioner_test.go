@@ -32,8 +32,8 @@ func allAlgorithms() []Partitioner {
 	}
 }
 
-// sumDurations returns the total processing time of the input set
-// — equivalent to T1 (perfectly sequential execution time).
+// sumDurations returns the total characterized load of the input set, which is
+// the planned T1 rather than a measured sequential baseline.
 func sumDurations(pkgs []model.PackageInfo) time.Duration {
 	var total time.Duration
 	for _, p := range pkgs {
@@ -66,10 +66,8 @@ func collectNames(r model.PartitionResult) map[string]int {
 	return m
 }
 
-// TestContract_EmptyInput verifies that every algorithm returns
-// `workers` empty partitions and zero makespan when given no
-// packages. This covers requirement #3 of the project's coding rules
-// (empty list edge case).
+// TestContract_EmptyInput verifies that every algorithm returns `workers` empty
+// partitions and zero makespan when given no packages.
 func TestContract_EmptyInput(t *testing.T) {
 	const workers = 4
 	for _, alg := range allAlgorithms() {

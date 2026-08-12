@@ -2,8 +2,9 @@
 // producing the same format that the data collection pipeline
 // (cmd/analyze) would generate from real projects.
 //
-// This allows testing the full CLI pipeline without access to
-// the real Go projects or a Go test environment.
+// These fixtures exercise partitioning, planned metrics and report generation
+// without subject-project checkouts or a Go test execution environment. They do
+// not reproduce characterization, baselines or empirical campaigns.
 //
 // Usage:
 //

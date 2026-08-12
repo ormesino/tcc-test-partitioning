@@ -1,7 +1,7 @@
-// Command validateprobes audits previously collected `go test -json` probes
-// before they are aggregated into a characterization. It is intentionally
-// independent from cmd/analyze so historical files can be checked without
-// rewriting them.
+// Command validateprobes is the blocking integrity check before characterization.
+// It compares each `go test -json` probe with the current `go list` universe,
+// validates terminal events and sidecar metadata, and classifies the set as
+// PASS, WARN or FAIL without rewriting the source files.
 package main
 
 import (
@@ -122,6 +122,8 @@ func main() {
 	}
 }
 
+// listExpectedPackages captures the package universe from the same project
+// checkout against which the probes are validated.
 func listExpectedPackages(projectPath, pattern string) ([]string, error) {
 	cmd := exec.Command("go", "list", pattern)
 	cmd.Dir = projectPath
@@ -147,6 +149,8 @@ func listExpectedPackages(projectPath, pattern string) ([]string, error) {
 	return packages, nil
 }
 
+// validate combines structural, population, timeout and runtime-policy checks.
+// FAIL blocks aggregation; WARN permits it only after the finding is reviewed.
 func validate(projectPath, pattern string, expectedRuns, requiredGOMAXPROCS int, expected []string, paths []string) validationReport {
 	report := validationReport{
 		GeneratedAt:      time.Now(),
@@ -250,6 +254,7 @@ func validate(projectPath, pattern string, expectedRuns, requiredGOMAXPROCS int,
 	return report
 }
 
+// inspectRun audits one probe and its optional .meta.json and .err sidecars.
 func inspectRun(path string, expected map[string]struct{}) (runReport, error) {
 	r := runReport{File: path, TerminalStatusByPkg: make(map[string]string)}
 	f, err := os.Open(path)

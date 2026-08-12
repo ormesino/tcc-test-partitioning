@@ -1,14 +1,8 @@
-// Command analyze parses one or more `go test -json` output files,
-// aggregates per-package median durations across runs and emits a
-// PackageInfo[] JSON consumable by the
-// partitioner CLI (cmd/partitioner --mode simulate).
-//
-// Behavior is governed by the project's ADRs:
-//   - ADR-006: packages whose status is "fail" or "skip" in *any* run
-//     are excluded from the output. Packages missing from any
-//     run are also excluded (the canonical median requires N samples).
-//   - ADR-007: expects N runs (default workflow uses N=10).
-//   - ADR-008: median across the N runs is the canonical duration.
+// Command analyze converts validated `go test -json` probes into the
+// characterization consumed by the partitioners. A package is included only
+// when it is present and passes in every input probe; its canonical duration is
+// the median of those observations. The final protocol uses ten probes per
+// project and runs cmd/validateprobes before this command.
 //
 // Input format:
 //
@@ -159,9 +153,10 @@ func parseRun(r io.Reader) (map[string]pkgOutcome, error) {
 	return out, nil
 }
 
-// secondsToDuration converts a float seconds value (as emitted by
-// `go test -json`) into time.Duration without precision loss beyond
-// nanosecond resolution.
+// secondsToDuration converts the floating-point seconds decoded from test2json
+// into nanoseconds. The source Elapsed value is already quantized to
+// milliseconds; floating-point conversion can add a residual of at most a few
+// nanoseconds, which cmd/auditdurations checks independently.
 func secondsToDuration(s float64) time.Duration {
 	if s <= 0 || math.IsNaN(s) || math.IsInf(s, 0) {
 		return 0
@@ -171,14 +166,14 @@ func secondsToDuration(s float64) time.Duration {
 
 // aggregate merges per-run outcomes into the final PackageInfo list.
 //
-// Inclusion rule (ADR-006):
+// Inclusion rule:
 //   - The package must appear in every run.
 //   - It must have Status == "pass" in every run.
 //
 // Otherwise the package is dropped and (in verbose mode) the reason
 // is reported to stderr.
 //
-// Duration:  median across runs (ADR-008).
+// Duration is the median across all input probes.
 func aggregate(runs []map[string]pkgOutcome, verbose bool) []model.PackageInfo {
 	if len(runs) == 0 {
 		return nil

@@ -1,6 +1,6 @@
-// Package model defines the core domain types shared across the
-// test-partitioning tool. These types map directly to the formal
-// P||Cmax scheduling problem (Graham, 1969).
+// Package model defines the domain types shared by characterization,
+// partitioning, execution and reporting. PackageInfo, Partition and
+// PartitionResult represent the jobs, machines and schedules of P||Cmax.
 package model
 
 import "time"
@@ -15,8 +15,8 @@ type PackageInfo struct {
 	// e.g. "github.com/cli/cli/v2/pkg/cmd/pr".
 	Name string `json:"name"`
 
-	// Duration is the median wall-clock time observed across
-	// multiple test executions (typically 10 runs, per ADR-007).
+	// Duration is the package weight in nanoseconds. Canonical empirical inputs
+	// use the median package-level Elapsed value across ten valid probes.
 	Duration time.Duration `json:"duration_ns"`
 }
 

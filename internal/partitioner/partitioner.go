@@ -1,9 +1,8 @@
-// Package partitioner defines the Partitioner interface and provides
-// concrete implementations of test-suite partitioning algorithms.
+// Package partitioner defines the common scheduling contract and the four
+// static strategies evaluated by the project.
 //
-// Each algorithm solves a variant of the P||Cmax problem (parallel
-// identical machines, minimizing makespan) with different trade-offs
-// between solution quality and computational cost.
+// Each strategy constructs a heuristic schedule for P||Cmax with different
+// uses of characterized duration and different computational costs.
 //
 // The baseline (native go test) is NOT a Partitioner — it delegates
 // scheduling entirely to the Go toolchain and is handled as a
@@ -15,10 +14,8 @@ import "tcc-test-partitioning/internal/model"
 // Partitioner is the strategy interface that all partitioning
 // algorithms must implement.
 //
-// Design rationale: following Go's convention of small interfaces
-// (cf. io.Reader, sort.Interface), Partitioner has only two methods.
-// This makes it trivial to add new algorithms without modifying
-// existing code (Open/Closed Principle).
+// The small interface lets orchestration code select strategies without
+// depending on their allocation rules.
 type Partitioner interface {
 	// Name returns a human-readable identifier for the algorithm,
 	// e.g. "Round-Robin", "LPT". This value is stored in

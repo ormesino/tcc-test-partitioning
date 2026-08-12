@@ -49,7 +49,7 @@ func (f *FFD) partition(packages []model.PackageInfo, workers, searchIterations 
 		return emptyPartitionResult(f.Name(), workers, time.Since(start))
 	}
 
-	// 1. Sort packages descending by duration
+	// Work on a deterministically sorted copy so the caller's input is preserved.
 	sortedPkgs := make([]model.PackageInfo, len(packages))
 	copy(sortedPkgs, packages)
 	sort.Slice(sortedPkgs, func(i, j int) bool {
@@ -59,7 +59,7 @@ func (f *FFD) partition(packages []model.PackageInfo, workers, searchIterations 
 		return sortedPkgs[i].Name < sortedPkgs[j].Name
 	})
 
-	// 2. Determine bounds for binary search
+	// Search between the scheduling lower bound and the total characterized load.
 	var maxDuration time.Duration
 	var sumDuration time.Duration
 	for _, p := range sortedPkgs {
@@ -79,28 +79,26 @@ func (f *FFD) partition(packages []model.PackageInfo, workers, searchIterations 
 	var bestAllocation []model.Partition
 	var bestMakespan time.Duration
 
-	// 3. Bounded binary search (Multifit loop). Forty iterations are
-	// sufficient to narrow the duration ranges used by this study, but
-	// do not turn the heuristic into an exact optimizer.
+	// Forty iterations are sufficient to narrow the duration ranges used by this
+	// study, but do not turn the heuristic into an exact optimizer.
 	for iter := 0; iter < searchIterations; iter++ {
 		capacity := lowerBound + (upperBound-lowerBound)/2
 
 		allocation, fits := tryFFD(sortedPkgs, workers, capacity)
 		if fits {
 			bestAllocation = allocation
-			upperBound = capacity // Try to find a tighter packing
+			upperBound = capacity
 		} else {
-			lowerBound = capacity // Need more capacity
+			lowerBound = capacity
 		}
 	}
 
-	// 4. Fallback in case binary search didn't find a perfect fit
-	// (or bounds were too tight initially).
+	// The total load is always a feasible fallback capacity.
 	if bestAllocation == nil {
 		bestAllocation, _ = tryFFD(sortedPkgs, workers, sumDuration)
 	}
 
-	// Re-calculate precise makespan of the valid allocation
+	// Derive makespan from the allocation rather than the candidate capacity.
 	bestMakespan = 0
 	for _, p := range bestAllocation {
 		if p.Load > bestMakespan {

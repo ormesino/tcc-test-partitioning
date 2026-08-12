@@ -1,15 +1,15 @@
-// Command benchmark drives the experimental matrix described in the
-// TCC methodology: a sweep over
+// Command benchmark executes the matrix defined by the final experimental
+// protocol: a sweep over
 //
 //	projects × workers × algorithms × repetitions
 //
 // for either the simulate mode (deterministic, partitioning-only) or
 // the run mode (real `go test` execution via the executor package).
 //
-// Each tuple receives a fresh Partition invocation and go test execution.
-// Immutable package/baseline inputs are shared, while OS state and the optional
-// project-level warm build cache may persist by design. Algorithm sequence is
-// counterbalanced across repetitions to reduce fixed-order bias.
+// Each tuple receives a fresh Partition invocation and, in run mode, a new
+// partitioned go test execution. Immutable characterization and baseline inputs
+// are shared, while OS state and the project-level warm build cache may persist
+// by design. Algorithm order is counterbalanced across repetitions.
 //
 // Outputs (under <output_dir>/<timestamp>/):
 //
@@ -57,7 +57,7 @@ func main() {
 	outputDirOverride := flag.String("output-dir", "",
 		"Override config.output_dir. Empty keeps config value.")
 	timeoutMinutesOverride := flag.Int("timeout-minutes", 0,
-		"Override the per-repetition config.timeout_minutes. Zero keeps the config value.")
+		"Override the per-process config.timeout_minutes. Zero keeps the config value.")
 	repetitionsOverride := flag.Int("repetitions", 0,
 		"Override config.repetitions. Zero keeps the config value.")
 	environmentLabelOverride := flag.String("environment-label", "",
@@ -445,11 +445,10 @@ func validateParallelBaselineReport(path string, r executor.BaselineReport, expe
 	return nil
 }
 
-// resolveT1 mirrors cmd/partitioner's resolveT1 but is intentionally
-// duplicated here to keep cmd/benchmark dependency-free from the
-// CLI binary. Preference order:
-//  1. BaselineReport JSON (methodologically sound).
-//  2. sum(packages.Duration) (approximation; emits a stderr warning).
+// resolveT1 mirrors cmd/partitioner's sequential-reference resolution without
+// coupling one command package to another. Run mode requires a compatible
+// measured baseline; the characterized duration sum is a warned fallback for
+// non-canonical simulation configurations.
 func resolveT1(packages []model.PackageInfo, baselineSeqFile string, dataFile string, warmCache bool) (time.Duration, string) {
 	if baselineSeqFile != "" {
 		r, err := executor.LoadBaselineReport(baselineSeqFile)
@@ -467,7 +466,7 @@ func resolveT1(packages []model.PackageInfo, baselineSeqFile string, dataFile st
 	}
 	fmt.Fprintln(os.Stderr,
 		"WARN: baseline_seq_file not set for a project. T1 = sum(Duration)\n"+
-			"      is an optimistic approximation; reported Speedup is biased upward.")
+			"      represents planned T1 only; it is not a measured sequential baseline.")
 	return sum, "approx (sum of durations)"
 }
 

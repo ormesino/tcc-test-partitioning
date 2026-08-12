@@ -1,11 +1,6 @@
 package partitioner
 
-// Equal-count (quantity-based) partitioning algorithm.
-//
-// Reference: this is the straightforward "block distribution"
-// strategy described in most parallel computing textbooks,
-// e.g., Pacheco (2011), §2.4.1, as the simplest static
-// decomposition for loop iterations.
+// Quantity is the duration-unaware contiguous block strategy.
 //
 // Complexity:
 //   - Time:  O(n)  where n = len(packages)
@@ -24,9 +19,8 @@ import (
 //   - the first (n mod p) workers receive ceil(n/p) packages
 //   - the remaining workers receive floor(n/p) packages
 //
-// This is a purely count-based strategy: it guarantees balanced
-// package counts but offers no guarantees on makespan because it
-// ignores processing times.
+// It is a simple comparison strategy: package counts differ by at most one,
+// but makespan can remain uneven because durations are ignored.
 type Quantity struct{}
 
 // Name returns the algorithm identifier.
@@ -46,7 +40,6 @@ func (q *Quantity) Partition(packages []model.PackageInfo, workers int) model.Pa
 	}
 	n := len(packages)
 
-	// Initialize empty partitions for each worker.
 	partitions := make([]model.Partition, workers)
 	for i := range partitions {
 		partitions[i] = model.Partition{
@@ -55,9 +48,7 @@ func (q *Quantity) Partition(packages []model.PackageInfo, workers int) model.Pa
 		}
 	}
 
-	// Distribute packages in contiguous blocks.
-	// First (n % workers) workers get ceil(n/workers) packages,
-	// the rest get floor(n/workers).
+	// The first n%workers blocks receive one additional package.
 	base := n / workers  // floor(n/p)
 	extra := n % workers // number of workers that get one extra
 
@@ -75,7 +66,6 @@ func (q *Quantity) Partition(packages []model.PackageInfo, workers int) model.Pa
 		}
 	}
 
-	// Compute makespan = max(Load) across all partitions.
 	var makespan time.Duration
 	for _, p := range partitions {
 		if p.Load > makespan {

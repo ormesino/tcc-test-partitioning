@@ -1,7 +1,8 @@
-// Demo program — final end-to-end comparison of all partitioning
-// algorithms across multiple datasets and worker counts.
+// Command demo compares all partitioners on bundled synthetic datasets.
 //
-// This demo simulates the full experimental pipeline:
+// It demonstrates the planning and metric layers without collecting probes,
+// executing subject projects, controlling cache regimes or reproducing the
+// accepted campaigns:
 //  1. Load synthetic datasets (stand-in for real collected data).
 //  2. Run all 4 algorithms with p ∈ {2, 4, 8} workers.
 //  3. Compute and display metrics for each combination.
@@ -53,7 +54,7 @@ func main() {
 		{"Mixed (robustness test)", synthetic.ProfileMixed()},
 	}
 
-	// Worker counts to test (same as planned experiments).
+	// Worker counts represented in the final experimental matrix.
 	workerCounts := []int{2, 4, 8}
 
 	var dsEntries []datasetEntry
@@ -104,7 +105,7 @@ func printDatasetHeader(ds dataset) {
 
 	fmt.Println("================================================================")
 	fmt.Printf("  DATASET: %s\n", ds.Name)
-	fmt.Printf("  Packages: %d | T1 (sequential): %v\n", len(ds.Packages), seqDuration)
+	fmt.Printf("  Packages: %d | Planned T1 (duration sum): %v\n", len(ds.Packages), seqDuration)
 	fmt.Println("================================================================")
 	fmt.Println()
 }
@@ -113,7 +114,7 @@ func printDatasetHeader(ds dataset) {
 // (dataset, workers) pair using pre-computed PartitionResults. It
 // does NOT call Partition() — see main() for the cache.
 func runComparison(ds dataset, results []model.PartitionResult, workers int) {
-	// Compute T1 (sequential time) = sum of all durations.
+	// Planned T1 is the sum of the synthetic package durations.
 	var seqDuration time.Duration
 	for _, p := range ds.Packages {
 		seqDuration += p.Duration
