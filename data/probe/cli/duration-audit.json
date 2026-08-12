@@ -1,0 +1,83 @@
+{
+  "classification": "A — sem erro",
+  "precision_source": "go test/test2json rounds package terminal Elapsed to 1 ms",
+  "tolerance_ns": 1,
+  "probe_files": 10,
+  "malformed_lines": 0,
+  "package_terminal_events": 2970,
+  "individual_test_terminal_events_ignored": 65230,
+  "duplicate_package_terminal_events": 0,
+  "elapsed_decimal_places": {
+    "2": 141,
+    "3": 2219
+  },
+  "scientific_notation_values": 0,
+  "integer_values": 610,
+  "zero_values": 610,
+  "below_1_microsecond": 610,
+  "below_1_millisecond": 610,
+  "below_10_milliseconds": 1683,
+  "below_100_milliseconds": 2868,
+  "distinct_values": 134,
+  "repeated_proportion": 0.9548821548821549,
+  "minimum_positive_seconds": 0.002,
+  "raw_median_seconds": 0.008,
+  "raw_maximum_seconds": 3.02,
+  "pass_only_packages": 236,
+  "stored_packages": 236,
+  "residual_differences": 2,
+  "divergences_beyond_tolerance": 0,
+  "largest_absolute_difference_ns": 1,
+  "largest_relative_difference": 9.756097560975609e-10,
+  "differences": [
+    {
+      "package": "github.com/cli/cli/v2/internal/codespaces/api",
+      "raw_seconds": [
+        "1.024",
+        "1.024",
+        "1.025",
+        "1.025",
+        "1.025",
+        "1.025",
+        "1.025",
+        "1.025",
+        "1.025",
+        "1.024"
+      ],
+      "expected_ns": 1025000000,
+      "stored_ns": 1024999999,
+      "absolute_difference_ns": 1,
+      "relative_difference": 9.756097560975609e-10,
+      "within_tolerance": true
+    },
+    {
+      "package": "github.com/cli/cli/v2/internal/prompter",
+      "raw_seconds": [
+        "2.049",
+        "2.058",
+        "2.048",
+        "2.049",
+        "2.05",
+        "2.057",
+        "2.053",
+        "2.05",
+        "2.036",
+        "2.045"
+      ],
+      "expected_ns": 2049500000,
+      "stored_ns": 2049499999,
+      "absolute_difference_ns": 1,
+      "relative_difference": 4.879238838741156e-10,
+      "within_tolerance": true
+    }
+  ],
+  "suite_mean_seconds": 0.05901271186440677,
+  "suite_median_seconds": 0.0105,
+  "suite_population_variance_seconds2": 0.08143258882145936,
+  "suite_population_stddev_seconds": 0.2853639585186948,
+  "suite_cv": 4.835635399613124,
+  "suite_max_over_median": 287.5238095238095,
+  "packages_for_50_percent": 3,
+  "packages_for_80_percent": 23,
+  "packages_for_90_percent": 75
+}

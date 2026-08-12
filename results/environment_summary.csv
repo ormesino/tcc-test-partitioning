@@ -1,0 +1,9 @@
+project,regime,result_dir,go_version,goos,goarch,num_cpu,gomaxprocs,gomaxprocs_configured,gomaxprocs_effective,gomaxprocs_policy,cpu_model,os_version,kernel_version,application_commit,application_dirty,environment_label
+cli,cold,20260705-183645,go1.26.2,linux,amd64,8,1,1,1,explicit-child-environment,AMD EPYC 7B13,Ubuntu 24.04.4 LTS,Linux 6.17.0-1020-gcp,6c8e232a6336321cc691928fe8912d6f7320b8ba,False,gcp-primary
+cli,warm,20260707-131039,go1.26.2,linux,amd64,8,1,1,1,explicit-child-environment,AMD EPYC 7B13,Ubuntu 24.04.4 LTS,Linux 6.17.0-1020-gcp,6c8e232a6336321cc691928fe8912d6f7320b8ba,False,gcp-primary
+goreleaser,cold,20260705-230606,go1.26.2,linux,amd64,8,1,1,1,explicit-child-environment,AMD EPYC 7B13,Ubuntu 24.04.4 LTS,Linux 6.17.0-1020-gcp,6c8e232a6336321cc691928fe8912d6f7320b8ba,False,gcp-primary
+goreleaser,warm,20260707-140842,go1.26.2,linux,amd64,8,1,1,1,explicit-child-environment,AMD EPYC 7B13,Ubuntu 24.04.4 LTS,Linux 6.17.0-1020-gcp,6c8e232a6336321cc691928fe8912d6f7320b8ba,False,gcp-primary
+grpc-go,cold,20260706-070547,go1.26.2,linux,amd64,8,1,1,1,explicit-child-environment,AMD EPYC 7B13,Ubuntu 24.04.4 LTS,Linux 6.17.0-1020-gcp,6c8e232a6336321cc691928fe8912d6f7320b8ba,False,gcp-primary
+grpc-go,warm,20260707-152705,go1.26.2,linux,amd64,8,1,1,1,explicit-child-environment,AMD EPYC 7B13,Ubuntu 24.04.4 LTS,Linux 6.17.0-1020-gcp,6c8e232a6336321cc691928fe8912d6f7320b8ba,False,gcp-primary
+hugo,cold,20260706-123517,go1.26.2,linux,amd64,8,1,1,1,explicit-child-environment,AMD EPYC 7B13,Ubuntu 24.04.4 LTS,Linux 6.17.0-1020-gcp,6c8e232a6336321cc691928fe8912d6f7320b8ba,False,gcp-primary
+hugo,warm,20260707-180210,go1.26.2,linux,amd64,8,1,1,1,explicit-child-environment,AMD EPYC 7B13,Ubuntu 24.04.4 LTS,Linux 6.17.0-1020-gcp,6c8e232a6336321cc691928fe8912d6f7320b8ba,False,gcp-primary

@@ -1,0 +1,5 @@
+project,mode,workers,duration_ns,speedup,efficiency,cache_regime,package_count,data_file_sha256,measured_at,baseline_file
+goreleaser,baseline-seq,1,189699667816,1.000000,1.000000,warm,121,123a5bb46da9d17cfad7ebf31e3ca74846fd68093ecd52298cd30bea798d733b,2026-07-05T14:27:22.714877436Z,data/baseline/goreleaser-seq-warm-passonly.json
+goreleaser,baseline-par,2,96171798345,1.972508,0.986254,warm,121,123a5bb46da9d17cfad7ebf31e3ca74846fd68093ecd52298cd30bea798d733b,2026-07-05T14:30:40.935108613Z,data/baseline/goreleaser-par-w2-warm-passonly.json
+goreleaser,baseline-par,4,48927685961,3.877144,0.969286,warm,121,123a5bb46da9d17cfad7ebf31e3ca74846fd68093ecd52298cd30bea798d733b,2026-07-05T14:33:12.811381495Z,data/baseline/goreleaser-par-w4-warm-passonly.json
+goreleaser,baseline-par,8,41822685381,4.535808,0.566976,warm,121,123a5bb46da9d17cfad7ebf31e3ca74846fd68093ecd52298cd30bea798d733b,2026-07-05T14:35:35.464138204Z,data/baseline/goreleaser-par-w8-warm-passonly.json

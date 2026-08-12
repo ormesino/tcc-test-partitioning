@@ -1,0 +1,11 @@
+{
+  "command": "GOMAXPROCS=1 go test -json -p 1 -parallel 1 -count=1 -timeout 60m ./...",
+  "started_at": "2026-07-05T07:01:00.3912156Z",
+  "finished_at": "2026-07-05T07:03:10.0742711Z",
+  "exit_code": 0,
+  "timed_out": false,
+  "gomaxprocs_configured": 1,
+  "gomaxprocs_effective": 1,
+  "gomaxprocs_policy": "explicit-child-environment",
+  "child_environment_applied": true
+}

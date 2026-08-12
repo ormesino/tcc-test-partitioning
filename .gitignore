@@ -21,33 +21,9 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
-.env
-/env/
+# Raw probe outputs; keep metadata and audit summaries
+/data/probe/*/run_[0-9][0-9].json
+/data/probe/*/run_[0-9][0-9].err
 
-# Editor/IDE
-.vscode/
-
-# Runtime outputs
-/report.json
-/reports/
-/logs/
-/bin/
-
-# External repositories. Keep only the curated list of subjects.
-/repos/*
-!/repos/repos.txt
-/data/repos/
-
-# Raw and historical experimental data
-/data/probe/
-/data/characterization/old/
-/archive/
-
-# Benchmark results are generated; configs are versioned.
-/benchmarks/results/
-/data/baseline/old/
-/data/characterization/old/
-
-# Internal documentation, not part of the public project artifact.
-/docs
+# Ignore documentation
+/docs/

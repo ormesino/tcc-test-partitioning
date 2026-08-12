@@ -1,0 +1,9 @@
+project,regime,pearson_planned_observed
+cli,cold,0.33304202874075506
+cli,warm,0.24553700211970753
+goreleaser,cold,0.319701232849075
+goreleaser,warm,0.5245239219570411
+grpc-go,cold,0.890972327458541
+grpc-go,warm,0.9676622266251859
+hugo,cold,0.08023548703667656
+hugo,warm,0.5230908046962486

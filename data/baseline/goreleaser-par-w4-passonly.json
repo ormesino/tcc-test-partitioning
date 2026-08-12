@@ -1,0 +1,15 @@
+{
+  "mode": "baseline-par",
+  "parallelism": 4,
+  "duration_ns": 186663435280,
+  "measured_at": "2026-07-05T14:20:36.648655146Z",
+  "project_path": "repos/goreleaser",
+  "package_count": 121,
+  "package_source": "data/characterization/goreleaser.json",
+  "success": true,
+  "data_file_sha256": "123a5bb46da9d17cfad7ebf31e3ca74846fd68093ecd52298cd30bea798d733b",
+  "cache_regime": "cold",
+  "gomaxprocs_configured": 1,
+  "gomaxprocs_effective": 1,
+  "gomaxprocs_policy": "explicit-child-environment"
+}

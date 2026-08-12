@@ -1,0 +1,31 @@
+{
+  "mode": "run",
+  "workers": [
+    2,
+    4,
+    8
+  ],
+  "algorithms": [
+    "all"
+  ],
+  "repetitions": 5,
+  "max_attempts": 3,
+  "timeout_minutes": 90,
+  "output_dir": "benchmarks/results/goreleaser",
+  "warm_cache": true,
+  "environment_label": "gcp-primary",
+  "projects": [
+    {
+      "name": "goreleaser",
+      "expected_commit": "ce96e79b4883bdea39cf2cf5fe33fa63f5df4dd0",
+      "data_file": "data/characterization/goreleaser.json",
+      "baseline_seq_file": "data/baseline/goreleaser-seq-warm-passonly.json",
+      "baseline_par_files": {
+        "2": "data/baseline/goreleaser-par-w2-warm-passonly.json",
+        "4": "data/baseline/goreleaser-par-w4-warm-passonly.json",
+        "8": "data/baseline/goreleaser-par-w8-warm-passonly.json"
+      },
+      "project_path": "repos/goreleaser"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "mode": "baseline-seq",
+  "parallelism": 1,
+  "duration_ns": 390765237475,
+  "measured_at": "2026-07-05T12:58:57.923122591Z",
+  "project_path": "repos/cli",
+  "package_count": 236,
+  "package_source": "data/characterization/cli.json",
+  "success": true,
+  "data_file_sha256": "f55c270bf45ca3354683a78b516ffdf60e828dc2aa929aee060e26fa027e9d1b",
+  "cache_regime": "cold",
+  "gomaxprocs_configured": 1,
+  "gomaxprocs_effective": 1,
+  "gomaxprocs_policy": "explicit-child-environment"
+}

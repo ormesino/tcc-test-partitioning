@@ -1,0 +1,15 @@
+{
+  "mode": "baseline-par",
+  "parallelism": 4,
+  "duration_ns": 78317763097,
+  "measured_at": "2026-07-05T16:38:48.553394024Z",
+  "project_path": "repos/hugo",
+  "package_count": 142,
+  "package_source": "data/characterization/hugo.json",
+  "success": true,
+  "data_file_sha256": "5c24af6c0351dcb49713e6a1c2e471fe541664b2d44f95ad882d6b9b4fcfb7a6",
+  "cache_regime": "warm",
+  "gomaxprocs_configured": 1,
+  "gomaxprocs_effective": 1,
+  "gomaxprocs_policy": "explicit-child-environment"
+}

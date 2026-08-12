@@ -1,0 +1,5 @@
+project,mode,workers,duration_ns,speedup,efficiency,cache_regime,package_count,data_file_sha256,measured_at,baseline_file
+grpc-go,baseline-seq,1,641503983702,1.000000,1.000000,cold,144,1afa12ee3fa488a0d72c9834f321c3805989e6646cadc799d6021494a1fa7b9d,2026-07-05T13:28:49.574327284Z,data/baseline/grpc-go-seq-passonly.json
+grpc-go,baseline-par,2,323376258063,1.983770,0.991885,cold,144,1afa12ee3fa488a0d72c9834f321c3805989e6646cadc799d6021494a1fa7b9d,2026-07-05T13:34:13.476158653Z,data/baseline/grpc-go-par-w2-passonly.json
+grpc-go,baseline-par,4,196978583076,3.256719,0.814180,cold,144,1afa12ee3fa488a0d72c9834f321c3805989e6646cadc799d6021494a1fa7b9d,2026-07-05T13:37:30.986994472Z,data/baseline/grpc-go-par-w4-passonly.json
+grpc-go,baseline-par,8,129965106565,4.935971,0.616996,cold,144,1afa12ee3fa488a0d72c9834f321c3805989e6646cadc799d6021494a1fa7b9d,2026-07-05T13:39:41.495651019Z,data/baseline/grpc-go-par-w8-passonly.json

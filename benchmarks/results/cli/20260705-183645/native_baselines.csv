@@ -1,0 +1,5 @@
+project,mode,workers,duration_ns,speedup,efficiency,cache_regime,package_count,data_file_sha256,measured_at,baseline_file
+cli,baseline-seq,1,390765237475,1.000000,1.000000,cold,236,f55c270bf45ca3354683a78b516ffdf60e828dc2aa929aee060e26fa027e9d1b,2026-07-05T12:58:57.923122591Z,data/baseline/cli-seq-passonly.json
+cli,baseline-par,2,203172596884,1.923317,0.961658,cold,236,f55c270bf45ca3354683a78b516ffdf60e828dc2aa929aee060e26fa027e9d1b,2026-07-05T13:02:21.744081875Z,data/baseline/cli-par-w2-passonly.json
+cli,baseline-par,4,106027098188,3.685522,0.921381,cold,236,f55c270bf45ca3354683a78b516ffdf60e828dc2aa929aee060e26fa027e9d1b,2026-07-05T13:04:08.435894782Z,data/baseline/cli-par-w4-passonly.json
+cli,baseline-par,8,60149271135,6.496591,0.812074,cold,236,f55c270bf45ca3354683a78b516ffdf60e828dc2aa929aee060e26fa027e9d1b,2026-07-05T13:05:09.505702585Z,data/baseline/cli-par-w8-passonly.json

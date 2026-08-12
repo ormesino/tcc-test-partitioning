@@ -1,0 +1,11 @@
+metric,value
+complete_campaigns,8
+raw_rows,480
+aggregate_rows,96
+expected_raw_rows,480
+logical_errors,0
+attempts_gt_1,0
+all_gomaxprocs_effective_1,True
+all_application_dirty_false,True
+baseline_hashes_match_characterization,True
+campaign_native_hashes_match_characterization,True

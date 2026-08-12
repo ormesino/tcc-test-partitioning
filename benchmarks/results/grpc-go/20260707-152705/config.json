@@ -1,0 +1,31 @@
+{
+  "mode": "run",
+  "workers": [
+    2,
+    4,
+    8
+  ],
+  "algorithms": [
+    "all"
+  ],
+  "repetitions": 5,
+  "max_attempts": 3,
+  "timeout_minutes": 90,
+  "output_dir": "benchmarks/results/grpc-go",
+  "warm_cache": true,
+  "environment_label": "gcp-primary",
+  "projects": [
+    {
+      "name": "grpc-go",
+      "expected_commit": "faa34bf170ceef07b9ada9bcd44dc6e16a55d1f4",
+      "data_file": "data/characterization/grpc-go.json",
+      "baseline_seq_file": "data/baseline/grpc-go-seq-warm-passonly.json",
+      "baseline_par_files": {
+        "2": "data/baseline/grpc-go-par-w2-warm-passonly.json",
+        "4": "data/baseline/grpc-go-par-w4-warm-passonly.json",
+        "8": "data/baseline/grpc-go-par-w8-warm-passonly.json"
+      },
+      "project_path": "repos/grpc-go"
+    }
+  ]
+}

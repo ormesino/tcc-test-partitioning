@@ -1,0 +1,28 @@
+{
+  "collected_at": "2026-07-07T18:02:10.379693645Z",
+  "go_version": "go1.26.2",
+  "goos": "linux",
+  "goarch": "amd64",
+  "num_cpu": 8,
+  "gomaxprocs": 1,
+  "gomaxprocs_configured": 1,
+  "gomaxprocs_effective": 1,
+  "gomaxprocs_policy": "explicit-child-environment",
+  "cpu_model": "AMD EPYC 7B13",
+  "os_version": "Ubuntu 24.04.4 LTS",
+  "kernel_version": "Linux 6.17.0-1020-gcp",
+  "environment_label": "gcp-primary",
+  "go_cache": "/home/pedro/.cache/go-build",
+  "go_mod_cache": "/home/pedro/go/pkg/mod",
+  "total_memory_bytes": 33649033216,
+  "hostname": "vm-tcc-go-bench.southamerica-east1-a.c.tcc-go-bench.internal",
+  "application_version": "(devel)",
+  "application_commit": "6c8e232a6336321cc691928fe8912d6f7320b8ba",
+  "application_dirty": false,
+  "project_commits": {
+    "hugo": "72495f9fba69edadd50a7ecb9ae9fb3d9c46156b"
+  },
+  "project_dirty": {
+    "hugo": false
+  }
+}
