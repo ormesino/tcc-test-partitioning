@@ -1,78 +1,120 @@
 # tcc-test-partitioning
 
-Empirical evaluation of test-suite partitioning algorithms for Go projects.
-The tool compares four static partitioning strategies, Round-Robin, Quantity,
-LPT, and FFD-Multifit, against Go-native baselines under the P||Cmax scheduling
-model.
+Empirical evaluation of static test-suite partitioning strategies for Go
+projects. This repository contains the implementation, the accepted experimental
+artifacts, and consolidated tables produced for an undergraduate Computer
+Science thesis.
 
-The project is part of an undergraduate Computer Science thesis. The
-implementation intentionally uses only the Go standard library.
+The README is organized as a guided entry point to the artifact:
 
-## What This Repository Contains
+1. project purpose and scope;
+2. repository structure;
+3. role of each component in the experimental workflow;
+4. brief methodology and result summary.
 
-This repository contains a small research toolchain for:
+For the complete theoretical foundation, experimental design, threats to
+validity, and discussion of the results, consult the thesis submitted with this
+artifact.
 
-- collecting package-level Go test durations;
-- building pass-only characterization datasets;
-- simulating partitioning strategies from historical durations;
-- executing partitioned `go test` workloads locally;
-- collecting sequential and Go-native parallel baselines;
-- running full benchmark campaigns and exporting JSON/CSV results.
+## 1. Project Overview
 
-For the consolidated research and design rationale, see
-[DECISIONS.md](DECISIONS.md). The private working-document index and document
-hierarchy are in [docs/README.md](docs/README.md).
+The project compares four static partitioning strategies:
 
-## Repository Layout
+- **Round-Robin**, which distributes packages cyclically;
+- **Quantity**, which balances the number of packages per worker;
+- **LPT (Longest Processing Time first)**, which greedily assigns the longest
+  remaining package to the least-loaded worker;
+- **FFD-Multifit**, which searches for a tighter capacity-based packing.
+
+The strategies are evaluated against sequential and Go-native parallel
+baselines under the `P||Cmax` scheduling model. The primary objective is to
+reduce empirical makespan, the elapsed time until the slowest worker finishes,
+while keeping the cost of constructing the partitions negligible.
+
+In this repository, **partitioning overhead** means only the time spent building
+the partitions. It does not include process coordination, compilation, or test
+execution. The implementation uses only the Go standard library.
+
+The published artifact includes the source code, synthetic fixtures, validated
+characterizations, pass-only baselines, accepted campaign reports, probe
+metadata and audits, and consolidated result tables. Raw probe NDJSON and stderr
+files, subject-repository clones, and transient execution outputs are not part
+of the public artifact set.
+
+## 2. Repository Structure
 
 ```text
 cmd/
-  analyze/      Aggregates N go test -json runs into PackageInfo data.
-  auditdurations/ Independently reconciles probes, medians and suite metrics.
-  benchmark/    Experimental driver: projects x workers x algorithms x reps.
-  demo/         Demonstrates all algorithms on synthetic datasets.
-  gendata/      Exports deterministic synthetic fixtures as JSON.
-  partitioner/  Main CLI: simulate, run, baseline-seq, baseline-par.
-  preflight/    Verifies effective child-process GOMAXPROCS.
-  validateprobes/ Retroactive PASS/WARN/FAIL integrity check for probes.
-  workerdiag/   Completed non-canonical diagnostic that motivated GOMAXPROCS=1.
+  analyze/          Aggregates repeated go test -json probes.
+  auditdurations/   Reconciles probes, medians, and suite metrics.
+  benchmark/        Runs projects x workers x algorithms x repetitions.
+  demo/             Demonstrates all algorithms on synthetic data.
+  gendata/          Generates deterministic synthetic fixtures.
+  partitioner/      Main CLI for simulation, execution, and baselines.
+  preflight/        Checks effective child-process GOMAXPROCS.
+  validateprobes/   Audits probe integrity with PASS/WARN/FAIL status.
+  workerdiag/       Diagnoses worker runtime semantics.
 data/
-  synthetic/         Deterministic synthetic fixtures.
-  characterization/  Final pass-only package datasets for the selected projects.
-  baseline/          Final pass-only baseline measurements.
+  synthetic/        Deterministic fixtures for local validation.
+  probe/            Probe metadata, validation reports, and duration audits.
+  characterization/ Final pass-only package-duration datasets.
+  baseline/         Final pass-only sequential and native measurements.
 internal/
-  model/        Domain types: PackageInfo, Partition, PartitionResult.
-  partitioner/  Implementations of the four partitioning algorithms.
-  executor/     Parallel execution of go test using goroutines and channels.
-  metrics/      Makespan, speedup, efficiency, and load-balance metrics.
+  model/            Domain types and result structures.
+  partitioner/      Implementations of the four algorithms.
+  executor/         Parallel go test execution.
+  metrics/          Makespan, speedup, efficiency, and balance metrics.
 repos/
-  repos.txt     List of analyzed GitHub projects; clones live in repos/<name>.
+  repos.txt         Selected projects and revisions; local clones go here.
 scripts/
-  collect.ps1                    Collects repeated go test -json runs.
-  collect_passonly_baselines.ps1 Collects comparable pass-only baselines.
-  recharacterize_all.ps1         Rebuilds characterization data for all subjects.
-  run_all_campaigns.ps1          Runs the final cold and warm campaigns.
-  generate_charts.py             Generates plots from benchmark results.
-  triage.ps1                     Historical project-selection utility; not part of final collection.
+  collect.ps1                    Collects repeated package-level probes.
+  collect_passonly_baselines.ps1 Collects comparable baselines.
+  recharacterize_all.ps1         Rebuilds all characterization datasets.
+  run_all_campaigns.ps1          Runs the complete campaign matrix.
+  triage.ps1                     Supports the original project-selection stage.
 benchmarks/
-  example-config.json  Synthetic benchmark example.
-  campaign_*.json      Final campaign configs for the selected projects.
+  example-config.json Synthetic example for local validation.
+  campaign_*.json     Final campaign configurations.
+  results/            Primary artifacts from the eight accepted campaigns.
+results/
+  *.csv               Consolidated views derived from campaign artifacts.
+  SHA256SUMS.txt      Integrity manifest for the consolidated tables.
 ```
 
-Generated runtime outputs such as logs, reports, raw probes, benchmark results,
-and cloned external repositories are ignored by Git.
+The two result directories serve different purposes:
 
-## Requirements
+- `benchmarks/results/` preserves the primary output of each accepted campaign,
+  including resolved configuration, environment, raw repetitions, and
+  aggregates;
+- `results/` provides compact cross-campaign views used to inspect the complete
+  experiment without reopening every campaign directory.
 
-- Go 1.22 or newer.
-- PowerShell 7 or newer for the collection scripts.
-- Python with `pandas` and `matplotlib` only for chart generation.
-- GNU Make is optional and only provides convenience targets.
+## 3. Components and Experimental Workflow
 
-## Quick Validation
+The components form a traceable pipeline from raw timing observations to the
+final analysis:
 
-The fastest way to validate the tool does not require cloning external
-projects or running real test suites.
+| Stage | Main components | Input | Output |
+| --- | --- | --- | --- |
+| Environment check | `cmd/preflight`, `cmd/workerdiag` | Go runtime and a subject project | confirmation of worker semantics |
+| Probe collection | `scripts/collect.ps1` | subject repository | repeated `go test -json` observations |
+| Validation | `cmd/validateprobes`, `cmd/auditdurations` | probes and metadata | integrity report and duration audit |
+| Characterization | `cmd/analyze`, `scripts/recharacterize_all.ps1` | accepted probes | pass-only package medians |
+| Baselines | `cmd/partitioner`, `collect_passonly_baselines.ps1` | characterization and subject project | sequential and Go-native references |
+| Simulation and execution | `cmd/partitioner` | characterization, baseline, and worker count | planned or empirical partition result |
+| Campaigns | `cmd/benchmark`, `run_all_campaigns.ps1` | campaign configurations | raw and aggregate campaign reports |
+| Final analysis | `benchmarks/results/`, `results/` | accepted reports | auditable artifacts and consolidated tables |
+
+### Requirements
+
+- Go 1.22 or newer;
+- PowerShell 7 or newer for the collection scripts;
+- GNU Make, optionally, for convenience targets.
+
+### Quick validation with synthetic data
+
+This path exercises the tool without cloning external projects or running their
+test suites:
 
 ```powershell
 go run ./cmd/gendata -profile all
@@ -80,12 +122,76 @@ go run ./cmd/demo --output-json reports/demo.json
 go run ./cmd/benchmark --config benchmarks/example-config.json
 ```
 
-This generates deterministic synthetic datasets, runs all four algorithms, and
-writes structured JSON/CSV reports.
+### Reproducing the experimental flow
 
-## Main CLI
+The selected repositories and frozen revisions are listed in `repos/repos.txt`.
+Place local clones under `repos/<name>` and verify the execution environment
+before collecting measurements:
 
-### Simulate from a characterization file
+```powershell
+go run ./cmd/preflight
+pwsh scripts/collect.ps1 -ProjectPath repos/cli -ProjectName cli -Runs 10
+```
+
+Probe collection runs
+`GOMAXPROCS=1 go test -json -p 1 -parallel 1 -count=1` ten times. It retains the
+build cache across characterization runs while disabling the Go test-result
+cache. `cmd/validateprobes` then verifies the package universe, terminal events,
+NDJSON structure, exit metadata, and timeout indicators before aggregation.
+
+The validation statuses mean:
+
+- `PASS`: the expected runs and terminal package events are complete;
+- `WARN`: aggregation is allowed, but the reported caveats require review; this
+  is expected when failing or skipped packages are intentionally excluded by
+  the pass-only policy;
+- `FAIL`: aggregation is blocked until the affected probes are corrected or
+  recollected.
+
+Baselines use the same pass-only package universe as the characterization so
+that `T1` and `Tp` remain comparable:
+
+```powershell
+pwsh -ExecutionPolicy Bypass -File scripts/collect_passonly_baselines.ps1 `
+  -TimeoutMinutes 60
+```
+
+A single accepted campaign configuration can be executed with:
+
+```powershell
+go run ./cmd/benchmark `
+  --config benchmarks/campaign_cli_warm.json `
+  --repetitions 5 `
+  --environment-label gcp-primary
+```
+
+The complete matrix can be run with:
+
+```powershell
+pwsh -ExecutionPolicy Bypass -File scripts/run_all_campaigns.ps1 `
+  -TimeoutMinutes 90 `
+  -Repetitions 5 `
+  -EnvironmentLabel gcp-primary
+```
+
+Each campaign directory contains:
+
+- `config.json`, the resolved configuration;
+- `environment.json`, the captured execution environment;
+- `native_baselines.csv`, the sequential and native parallel references;
+- `results.json`, the complete structured report;
+- `raw.csv`, one row per logical repetition;
+- `aggregate.csv`, summaries by project, algorithm, and worker count.
+
+Campaigns use a cyclic counterbalanced algorithm order and retry a failed
+logical repetition up to three total attempts by default. Failed attempts are
+preserved but excluded from aggregation. If the final attempt also fails, the
+repetition remains failed and the command exits with an error.
+
+### Direct CLI examples
+
+Simulation computes a planned schedule from historical durations without
+executing `go test`:
 
 ```powershell
 go run ./cmd/partitioner --mode simulate `
@@ -96,10 +202,8 @@ go run ./cmd/partitioner --mode simulate `
   --output-json reports/cli-simulate-w4.json
 ```
 
-`simulate` does not execute `go test`; it computes planned schedules and
-metrics from previously collected durations.
-
-### Run a partitioned execution
+Execution partitions the package list and starts one `go test` process per
+worker:
 
 ```powershell
 go run ./cmd/partitioner --mode run --warm-cache `
@@ -111,172 +215,83 @@ go run ./cmd/partitioner --mode run --warm-cache `
   --output-json reports/cli-ffd-w4-warm.json
 ```
 
-`run` partitions the package list and executes one `go test` process per worker.
-The final protocol requires every worker to receive `GOMAXPROCS=1` together with
-`-p 1 -parallel 1`. This decision was made after `cmd/workerdiag` found a material
-effect from inherited internal Go parallelism. The current code must not be used
-for final collection unless `go run ./cmd/preflight` succeeds. The executor now
-injects and verifies the value for every measured child process.
+Every measured child process receives and verifies `GOMAXPROCS=1`, together
+with `-p 1 -parallel 1`.
 
-## Data Collection Workflow
+## 4. Thesis Methodology and Results
 
-### 1. Clone or place subject repositories
+The final study used four Go projects at frozen revisions:
 
-The selected projects are listed in `repos/repos.txt`. Local clones are expected
-under `repos/<name>`, for example `repos/cli` or `repos/grpc-go`.
+| Project | Frozen commit | Pass-only packages |
+| --- | --- | ---: |
+| cli/cli | `da68cb8f6f597cfc3838cf40f89ecc01f4e53233` | 236 |
+| goreleaser/goreleaser | `ce96e79b4883bdea39cf2cf5fe33fa63f5df4dd0` | 121 |
+| grpc/grpc-go | `faa34bf170ceef07b9ada9bcd44dc6e16a55d1f4` | 144 |
+| gohugoio/hugo | `72495f9fba69edadd50a7ecb9ae9fb3d9c46156b` | 142 |
 
-### 2. Characterize a project
+Only packages that passed all ten accepted characterization probes were
+included. The canonical dataset comprises:
 
-```powershell
-pwsh scripts/collect.ps1 -ProjectPath repos/cli -ProjectName cli -Runs 10
-```
+- 40 validated probes and 4 pass-only characterizations;
+- 32 pass-only baselines;
+- 8 cold- and warm-cache campaigns;
+- 480 logical executions and 96 aggregate rows;
+- no final logical errors and no attempts beyond the first.
 
-This runs `GOMAXPROCS=1 go test -json -p 1 -parallel 1 -count=1` repeatedly and stores
-`run_NN.json`, `run_NN.err`, and `run_NN.meta.json` under
-`data/probe/<project>/`. Before aggregation, `cmd/validateprobes` checks the
-expected package universe, terminal-event completeness, malformed NDJSON, exit
-metadata, and timeout indicators, producing `validation.json`. Only then is the
-pass-only dataset written to `data/characterization/<project>.json`.
+All final campaigns were collected in the `gcp-primary` environment on
+Linux/amd64 with an AMD EPYC 7B13 VM and effective `GOMAXPROCS=1`. Each campaign
+used five logical repetitions, worker counts of 2, 4, and 8, and a
+counterbalanced algorithm order.
 
-The build cache is intentionally retained across the ten characterization runs.
-`-count=1` disables test-result caching, while package-level `Elapsed` excludes
-the preceding test-binary build. Cold campaign isolation is a separate regime.
+The four hypotheses were defined before acceptance of the final dataset and
+treated as directional hypotheses:
 
-To validate an existing set without recollecting it:
+- **H1 — partially supported:** LPT achieved lower empirical makespan than
+  Round-Robin in 16/24 comparable cells and lower than Quantity in 17/24. It
+  beat both simultaneously in 14/24; the median improvements were 6.49% and
+  4.17%, respectively.
+- **H2 — supported mainly under warm cache:** the relative LPT advantage was
+  greater under warm cache in 10/12 comparisons with Round-Robin and 8/12 with
+  Quantity.
+- **H3 — strongly supported:** partition construction remained well below 1%
+  of empirical makespan; the maximum observed share was 0.000720%.
+- **H4 — not supported:** FFD-Multifit's planned advantage over LPT was at most
+  0.029%, and it did not achieve a lower empirical makespan in any comparable
+  cell. Its median empirical difference relative to LPT was -40.13%.
 
-```powershell
-$probes = Get-ChildItem data/probe/cli -Filter run_*.json |
-  Where-Object Name -Match '^run_\d{2}\.json$' |
-  Sort-Object Name | Select-Object -ExpandProperty FullName
-go run ./cmd/validateprobes `
-  -project-path repos/cli `
-  -expected-runs 10 `
-  -output data/probe/cli/validation.json `
-  $probes
-```
+The difference between planned and empirical behavior is consistent with costs
+that historical package durations do not model, such as process startup,
+compilation, I/O, cache effects, and the number of packages assigned to each
+partition. This is a descriptive interpretation, not a causal claim. Pearson
+correlations between planned and observed makespan are likewise reported
+without significance tests or causal attribution.
 
-`PASS` means the expected runs and terminal package events are complete. `WARN`
-allows aggregation but requires reviewing the listed caveats, which is expected
-for historical probes without sidecars. `FAIL` blocks aggregation and identifies
-the runs that need correction or recollection.
+This summary is intentionally brief. The thesis should be used as the canonical
+source for the research questions, theoretical background, complete protocol,
+statistical treatment, limitations, threats to validity, and detailed result
+discussion.
 
-To reconcile durations independently after validation:
+## Technical Reference
 
-```powershell
-go run ./cmd/auditdurations `
-  -characterization data/characterization/cli.json `
-  $probes
-```
-
-The auditor reports source quantization, pass-only medians, suite dispersion,
-concentration and every characterization difference with a 1 ns tolerance.
-
-### Current experimental state
-
-The former GCP probes passed the retroactive structural validator, so no silent
-truncation or aggregation defect was found. `cmd/workerdiag`, however, showed a
-material timing effect when `GOMAXPROCS` was fixed at one. The final methodology
-therefore requires a complete timing-dependent recollection under
-`GOMAXPROCS=1`.
-
-All previous cloud characterizations, baselines, and campaigns are classified as
-`pilot/pre-gomaxprocs1`. The local Windows dataset is outside the final study.
-
-The selected repositories remain frozen at their existing commits. Do not pull
-new upstream revisions or run a new triage: that would change the subject systems
-at the same time as the worker semantics.
-
-Implementation preparation is complete. Before the final run:
-
-1. run the preflight and confirm clean, frozen source identities;
-2. recollect ten probes per project and regenerate the four characterizations;
-3. audit and freeze the characterizations;
-4. recollect all 32 baselines;
-5. run eight campaigns with five repetitions and counterbalanced order.
-
-### 3. Collect pass-only baselines
-
-```powershell
-pwsh -ExecutionPolicy Bypass -File scripts/collect_passonly_baselines.ps1 -TimeoutMinutes 60
-```
-
-The baseline commands use the same package list as the characterization file.
-This keeps `T1` and `Tp` comparable when computing speedup. Cold baselines use a
-fresh isolated `GOCACHE`; reports are first staged and validated, and an existing
-canonical report is backed up before replacement.
-
-### 4. Run benchmark campaigns
-
-```powershell
-go run ./cmd/benchmark --config benchmarks/campaign_cli_warm.json --repetitions 5 --environment-label gcp-primary
-```
-
-Future final campaigns use five logical repetitions and a cyclic counterbalanced
-algorithm order. A real benchmark retries a failed logical repetition up to three total attempts
-by default (`max_attempts`). Every failure is logged. Failed attempts are not
-aggregated; if the third attempt also fails, the repetition remains marked as
-failed and the command returns an error after preserving all reports.
-
-A benchmark run writes:
-
-- `config.json`: resolved configuration copy;
-- `environment.json`: captured environment metadata;
-- `native_baselines.csv`: sequential and Go-native parallel references used by the run;
-- `results.json`: full structured report;
-- `raw.csv`: one row per repetition;
-- `aggregate.csv`: summary by project, algorithm, and worker count.
-
-For the complete set of final campaigns:
-
-```powershell
-pwsh -ExecutionPolicy Bypass -File scripts/run_all_campaigns.ps1 `
-  -TimeoutMinutes 90 -Repetitions 5 -EnvironmentLabel gcp-primary
-```
-
-### Targeted worker-semantics diagnostic
-
-This diagnostic has been completed and is intentionally separate from canonical campaigns:
-
-```powershell
-go run ./cmd/workerdiag `
-  --project-path repos/cli `
-  --data-file data/characterization/cli.json `
-  --workers 1,2,4,8 `
-  --repetitions 3 `
-  --top-packages 8
-```
-
-It alternates inherited `GOMAXPROCS` and `GOMAXPROCS=1`, validates the child
-setting with a self-check, and writes JSON, CSV, and a textual interpretation.
-It demonstrated that inherited internal Go parallelism materially affected execution, especially for gRPC-Go. The canonical protocol now requires `GOMAXPROCS=1`; diagnostic values remain non-canonical.
-
-## Selected Subject Projects
-
-| Project | Frozen commit | Final characterization |
-| --- | --- | --- |
-| cli/cli | `da68cb8f6f597cfc3838cf40f89ecc01f4e53233` | pending under `GOMAXPROCS=1` |
-| goreleaser/goreleaser | `ce96e79b4883bdea39cf2cf5fe33fa63f5df4dd0` | pending under `GOMAXPROCS=1` |
-| grpc/grpc-go | `faa34bf170ceef07b9ada9bcd44dc6e16a55d1f4` | pending under `GOMAXPROCS=1` |
-| gohugoio/hugo | `72495f9fba69edadd50a7ecb9ae9fb3d9c46156b` | pending under `GOMAXPROCS=1` |
-
-Only packages that pass under the characterization regime are included in the
-final experiments.
-
-## Testing
+### Testing
 
 ```powershell
 go test ./cmd/... ./internal/... ./data/synthetic
 go vet ./...
 ```
 
-Avoid `go test ./...` as a blanket test command if external repositories are
-cloned under `repos/`. The scoped test command above validates this tool only.
+Avoid `go test ./...` when external repositories are cloned under `repos/`, as
+the blanket command may include those projects. The scoped command validates
+this tool only.
 
-## JSON Conventions
-
-All generated JSON follows the same conventions:
+### JSON conventions
 
 - field names use `snake_case`;
 - `time.Duration` values are serialized as nanoseconds with `_ns` suffixes;
 - `time.Time` values use RFC3339 formatting;
 - optional fields use `omitempty` where appropriate.
+
+The experimental dataset and thesis analysis are complete. This repository is
+the archival presentation of the accepted study; no additional characterization,
+baseline collection, campaign execution, project update, or hypothesis
+reformulation is planned.
