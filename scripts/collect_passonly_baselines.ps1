@@ -1,11 +1,31 @@
 <#
 .SYNOPSIS
-    Coleta baselines pass-only usando data/characterization/*.json.
+    Collects pass-only baselines from data/characterization/*.json.
 
 .DESCRIPTION
-    Executa cmd/partitioner nos modos baseline-seq e baseline-par passando
-    --data-file, de modo que o baseline rode exatamente os pacotes presentes
-    na caracterizacao usada pelas campanhas.
+    Runs cmd/partitioner in baseline-seq and baseline-par modes with a
+    characterization file. This ensures that every baseline executes exactly
+    the pass-only package population used by the benchmark campaigns.
+
+    Before measurement, the script validates GOMAXPROCS, characterization
+    availability, subject-project commits, and clean working trees. It collects
+    cold and/or warm baselines, validates each staged report, backs up an
+    existing canonical report, and publishes only successful artifacts.
+
+.PARAMETER Projects
+    Subject projects to process. Defaults to all four final projects.
+
+.PARAMETER Workers
+    Worker counts used for native parallel baselines. Default: 2, 4, and 8.
+
+.PARAMETER TimeoutMinutes
+    Timeout passed to each baseline execution. Default: 60 minutes.
+
+.PARAMETER ColdOnly
+    Collects only cold-cache baselines.
+
+.PARAMETER WarmOnly
+    Collects only warm-cache baselines.
 
 .EXAMPLE
     pwsh scripts/collect_passonly_baselines.ps1
@@ -23,14 +43,14 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-# Falhas de processos nativos devem ser tratadas pelo exit code e pelos
-# relatórios estruturados, não convertidas prematuramente em RuntimeException.
+# Handle native-process failures through exit codes and structured reports
+# instead of converting them prematurely into RuntimeException instances.
 if (Get-Variable PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyContinue) {
     $PSNativeCommandUseErrorActionPreference = $false
 }
 
 if ($ColdOnly -and $WarmOnly) {
-    throw "Use apenas um entre -ColdOnly e -WarmOnly."
+    throw "Use only one of -ColdOnly and -WarmOnly."
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
@@ -54,32 +74,32 @@ $expectedCommits = @{
     'hugo'       = '72495f9fba69edadd50a7ecb9ae9fb3d9c46156b'
 }
 
-# Bloqueia antes da primeira medição se runtime, população ou fonte estiverem
-# incompatíveis. Assim uma matriz de 32 baselines não falha somente no meio.
+# Fail before the first measurement when the runtime, package population, or
+# subject source is incompatible, avoiding a partial 32-baseline matrix.
 Push-Location $repoRoot
 try {
     & go run ./cmd/preflight | Out-Null
     if ($LASTEXITCODE -ne 0) {
-        throw 'Preflight de GOMAXPROCS falhou.'
+        throw 'GOMAXPROCS preflight failed.'
     }
     foreach ($project in $Projects) {
         if (-not $projectPaths.ContainsKey($project)) {
-            throw "Projeto desconhecido: $project"
+            throw "Unknown project: $project"
         }
         $dataFile = Join-Path $repoRoot "data/characterization/$project.json"
         if (-not (Test-Path -LiteralPath $dataFile)) {
-            throw "Caracterizacao ausente para ${project}: $dataFile"
+            throw "Missing characterization for ${project}: $dataFile"
         }
         $packages = @(Get-Content -Raw -LiteralPath $dataFile | ConvertFrom-Json)
         if ($packages.Count -eq 0) {
-            throw "Caracterizacao vazia para ${project}: $dataFile"
+            throw "Empty characterization for ${project}: $dataFile"
         }
         $actualCommit = (& git -C $projectPaths[$project] rev-parse HEAD).Trim()
         if ($LASTEXITCODE -ne 0 -or $actualCommit -ne $expectedCommits[$project]) {
-            throw "Commit incorreto para ${project}: atual=$actualCommit esperado=$($expectedCommits[$project])"
+            throw "Incorrect commit for ${project}: actual=$actualCommit expected=$($expectedCommits[$project])"
         }
         if (& git -C $projectPaths[$project] status --porcelain) {
-            throw "Arvore modificada no projeto ${project}."
+            throw "The ${project} working tree is not clean."
         }
     }
 }
@@ -98,8 +118,8 @@ function Invoke-Baseline {
         [bool] $Warm
     )
 
-    # O comando roda a partir de $repoRoot; caminhos relativos mantêm os
-    # relatórios portáveis e evitam persistir o diretório pessoal do coletor.
+    # Run from $repoRoot so relative paths keep reports portable and avoid
+    # persisting the collector's personal directory.
     $projectPath = $projectPaths[$Project]
     $dataFile = "data/characterization/$Project.json"
     $suffix = if ($Warm) { '-warm-passonly' } else { '-passonly' }
@@ -140,15 +160,15 @@ function Invoke-Baseline {
     Write-Host "==> $Project $Mode $(if ($Mode -eq 'baseline-par') { "w=$WorkersValue " })$(if ($Warm) { 'warm' } else { 'cold' })"
     & go @args 2>&1 | Tee-Object -FilePath $logFile
     if ($LASTEXITCODE -ne 0) {
-        throw "Falha ao coletar $outFile (exit=$LASTEXITCODE). Veja $logFile"
+        throw "Failed to collect $outFile (exit=$LASTEXITCODE). Review $logFile."
     }
     if (-not (Test-Path -LiteralPath $stagedFile)) {
-        throw "Coleta terminou sem produzir o artefato temporario: $stagedFile"
+        throw "Collection completed without producing the staged artifact: $stagedFile"
     }
 
     $report = Get-Content -Raw -LiteralPath $stagedFile | ConvertFrom-Json
     if (-not $report.success) {
-        throw "Baseline falhou e nao substituira o artefato atual: $($report.error). Diagnostico: $stagedFile"
+        throw "The baseline failed and will not replace the current artifact: $($report.error). Diagnostic: $stagedFile"
     }
 
     $backupFile = Join-Path $backupDir $fileName
@@ -166,14 +186,14 @@ function Invoke-Baseline {
         }
         throw
     }
-    Write-Host "==> Baseline publicado: $outFile"
+    Write-Host "==> Baseline published: $outFile"
 }
 
 Push-Location $repoRoot
 try {
     foreach ($project in $Projects) {
         if (-not $projectPaths.ContainsKey($project)) {
-            throw "Projeto desconhecido: $project"
+            throw "Unknown project: $project"
         }
 
         if ($runCold) {
@@ -195,4 +215,4 @@ finally {
     Pop-Location
 }
 
-Write-Host "==> Baselines pass-only concluidos. Logs: $logDir"
+Write-Host "==> Pass-only baseline collection complete. Logs: $logDir"

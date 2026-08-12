@@ -1,39 +1,39 @@
 <#
 .SYNOPSIS
-    Coleta N execucoes de `go test -json` em um projeto Go e gera o
-    JSON de caracterizacao consumido por cmd/partitioner.
+    Builds the package-duration characterization for one Go project.
 
 .DESCRIPTION
-    Implementa o pipeline definido pelas ADRs 006-008 e ADR-017:
-      - ADR-006: pacotes que falham ou sao skipados sao excluidos
-                 (filtragem feita por cmd/analyze).
-      - ADR-007: executa N rodadas com `-count=1` (default N=10).
-      - ADR-008: mediana entre as rodadas como duracao canonica.
-      - ADR-017/026: mede sob `-p 1 -parallel 1` e injeta GOMAXPROCS=1
-                     explicitamente em cada processo filho.
+    Runs N package-level `go test -json` probes with `-count=1`, `-p 1`,
+    `-parallel 1`, and an explicitly injected GOMAXPROCS=1. The default is ten
+    probes, matching the final experimental protocol.
 
-    Cada rodada gera tres arquivos em data/probe/<ProjectName>/:
-        run_NN.json       ← stdout puro (NDJSON consumido por cmd/analyze)
-        run_NN.err        ← stderr (compile errors, warnings — diagnostico)
-        run_NN.meta.json  ← comando, timestamps, exit code e indicio de timeout
-    Ao final, cmd/analyze agrega todas as rodadas em
-        data/characterization/<ProjectName>.json
+    Each probe writes three files under data/probe/<ProjectName>/:
+        run_NN.json       - unmodified stdout NDJSON consumed by cmd/analyze
+        run_NN.err        - stderr retained for diagnostics
+        run_NN.meta.json  - command, timestamps, exit code, timeout evidence,
+                            and effective GOMAXPROCS evidence
+
+    After collection, cmd/validateprobes checks probe integrity. If validation
+    succeeds, cmd/analyze retains only packages that passed every accepted probe
+    and uses their median durations to write
+    data/characterization/<ProjectName>.json. Finally, cmd/auditdurations
+    independently reconciles the probe durations and characterization output.
 
 .PARAMETER ProjectPath
-    Caminho absoluto da raiz do projeto Go (deve conter go.mod).
+    Path to the Go project root. The directory is expected to contain go.mod.
 
 .PARAMETER ProjectName
-    Identificador curto usado nos diretorios e nomes de arquivos
-    (ex.: cli, hugo, goreleaser, grpc-go).
+    Short identifier used in directory and file names, such as cli, hugo,
+    goreleaser, or grpc-go.
 
 .PARAMETER Runs
-    Numero de execucoes. Default: 10.
+    Number of probes to collect. Default: 10.
 
 .PARAMETER TimeoutMinutes
-    Timeout passado ao `go test -timeout`. Default: 50.
+    Timeout passed to `go test -timeout`. Default: 50 minutes.
 
 .PARAMETER Pattern
-    Padrao de pacotes passado ao `go test`. Default: ./...
+    Package pattern passed to `go test`. Default: ./...
 
 .EXAMPLE
     pwsh scripts/collect.ps1 -ProjectPath C:\src\cli -ProjectName cli
@@ -59,29 +59,29 @@ if (Get-Variable PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyCo
     $PSNativeCommandUseErrorActionPreference = $false
 }
 
-# Resolve diretorios relativos ao repositorio (scripts/ esta na raiz).
+# Resolve project-relative paths from the scripts directory.
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $probeDir = Join-Path $repoRoot "data/probe/$ProjectName"
 $outDir   = Join-Path $repoRoot 'data/characterization'
 $outFile  = Join-Path $outDir   "$ProjectName.json"
 
 if (-not (Test-Path $ProjectPath)) {
-    throw "ProjectPath nao existe: $ProjectPath"
+    throw "ProjectPath does not exist: $ProjectPath"
 }
 if (-not (Test-Path (Join-Path $ProjectPath 'go.mod'))) {
-    Write-Warning "go.mod nao encontrado em $ProjectPath (prosseguindo mesmo assim)."
+    Write-Warning "go.mod was not found under $ProjectPath; continuing anyway."
 }
 
 New-Item -ItemType Directory -Force -Path $probeDir | Out-Null
 New-Item -ItemType Directory -Force -Path $outDir   | Out-Null
 
-# Verifica que go esta no PATH (a coleta real depende disso).
+# Real probe collection requires the Go executable to be available on PATH.
 $go = Get-Command go -ErrorAction SilentlyContinue
 if (-not $go) {
-    throw "binario 'go' nao encontrado no PATH. Instale o Go antes da coleta."
+    throw "The 'go' executable was not found on PATH. Install Go before collecting probes."
 }
 
-Write-Host "==> Projeto:  $ProjectName"
+Write-Host "==> Project:  $ProjectName"
 Write-Host "    Path:     $ProjectPath"
 Write-Host "    Runs:     $Runs"
 Write-Host "    Timeout:  ${TimeoutMinutes}m"
@@ -93,7 +93,7 @@ Push-Location $repoRoot
 try {
     $gomaxprocsEvidence = (& go run ./cmd/preflight | ConvertFrom-Json)
     if ($LASTEXITCODE -ne 0 -or $gomaxprocsEvidence.gomaxprocs_effective -ne 1) {
-        throw 'Preflight de GOMAXPROCS falhou.'
+        throw 'GOMAXPROCS preflight failed.'
     }
 }
 finally {
@@ -113,9 +113,9 @@ for ($i = 1; $i -le $Runs; $i++) {
 
     Push-Location $ProjectPath
     try {
-        # stdout (NDJSON puro) e stderr (compile errors, warnings) vao para
-        # arquivos distintos. O sidecar preserva o exit code, que nao pode ser
-        # reconstruido com seguranca apenas a partir do NDJSON.
+        # Keep unmodified stdout NDJSON separate from diagnostic stderr. The
+        # metadata sidecar preserves the exit code, which cannot be recovered
+        # reliably from NDJSON alone.
         $utf8 = New-Object System.Text.UTF8Encoding($false)
         $previousGOMAXPROCS = [Environment]::GetEnvironmentVariable('GOMAXPROCS', 'Process')
         try {
@@ -130,10 +130,10 @@ for ($i = 1; $i -le $Runs; $i++) {
         }
         [System.IO.File]::WriteAllLines($file, $outLines, $utf8)
 
-        # O timeout real de `go test -timeout` termina com exit code nao zero e
-        # emite o panic especifico abaixo. Mensagens como "deadline exceeded"
-        # fazem parte de testes normais (especialmente grpc-go) e nao indicam
-        # timeout do processo.
+        # A real `go test -timeout` expiration returns a non-zero exit code and
+        # emits the specific panic below. Messages such as "deadline exceeded"
+        # may be normal test output, especially in grpc-go, and do not by
+        # themselves indicate a process timeout.
         $combinedDiagnostic = (($outLines -join "`n") + "`n")
         if (Test-Path $errFile) {
             $combinedDiagnostic += Get-Content -Raw -LiteralPath $errFile
@@ -158,7 +158,7 @@ for ($i = 1; $i -le $Runs; $i++) {
     }
 
     if ((Test-Path $errFile) -and ((Get-Item $errFile).Length -gt 0)) {
-        Write-Host "       (stderr nao vazio: $errFile)" -ForegroundColor Yellow
+        Write-Host "       (non-empty stderr: $errFile)" -ForegroundColor Yellow
     }
 
     $runFiles.Add($file)
@@ -166,7 +166,7 @@ for ($i = 1; $i -le $Runs; $i++) {
 
 Write-Host ''
 $validationFile = Join-Path $probeDir 'validation.json'
-Write-Host "==> Validando integridade retroativa dos probes"
+Write-Host "==> Validating probe integrity"
 Push-Location $repoRoot
 try {
     & go run ./cmd/validateprobes `
@@ -177,7 +177,7 @@ try {
         -output $validationFile `
         @runFiles
     if ($LASTEXITCODE -ne 0) {
-        throw "Validacao dos probes falhou. Consulte $validationFile antes de agregar."
+        throw "Probe validation failed. Review $validationFile before aggregation."
     }
 }
 finally {
@@ -185,13 +185,13 @@ finally {
 }
 
 Write-Host ''
-Write-Host "==> Agregando $($runFiles.Count) rodadas -> $outFile"
+Write-Host "==> Aggregating $($runFiles.Count) probes -> $outFile"
 
 Push-Location $repoRoot
 try {
     & go run ./cmd/analyze -output $outFile @runFiles
     if ($LASTEXITCODE -ne 0) {
-        throw "cmd/analyze falhou (exit=$LASTEXITCODE)"
+        throw "cmd/analyze failed (exit=$LASTEXITCODE)"
     }
 }
 finally {
@@ -199,7 +199,7 @@ finally {
 }
 
 $durationAuditFile = Join-Path $probeDir 'duration-audit.json'
-Write-Host "==> Auditando duracoes -> $durationAuditFile"
+Write-Host "==> Auditing durations -> $durationAuditFile"
 Push-Location $repoRoot
 try {
     & go run ./cmd/auditdurations `
@@ -207,7 +207,7 @@ try {
         -output $durationAuditFile `
         @runFiles
     if ($LASTEXITCODE -ne 0) {
-        throw "Auditoria de duracoes falhou. Consulte $durationAuditFile"
+        throw "Duration audit failed. Review $durationAuditFile."
     }
 }
 finally {
@@ -215,4 +215,4 @@ finally {
 }
 
 Write-Host ''
-Write-Host "==> Concluido. Caracterizacao salva em $outFile"
+Write-Host "==> Complete. Characterization saved to $outFile"

@@ -1,5 +1,28 @@
+<#
+.SYNOPSIS
+    Screens candidate Go projects and writes a repository-level CSV report.
+
+.DESCRIPTION
+    Reads GitHub repositories from repos/repos.txt, shallow-clones any missing
+    candidates, checks whether `go build ./...` succeeds, and records repository
+    size, package counts, test-package counts, and latest-commit metadata in
+    reports/triage.csv.
+
+    This script automates only the initial candidate screening described in the
+    thesis. The complete progressive selection also considered repeated test
+    stability and package-duration distributions, which are outside this
+    script's scope.
+
+    Existing local clones are reused. The output report is replaced on every
+    invocation.
+
+.EXAMPLE
+    pwsh scripts/triage.ps1
+#>
+
 $ErrorActionPreference = "Continue"
 
+# Repository paths and report initialization.
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $reposRoot = Join-Path $repoRoot 'repos'
 $reportsRoot = Join-Path $repoRoot 'reports'
@@ -29,6 +52,7 @@ foreach ($repo in $repos) {
   $last_commit_hash = "-"
   $size_mb = "-"
 
+  # Clone only candidates that are not already available locally.
   if (-not (Test-Path $dir)) {
     $clone_started_at = (Get-Date).ToUniversalTime().ToString("o")
     $cloneOutput = git clone --depth=50 "https://github.com/$repo.git" $dir 2>&1
@@ -46,6 +70,8 @@ foreach ($repo in $repos) {
     $clone_ok = "yes"
   }
 
+  # Inspect build viability and repository characteristics used during the
+  # initial screening stage.
   if ($clone_ok -eq "yes") {
     Push-Location $dir
 

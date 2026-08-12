@@ -1,28 +1,32 @@
 <#
 .SYNOPSIS
-    Executa campanhas cold e/ou warm dos projetos selecionados.
+    Runs cold- and/or warm-cache campaigns for selected subject projects.
 
 .DESCRIPTION
-    Executa somente os projetos e regimes selecionados. Quando mais de um for
-    escolhido, cold e executado antes de warm. Cada etapa e logada com
-    timestamp, progresso e resultado.
+    Runs the selected projects and cache regimes using the final campaign
+    configuration files under benchmarks/. Cold campaigns run before warm
+    campaigns when both regimes are selected. Each campaign receives a
+    timestamped log with its command, progress, exit status, and elapsed time.
+
+    The canonical experiment is already complete; this wrapper is retained for
+    auditing and reproducing the accepted campaign protocol.
 
 .PARAMETER TimeoutMinutes
-    Timeout por repeticao em minutos. Cada repeticao corresponde a uma
-    combinacao de projeto, algoritmo e numero de workers. Default: 90.
+    Timeout per logical repetition in minutes. Each repetition represents one
+    project, algorithm, and worker-count combination. Default: 90.
 
 .PARAMETER Repetitions
-    Numero de repeticoes logicas por algoritmo e quantidade de workers.
-    Default: 5 para as campanhas futuras.
+    Number of logical repetitions for each algorithm and worker count.
+    Default: 5, matching the accepted final protocol.
 
 .PARAMETER EnvironmentLabel
-    Rotulo persistido em environment.json. Default: gcp-primary.
+    Label recorded in environment.json. Default: gcp-primary.
 
 .PARAMETER Projects
-    Projetos a executar. Valores aceitos: cli, goreleaser, grpc-go e hugo.
+    Projects to run. Accepted values: cli, goreleaser, grpc-go, and hugo.
 
 .PARAMETER Regimes
-    Regimes a executar. Valores aceitos: cold e warm.
+    Cache regimes to run. Accepted values: cold and warm.
 
 .EXAMPLE
     pwsh -ExecutionPolicy Bypass -File scripts/run_all_campaigns.ps1
@@ -74,31 +78,31 @@ function Run-Step {
     )
 
     $stepStart = Get-Date
-    Write-Log "INICIO CAMPANHA ${CampaignIndex}/${CampaignTotal}: $Name"
-    Write-Log "  Comando: $Command $($Arguments -join ' ')"
-    Write-Log "  O benchmark mostrara inicio e fim de cada combinacao desta campanha."
+    Write-Log "CAMPAIGN START ${CampaignIndex}/${CampaignTotal}: $Name"
+    Write-Log "  Command: $Command $($Arguments -join ' ')"
+    Write-Log "  The benchmark reports the start and end of each combination in this campaign."
 
     $stepLog = Join-Path $logDir "$($Name -replace '[^a-zA-Z0-9_-]','_').log"
 
     try {
-        # Consome a saida do pipeline dentro da funcao para que ela seja
-        # exibida imediatamente sem entrar no valor retornado por Run-Step.
+        # Consume pipeline output inside the function so it is displayed
+        # immediately without becoming part of the Run-Step return value.
         & $Command @Arguments 2>&1 |
             Tee-Object -FilePath $stepLog |
             ForEach-Object { Write-Host $_ }
         $exitCode = $LASTEXITCODE
     } catch {
         $exitCode = 1
-        Write-Log "  EXCECAO: $_"
+        Write-Log "  EXCEPTION: $_"
     }
 
     $stepEnd = Get-Date
     $elapsed = $stepEnd - $stepStart
 
     if ($exitCode -eq 0) {
-        Write-Log "CAMPANHA CONCLUIDA ${CampaignIndex}/${CampaignTotal}: $Name (${elapsed})"
+        Write-Log "CAMPAIGN COMPLETE ${CampaignIndex}/${CampaignTotal}: $Name (${elapsed})"
     } else {
-        Write-Log "CAMPANHA COM FALHA ${CampaignIndex}/${CampaignTotal}: $Name (exit code: $exitCode, ${elapsed})"
+        Write-Log "CAMPAIGN FAILED ${CampaignIndex}/${CampaignTotal}: $Name (exit code: $exitCode, ${elapsed})"
     }
     Write-Log ""
 
@@ -108,14 +112,14 @@ function Run-Step {
 Push-Location $repoRoot
 try {
     Write-Log "============================================="
-    Write-Log "CAMPANHAS TCC - EXECUCAO COMPLETA"
+    Write-Log "THESIS CAMPAIGNS - FULL EXECUTION"
     Write-Log "============================================="
-    Write-Log "Inicio geral: $startTime"
-    Write-Log "Log principal: $logFile"
-    Write-Log "Timeout por repeticao: $TimeoutMinutes min"
-    Write-Log "Repeticoes logicas por combinacao: $Repetitions"
-    Write-Log "Rotulo de ambiente: $EnvironmentLabel"
-    Write-Log "Projetos: $($Projects -join ', ')"
+    Write-Log "Overall start: $startTime"
+    Write-Log "Main log: $logFile"
+    Write-Log "Timeout per repetition: $TimeoutMinutes min"
+    Write-Log "Logical repetitions per combination: $Repetitions"
+    Write-Log "Environment label: $EnvironmentLabel"
+    Write-Log "Projects: $($Projects -join ', ')"
     Write-Log "Regimes: $($Regimes -join ', ')"
     Write-Log ""
 
@@ -128,13 +132,13 @@ try {
 
     $campaignTotal = @($Projects | Select-Object -Unique).Count * @($Regimes | Select-Object -Unique).Count
     $campaignIndex = 0
-    Write-Log "Total de campanhas selecionadas: $campaignTotal"
+    Write-Log "Total selected campaigns: $campaignTotal"
     Write-Log ""
 
     if ('cold' -in $Regimes) {
-        Write-Log "=== CAMPANHAS COLD ==="
+        Write-Log "=== COLD CAMPAIGNS ==="
         foreach ($c in $coldConfigs) {
-            Write-Log "  Regime cold: cada worker usara um GOCACHE temporario e isolado"
+            Write-Log "  Cold regime: each worker uses a temporary isolated GOCACHE"
 
             $campaignIndex++
             $exitCode = Run-Step -Name $c.Name `
@@ -158,7 +162,7 @@ try {
     ) | Where-Object { $_.Project -in $Projects }
 
     if ('warm' -in $Regimes) {
-        Write-Log "=== CAMPANHAS WARM ==="
+        Write-Log "=== WARM CAMPAIGNS ==="
         foreach ($c in $warmConfigs) {
             $campaignIndex++
             $exitCode = Run-Step -Name $c.Name `
@@ -178,24 +182,24 @@ try {
     $totalElapsed = $endTime - $startTime
 
     Write-Log "============================================="
-    Write-Log "EXECUCAO COMPLETA"
-    Write-Log "Inicio:  $startTime"
-    Write-Log "Termino: $endTime"
-    Write-Log "Duracao total: $totalElapsed"
-    Write-Log "Logs em: $logDir"
-    Write-Log "Campanhas concluidas com sucesso: $($successes.Count)/$campaignTotal"
+    Write-Log "EXECUTION COMPLETE"
+    Write-Log "Start:    $startTime"
+    Write-Log "End:      $endTime"
+    Write-Log "Total duration: $totalElapsed"
+    Write-Log "Logs: $logDir"
+    Write-Log "Successful campaigns: $($successes.Count)/$campaignTotal"
     if ($successes.Count -gt 0) {
-        Write-Log "Sucessos: $($successes -join ', ')"
+        Write-Log "Successes: $($successes -join ', ')"
     }
     if ($failures.Count -gt 0) {
-        Write-Log "Falhas: $($failures -join ', ')"
+        Write-Log "Failures: $($failures -join ', ')"
     } else {
-        Write-Log "Falhas: nenhuma"
+        Write-Log "Failures: none"
     }
     Write-Log "============================================="
 
     Write-Host ""
-    Write-Host "Verifique os resultados em benchmarks/results/ e os logs em $logDir"
+    Write-Host "Review results under benchmarks/results/ and logs under $logDir"
 
     if ($failures.Count -gt 0) {
         exit 1

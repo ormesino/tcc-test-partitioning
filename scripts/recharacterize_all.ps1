@@ -1,12 +1,27 @@
 <#
 .SYNOPSIS
-    Reexecuta a caracterizacao dos projetos selecionados.
+    Rebuilds characterizations for the selected subject projects.
 
 .DESCRIPTION
-    Orquestra scripts/collect.ps1 para os quatro repositorios em repos/,
-    preservando caracterizacoes anteriores em data/characterization/old/.
-    Opcionalmente arquiva tambem os probes antigos para evitar sobrescrita de
-    run_01.json...run_NN.json.
+    Orchestrates scripts/collect.ps1 for any selected subset of the four subject
+    repositories under repos/. Existing characterizations are copied to a
+    timestamped data/characterization/old/ directory before collection.
+
+    With -ArchiveProbe, the previous probe directory is also moved to a
+    timestamped data/probe/old/ directory so run_01.json through run_NN.json are
+    not overwritten. A separate execution log is retained for each project.
+
+.PARAMETER Projects
+    Subject projects to recharacterize. Defaults to all four final projects.
+
+.PARAMETER Runs
+    Number of probes collected for each project. Default: 10.
+
+.PARAMETER TimeoutMinutes
+    Timeout passed to each probe execution. Default: 60 minutes.
+
+.PARAMETER ArchiveProbe
+    Archives each existing project probe directory before recollection.
 
 .EXAMPLE
     pwsh scripts/recharacterize_all.ps1 -Runs 10 -TimeoutMinutes 60
@@ -46,21 +61,21 @@ if ($ArchiveProbe) {
     New-Item -ItemType Directory -Force -Path $probeBackupDir | Out-Null
 }
 
-Write-Host "==> Recaracterizacao iniciada em $timestamp"
-Write-Host "    Projetos: $($Projects -join ', ')"
+Write-Host "==> Recharacterization started at $timestamp"
+Write-Host "    Projects: $($Projects -join ', ')"
 Write-Host "    Runs: $Runs"
-Write-Host "    Timeout por run: ${TimeoutMinutes}m"
+Write-Host "    Timeout per probe: ${TimeoutMinutes}m"
 Write-Host "    Logs: $logDir"
 Write-Host ""
 
 foreach ($project in $Projects) {
     if (-not $projectPaths.ContainsKey($project)) {
-        throw "Projeto desconhecido: $project"
+        throw "Unknown project: $project"
     }
 
     $projectPath = Join-Path $repoRoot $projectPaths[$project]
     if (-not (Test-Path $projectPath)) {
-        throw "Repositorio nao encontrado para ${project}: $projectPath"
+        throw "Repository not found for ${project}: $projectPath"
     }
 
     $charFile = Join-Path $charDir "$project.json"
@@ -74,7 +89,7 @@ foreach ($project in $Projects) {
     }
 
     $logFile = Join-Path $logDir "$project.log"
-    Write-Host "==> [$project] coletando $Runs rodadas"
+    Write-Host "==> [$project] collecting $Runs probes"
     & pwsh -NoProfile -ExecutionPolicy Bypass -File $collectScript `
         -ProjectPath $projectPath `
         -ProjectName $project `
@@ -83,15 +98,15 @@ foreach ($project in $Projects) {
         Tee-Object -FilePath $logFile
 
     if ($LASTEXITCODE -ne 0) {
-        throw "Falha na recaracterizacao de $project (exit=$LASTEXITCODE). Veja $logFile"
+        throw "Failed to recharacterize $project (exit=$LASTEXITCODE). Review $logFile."
     }
 
-    Write-Host "==> [$project] concluido. Log: $logFile"
+    Write-Host "==> [$project] complete. Log: $logFile"
     Write-Host ""
 }
 
-Write-Host "==> Recaracterizacao concluida."
-Write-Host "    Caracterizacoes antigas: $charBackupDir"
+Write-Host "==> Recharacterization complete."
+Write-Host "    Previous characterizations: $charBackupDir"
 if ($ArchiveProbe) {
-    Write-Host "    Probes antigos: $probeBackupDir"
+    Write-Host "    Previous probes: $probeBackupDir"
 }
